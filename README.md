@@ -14,6 +14,8 @@ Specialized modes for IBM App Connect Enterprise (ACE) development:
 - **ace-readme** - Technical documentation generator
 - **ace-flow-builder** - Message flow builder and generator
 - **ace-flow-designer** - Requirements gathering and design
+- **ace-flow-harness** - End-to-end deploy-and-test execution: installs dependencies, provisions the environment, deploys with ibmint, starts the server, drives the flow, and verifies results via executable scripts
+- **ace-conventions-profiler** - Extracts the house-style conventions of an existing ACE estate into a reusable profile that ace-flow-builder conforms to
 - **ace-review** - Code review and quality analysis (git-scoped incremental reviews, tailorable via custom rules)
 - **cve-analysis** - Exploitability assessment of CVEs and IBM security bulletins for ACE and MQ (affected vs exploitable, component mapping, batch triage, persistent decision log)
 - **ace-support-case** - IBM support-case preparation: guided diagnostic collection (aceDataCollector, traces, abend files) and a ready-to-paste case submission
@@ -79,6 +81,8 @@ bob/
 │   ├── ace-readme/             # Documentation generator mode
 │   ├── ace-flow-builder/       # Flow builder mode
 │   ├── ace-flow-designer/      # Flow designer mode
+│   ├── ace-flow-harness/       # Deploy-and-test harness (provisions, deploys, runs, verifies)
+│   ├── ace-conventions-profiler/ # House-style conventions extractor (profile for flow-builder)
 │   ├── ace-review/             # Code review mode (review/ + custom-rules/rules.md)
 │   ├── cve-analysis/           # CVE / security-bulletin exploitability assessment
 │   └── ace-support-case/       # IBM support-case diagnostics and submission

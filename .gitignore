@@ -12,6 +12,11 @@ general_modes/*/.env
 ace_modes/*/log/
 general_modes/*/log/
 
+# Customer conventions profile - emitted by ace-conventions-profiler and installed
+# into a flow-builder copy's references/. Carries real customer library, app, and
+# queue names and cannot be anonymised; it must never be committed
+ace_modes/**/references/customer_profile.md
+
 # Per-project Bob output created when importing modes into a target project
 .bob/
 

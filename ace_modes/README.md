@@ -213,14 +213,85 @@ This directory contains specialized Bob modes for IBM App Connect Enterprise (AC
 
 ---
 
+### 🏗️🔧🧪 ACE Flow Harness (`ace-flow-harness`)
+
+**Purpose:** Stands up an IBM ACE test environment and runs an end-to-end deploy-and-test cycle - install dependencies, provision the environment, deploy, start the integration server, drive the flow, verify results. Produces executable scripts, not just a plan document.
+
+**When to use:**
+- You want a repeatable deploy-and-test environment for a flow, application, or SupportPac
+- You need dependency JARs (SupportPac impl/tool jars, third-party libraries) installed in the right place
+- You need shared-classes placement done correctly for your topology (standalone, Docker, node-managed)
+- You want `deploy_and_test.bat` / `run-tests.sh` style scripts that drop into CI unchanged
+
+**What it does:**
+- Enforces a canonical harness layout (`testing/test-resources/Sources/` shared across topologies, one folder per topology) and an ordered lifecycle:
+  1. Source the ACE environment (`mqsiprofile`)
+  2. Install dependencies (impl jar → `server/jplugin`, tool jar → `tools/plugins`, third-party libs → shared-classes)
+  3. Provision the test environment (work dir, test data, config)
+  4. Deploy with `ibmint` - **policy projects first, then applications**, before server start
+  5. Start the integration server and **wait for `BIP1991I`** (never a fixed sleep)
+  6. Verify the HTTP listener, drive the flow (HTTP / file / MQ), verify results, scan logs for `BIP*E:` errors
+- Parameterizes the project-specific bits (artifact names, ports, dependencies, test data, drivers, verification) so the same pattern applies to any ACE app
+- If the repo already has a documented `testing/` tree, that documentation is the source of truth - the template fills gaps, it does not override a working setup
+
+**Key features:**
+- Topology matrix for shared-classes placement (standalone/Docker: `<work-dir>/shared-classes/`; node-managed: `%MQSI_REGISTRY%\shared-classes\`)
+- Load-bearing gotchas baked in: deploy before start, policies before app, ship the whole dependency set, clean stale `config/.lock`, binary compare for round-trips
+- Scripts fail fast with `[STEP]` / `[OK]` / `[ERROR]` logging and non-zero exit on failure
+- Worked reference example: PGP SupportPac harness (BouncyCastle dependencies, encrypt/decrypt round-trip) across standalone and Docker topologies
+
+**Boundary:** this mode provisions and executes. Use `ace-flow-builder` to build or fix the flow itself; use `ace-review` for quality findings. Designing test scenarios without executing them is a separate concern (the companion ace-flow-test mode), not part of this mode.
+
+**Location:** `ace-flow-harness/`
+
+---
+
+### 🧭 ACE Conventions Profiler (`ace-conventions-profiler`)
+
+**Purpose:** Looks across a customer's EXISTING ACE estate, works out how that customer builds ACE (frameworks, logging, error handling, naming, configuration, structure), and captures it as a reusable conventions profile that `ace-flow-builder` conforms to when generating new flows.
+
+**When to use:**
+- You want new generated flows to match the house style of an existing estate
+- You need an index of the shared libraries, subflows, and ESQL modules an estate actually reuses
+- You want the naming / logging / error-handling standards of a set of applications made explicit
+- You are onboarding onto an unfamiliar estate and want its conventions described, not graded
+
+**What it does:**
+- Runs a fixed, rule-based extraction (it describes conventions, it does not learn or judge):
+  1. **Scope** - which apps and libraries, warn if only one app (a single occurrence is not a convention)
+  2. **Library index** - classify every project, separate framework libraries from app-specific ones by reference counting
+  3. **Cross-reference build** - record where each reusable unit is used
+  4. **Pattern extraction** across eleven axes (frameworks, logging, error handling, integration patterns, naming, configuration, structure, message modeling, security, transactions, monitoring), every finding scored by support (X of N apps) and confidence
+  5. **Review and curate** - you accept, reject, or modify each finding before it becomes canon
+  6. **Emit profile** - `customer_profile.md`, installed into your `ace-flow-builder` copy at `references/customer_profile.md`
+- A consistent-but-wrong pattern is flagged as a CONFLICT against correctness rules, never silently canonicalised
+- flow-builder applies the profile at fixed precedence: validated rules (correctness) > customer profile (convention) > generic defaults
+
+**Key features:**
+- Works best across MULTIPLE applications; says so when pointed at one
+- Fan-out analysis (one agent per application/library) with a durable `analyzing.md` intermediate, so re-runs are cheap
+- Prescriptive vs descriptive flag on every convention
+- The emitted profile is the plug-in point that makes the generic flow-builder produce estate-native flows
+
+**Confidentiality:** the emitted profile necessarily contains real library, application, and queue names and cannot be anonymised. It belongs in the customer workspace or the customer's own flow-builder copy - never in this repository. The install path (`references/customer_profile.md`) is gitignored here for that reason.
+
+**Boundary:** this mode DESCRIBES conventions. For quality findings on one app use `ace-review`; for creating new flows use `ace-flow-builder`.
+
+**Location:** `ace-conventions-profiler/`
+
+---
+
 ## Mode Workflow
 
 ### Typical Development Flow
 
 1. **Design Phase:** Use `ace-flow-designer` to gather requirements and create a detailed specification
 2. **Build Phase:** Use `ace-flow-builder` to implement the design (can work directly from the designer's output)
-3. **Review Phase:** Use `ace-review` to validate code quality and best practices
-4. **Documentation Phase:** Use `ace-readme` to generate comprehensive technical documentation
+3. **Test Phase:** Use `ace-flow-harness` to provision a test environment, deploy, and run an end-to-end test cycle
+4. **Review Phase:** Use `ace-review` to validate code quality and best practices
+5. **Documentation Phase:** Use `ace-readme` to generate comprehensive technical documentation
+
+On an estate with established conventions, run `ace-conventions-profiler` once up front - the emitted profile makes `ace-flow-builder` generate in the customer's house style from the first flow.
 
 ### Quick Build Flow
 
@@ -236,8 +307,10 @@ For simple, well-understood patterns:
 The modes are designed to work together and will suggest transitions when appropriate:
 
 - **ace-flow-designer** → **ace-flow-builder** (after design is complete)
+- **ace-flow-builder** → **ace-flow-harness** (to deploy and test what was built)
 - **ace-flow-builder** → **ace-review** (after implementation)
 - **ace-review** → **ace-flow-builder** (to implement recommended fixes)
+- **ace-conventions-profiler** → **ace-flow-builder** (the emitted profile feeds house style into generation)
 - **Any mode** → **ace-readme** (to generate documentation)
 
 ---
@@ -378,6 +451,8 @@ After importing modes (either globally or locally):
    - 📄 ACE README
    - 🏗️ ACE Flow Builder
    - 🎨 ACE Flow Designer
+   - 🏗️🔧🧪 ACE Flow Harness
+   - 🧭 ACE Conventions Profiler
    - 🔍 ACE Review
    - 🛡️ ACE/MQ CVE Analysis
    - 🆘 ACE Support Case
