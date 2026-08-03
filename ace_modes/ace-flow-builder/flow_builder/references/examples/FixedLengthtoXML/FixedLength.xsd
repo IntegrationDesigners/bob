@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<xsd:schema xmlns:dfdl="http://www.ogf.org/dfdl/dfdl-1.0/" xmlns:fn="http://www.w3.org/2005/xpath-functions" xmlns:ibmDfdlExtn="http://www.ibm.com/dfdl/extensions" xmlns:ibmSchExtn="http://www.ibm.com/schema/extensions" xmlns:recFixLengthFieldsFmt="http://www.ibm.com/dfdl/RecordFixLengthFieldFormat" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          
+  
+  
+  <xsd:import namespace="http://www.ibm.com/dfdl/RecordFixLengthFieldFormat" schemaLocation="IBMdefined/RecordFixLengthFieldFormat.xsd"/>
+          
+  
+  
+  <xsd:annotation>
+            		
+    
+    
+    <xsd:appinfo source="http://www.ogf.org/dfdl/">
+                  			
+      
+      
+      <dfdl:format encoding="{$dfdl:encoding}" escapeSchemeRef="" occursCountKind="fixed" ref="recFixLengthFieldsFmt:RecordFixLengthFieldsFormat"/>
+                  		
+    
+    
+    </xsd:appinfo>
+            	
+  
+  
+  </xsd:annotation>
+      	
+  
+  
+  <xsd:element dfdl:lengthKind="delimited" ibmSchExtn:docRoot="true" name="MessageFixedLength">
+            		
+    
+    
+    <xsd:complexType>
+                  			
+      
+      
+      <xsd:sequence dfdl:separator="%CR;%LF;%WSP*;" dfdl:separatorSuppressionPolicy="anyEmpty">
+                        				
+        
+        
+        <xsd:element dfdl:lengthKind="delimited" dfdl:occursCountKind="implicit" maxOccurs="unbounded" name="Item">
+                              					
+          
+          
+          <xsd:complexType>
+                                    						
+            
+            
+            <xsd:sequence>
+                                          							
+              
+              
+              <xsd:element dfdl:length="30" dfdl:textPadKind="padChar" ibmDfdlExtn:sampleValue="Bloggs" name="LastName" type="xsd:string"/>
+                                          							
+              
+              
+              <xsd:element dfdl:length="30" dfdl:textPadKind="padChar" ibmDfdlExtn:sampleValue="Joe" name="FirstName" type="xsd:string"/>
+                                          							
+              
+              
+              <xsd:element dfdl:length="30" dfdl:textPadKind="padChar" ibmDfdlExtn:sampleValue="Hursley Park" name="Address" type="xsd:string"/>
+                                                                      
+              
+              
+              <xsd:element dfdl:length="10" dfdl:textPadKind="padChar" ibmDfdlExtn:sampleValue="1958-12-01" name="DateOfBirth" type="xsd:string"/>
+                                                                  
+            
+            
+            </xsd:sequence>
+                                    					
+          
+          
+          </xsd:complexType>
+                              				
+        
+        
+        </xsd:element>
+                        			
+      
+      
+      </xsd:sequence>
+                  		
+    
+    
+    </xsd:complexType>
+            	
+  
+  
+  </xsd:element>
+      
+
+
+</xsd:schema>

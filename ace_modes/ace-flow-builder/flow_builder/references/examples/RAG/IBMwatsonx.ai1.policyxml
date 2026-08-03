@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policies>
+  <policy policyType="ibmwatsonxai" policyName="IBMwatsonx.ai1" policyTemplate="online_v1_basic_api_key">
+    <applicationType>online</applicationType>
+    <applicationVersion>v1</applicationVersion>
+    <authenticationMethod>BASIC_API_KEY</authenticationMethod>
+    <apiUrl>https://us-south.ml.cloud.ibm.com</apiUrl>
+    <isTlsEnabled>false</isTlsEnabled>
+    <endpointUrl></endpointUrl>
+    <credentialName>RAGPolicyProject_IBMwatsonx.ai1</credentialName>
+  </policy>
+</policies>

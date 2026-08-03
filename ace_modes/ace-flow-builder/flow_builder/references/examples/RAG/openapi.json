@@ -1,0 +1,64 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Rag Query API",
+    "version": "1.0.0",
+    "description": "API for querying a Retrieval-Augmented Generation (RAG) model"
+  },
+  "servers": [
+    {
+      "url": "/rag"
+    }
+  ],
+  "x-ibm-configuration": {},
+  "paths": {
+    "/query": {
+      "post": {
+        "responses": {
+          "200": {
+            "description": "success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "The answer to your question is ...."
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Submit a query.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "query": {
+                    "title": "query",
+                    "type": "string",
+                    "example": "what is context tree"
+                  }
+                },
+                "required": [
+                  "query"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

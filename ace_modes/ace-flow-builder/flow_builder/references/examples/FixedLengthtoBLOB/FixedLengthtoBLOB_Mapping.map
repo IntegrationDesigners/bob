@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="/FixedLength.xsd"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="FixedLengthtoBLOB_Mapping">
+        <input path="mb:msg(MessageFixedLength,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageFixedLength"/>
+        <output path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/Properties"/>
+            <output path="$ComIbmMessageAssembly_BLOB/Properties"/>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item[1]" var="Item1"/>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item[2]" var="Item2"/>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item[3]" var="Item3"/>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item[4]" var="Item4"/>
+            <output path="$ComIbmMessageAssembly_BLOB/BLOB/text()"/>
+            <code lang="xpath">iib:hexBinaryValue(fn:concat(&#13;
+substring(concat($Item1/LastName,'                              '), 1, 30),&#13;
+substring(concat($Item1/FirstName,'                              '), 1, 30),&#13;
+substring(concat($Item1/Address,'                              '), 1, 30),&#13;
+substring(concat($Item1/DateOfBirth,'                              '), 1, 30),&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+substring(concat($Item2/LastName,'                              '), 1, 30),&#13;
+substring(concat($Item2/FirstName,'                              '), 1, 30),&#13;
+substring(concat($Item2/Address,'                              '), 1, 30),&#13;
+substring(concat($Item2/DateOfBirth,'                              '), 1, 30),&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+substring(concat($Item3/LastName,'                              '), 1, 30),&#13;
+substring(concat($Item3/FirstName,'                              '), 1, 30),&#13;
+substring(concat($Item3/Address,'                              '), 1, 30),&#13;
+substring(concat($Item3/DateOfBirth,'                              '), 1, 30),&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+substring(concat($Item4/LastName,'                              '), 1, 30),&#13;
+substring(concat($Item4/FirstName,'                              '), 1, 30),&#13;
+substring(concat($Item4/Address,'                              '), 1, 30),&#13;
+substring(concat($Item4/DateOfBirth,'                              '), 1, 30)&#13;
+))</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

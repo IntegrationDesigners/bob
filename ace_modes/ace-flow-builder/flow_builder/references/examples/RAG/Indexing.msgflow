@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode" xmlns:ComIbmApplicationConnectorRequest_pineconedb.msgnode="ComIbmApplicationConnectorRequest_pineconedb.msgnode" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFileInput.msgnode="ComIbmFileInput.msgnode" xmlns:ComIbmFlowOrder.msgnode="ComIbmFlowOrder.msgnode" xmlns:ComIbmLog.msgnode="ComIbmLog.msgnode"
+    xmlns:RAGSharedLib_FindIndex.subflow="RAGSharedLib/FindIndex.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:patternAnnotation="http://www.ibm.com/patternAnnotation/2010" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="Indexing.msgflow" nsPrefix="Indexing.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" nodeLayoutStyle="RECTANGLE">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ChunkSize" name="ChunkSize" lowerBound="1" defaultValueLiteral="500">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ChunkOverlap" name="ChunkOverlap" lowerBound="1" defaultValueLiteral="100">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.IndexName" name="IndexName" lowerBound="1" defaultValueLiteral="demo">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.Dimension" name="Dimension" defaultValueLiteral="1024">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ProjectID" name="ProjectID" lowerBound="1">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.inputDirectory" name="inputDirectory" lowerBound="1">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.filenamePattern" name="filenamePattern" lowerBound="1" defaultValueLiteral="*">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="Indexing" bundleName="Indexing" pluginId="RAGIndexing"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RAGIndexing/icons/full/obj16/Indexing.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RAGIndexing/icons/full/obj30/Indexing.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="176,145" computeExpression="esql://routine/#Indexing_Chunking.Main">
+        <translation xmi:type="utility:ConstantString" string="Chunking"/>
+      </nodes>
+      <nodes xmi:type="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="531,221" applicationConnectorType="ibmwatsonxai" action="postMlV1TextEmbeddings" businessObject="postMlV1TextEmbeddings_model" displayName="undefined" schemaPrefix="gen/Phase1_Indexing.IBM_watsonx.ai_Request" policyUrl="{RAGPolicyProject}:IBMwatsonx.ai1" mappingMode="jsonmap" messageSetProperty="gen/Phase1_Indexing.IBM_watsonx.ai_Request.response.schema.json">
+        <translation xmi:type="utility:ConstantString" string="Generate Embeddings"/>
+        <contextReference nodeName="Chunking" nodeType="ComIbmCompute.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="" schemaLocation="" schemaRoot="" resultDataLocation="" flowName=""/>
+        <contextReference nodeName="Read File" nodeType="ComIbmFileInput.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="" schemaLocation="" schemaRoot="" resultDataLocation="" flowName=""/>
+        <connectorServiceOptions optionName="httpMethod" optionValue="post"/>
+        <connectorServiceOptions optionName="path" optionValue="resources/postMlV1TextEmbeddings_model/operations/postMlV1TextEmbeddings"/>
+        <connectorServiceOptions optionName="action" optionValue="custom"/>
+        <requestMap map="{&quot;mappings&quot;:[{&quot;inputs&quot;:{&quot;expression&quot;:&quot;$mappingInput_InputRoot.JSON.Data.lines&quot;}},{&quot;model_id&quot;:{&quot;template&quot;:&quot;intfloat/multilingual-e5-large&quot;}},{&quot;project_id&quot;:{&quot;template&quot;:&quot;{{$mappingInput_Environment.Variable.ProjectID}}&quot;}},{&quot;version&quot;:{&quot;template&quot;:&quot;2024-03-14&quot;}}],&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f4368756e6b696e67&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f4368756e6b696e67&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f526561642046696c65&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f526561642046696c65&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;},{&quot;variable&quot;:&quot;mappingInput_InputRoot&quot;,&quot;$ref&quot;:&quot;#/mappingInputs/InputRoot&quot;},{&quot;variable&quot;:&quot;mappingInput_InputLocalEnvironment&quot;,&quot;$ref&quot;:&quot;#/mappingInputs/InputLocalEnvironment&quot;},{&quot;variable&quot;:&quot;mappingInput_Environment&quot;,&quot;$ref&quot;:&quot;#/mappingInputs/Environment&quot;}]}"/>
+        <mappingInput inputName="InputRoot" inputLocation="$InputRoot" schemaLocation="" schemaRoot=""/>
+        <mappingInput inputName="InputLocalEnvironment" inputLocation="$InputLocalEnvironment" schemaLocation="" schemaRoot=""/>
+        <mappingInput inputName="Environment" inputLocation="$Environment" messageDomain="" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="706,280" computeExpression="esql://routine/#Indexing_Pinecone_Data_Preprocess.Main">
+        <translation xmi:type="utility:ConstantString" string="Pinecone Data Preprocess"/>
+      </nodes>
+      <nodes xmi:type="ComIbmApplicationConnectorRequest_pineconedb.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="878,324" applicationConnectorType="pineconedb" action="postIndexesByIndexHostVectorsUpsert" businessObject="Vectors" displayName="undefined" schemaPrefix="gen/Phase1_Indexing.Pinecone_Vector_Database_Request2" policyUrl="{RAGPolicyProject}:PineconeVectorDatabase1" messageSetProperty="gen/Phase1_Indexing.Pinecone_Vector_Database_Request2.response.schema.json">
+        <filter>
+          <filterElementObject type="where">
+            <connectorPropertyRef propertyName="index_host" compareAction=""/>
+          </filterElementObject>
+        </filter>
+        <translation xmi:type="utility:ConstantString" string="Insert Vector"/>
+        <connectorProperty propertyName="index_host" displayName="Index host" propertyValue="[[$Environment/Variable/HostName]]" displayValue=""/>
+        <contextReference nodeName="Pinecone Data Preprocess" nodeType="ComIbmCompute.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="" schemaLocation="" schemaRoot="" resultDataLocation="" flowName=""/>
+        <contextReference nodeName="Generate Embeddings" nodeType="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="JSON" schemaLocation="gen/Phase1_Indexing.IBM_watsonx.ai_Request.response.schema.json" schemaRoot="" resultDataLocation="$ResultRoot" flowName=""/>
+        <contextReference nodeName="Chunking" nodeType="ComIbmCompute.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="" schemaLocation="" schemaRoot="" resultDataLocation="" flowName=""/>
+        <contextReference nodeName="Read File" nodeType="ComIbmFileInput.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="" schemaLocation="" schemaRoot="" resultDataLocation="" flowName=""/>
+        <connectorServiceOptions optionName="httpMethod" optionValue="post"/>
+        <connectorServiceOptions optionName="path" optionValue="resources/Indexes/{index_host}/Vectors/operations/postIndexesByIndexHostVectorsUpsert"/>
+        <connectorServiceOptions optionName="action" optionValue="create"/>
+        <mappingInput inputName="InputRoot" inputLocation="$InputRoot" schemaLocation="" schemaRoot=""/>
+        <mappingInput inputName="InputLocalEnvironment" inputLocation="$InputLocalEnvironment" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <nodes xmi:type="ComIbmFlowOrder.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="358,146">
+        <translation xmi:type="utility:ConstantString" string="Flow Order"/>
+      </nodes>
+      <nodes xmi:type="ComIbmFileInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="9,145" inputDirectory="/Users/charithakreddy/Desktop/ace-rag-ai-project/Data" filenamePattern="*.txt" messageCodedCharSetIdProperty="1208" recordDetection="fixedLength" recordLength="80000">
+        <translation xmi:type="utility:ConstantString" string="Read File"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLog.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="1049,369" logLevel="Info" logMessage="Vector embeddings added to pinecone vector database. Response: {{$mappingInput_InputRoot.JSON.Data}}">
+        <translation xmi:type="utility:ConstantString" string="Log Pinecone Insert"/>
+        <mappingInput inputName="InputRoot" inputLocation="$InputRoot" schemaLocation="" schemaRoot=""/>
+        <mappingInput inputName="InputLocalEnvironment" inputLocation="$InputLocalEnvironment" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <nodes xmi:type="RAGSharedLib_FindIndex.subflow:FCMComposite_1" xmi:id="FCMComposite_1_5" location="534,62">
+        <translation xmi:type="utility:ConstantString" string="FindIndex"/>
+      </nodes>
+      <nodes xmi:type="ComIbmLog.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="170,223" logLevel="Info" logMessage="Completed processing file: {{$mappingInput_InputLocalEnvironment.File.Name}}">
+        <translation xmi:type="utility:ConstantString" string="Log EOF"/>
+        <mappingInput inputName="InputLocalEnvironment" inputLocation="$InputLocalEnvironment" messageDomain="" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.second" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.first" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.EOD" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Chunking" configurable="true" userDefined="true" describedAttribute="Property.ChunkSize">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.ChunkSize" bundleName="Indexing" pluginId="RAGIndexing"/>
+        <propertyDescriptor groupName="Group.Chunking" configurable="true" userDefined="true" describedAttribute="Property.ChunkOverlap">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.ChunkOverlap" bundleName="Indexing" pluginId="RAGIndexing"/>
+          <propertyDescriptor groupName="Group.PineCone" configurable="true" userDefined="true" describedAttribute="Property.IndexName">
+            <propertyName xmi:type="utility:TranslatableString" key="Property.IndexName" bundleName="Indexing" pluginId="RAGIndexing"/>
+            <propertyDescriptor groupName="Group.PineCone" configurable="true" userDefined="true" describedAttribute="Property.Dimension">
+              <propertyName xmi:type="utility:TranslatableString" key="Property.Dimension" bundleName="Indexing" pluginId="RAGIndexing"/>
+              <propertyDescriptor groupName="Group.Watsonx.ai" configurable="true" userDefined="true" describedAttribute="Property.ProjectID">
+                <propertyName xmi:type="utility:TranslatableString" key="Property.ProjectID" bundleName="Indexing" pluginId="RAGIndexing"/>
+                <propertyDescriptor groupName="Group.Input" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.file.FileInputNodeDirPropertyEditor" configurable="true" describedAttribute="Property.inputDirectory">
+                  <propertyName xmi:type="utility:TranslatableString" key="Property.inputDirectory" bundleName="ComIbmFileInput" pluginId="com.ibm.etools.mft.ibmnodes.definitions"/>
+                  <propertyDescriptor groupName="Group.Input" propertyEditor="com.ibm.etools.mft.ibmnodes.editors.file.FileInputNodeFilePropertyEditor" configurable="true" describedAttribute="Property.filenamePattern">
+                    <propertyName xmi:type="utility:TranslatableString" key="Property.filenamePattern" bundleName="ComIbmFileInput" pluginId="com.ibm.etools.mft.ibmnodes.definitions"/>
+                  </propertyDescriptor>
+                </propertyDescriptor>
+              </propertyDescriptor>
+            </propertyDescriptor>
+          </propertyDescriptor>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <attributeLinks promotedAttribute="Property.inputDirectory" overriddenNodes="FCMComposite_1_4">
+      <overriddenAttribute href="ComIbmFileInput.msgnode#Property.inputDirectory"/>
+    </attributeLinks>
+    <attributeLinks promotedAttribute="Property.filenamePattern" overriddenNodes="FCMComposite_1_4">
+      <overriddenAttribute href="ComIbmFileInput.msgnode#Property.filenamePattern"/>
+    </attributeLinks>
+    <stickyBoard/>
+    <patternAnnotations>
+      <AnnotationTarget targetObjects="//FCMComposite_1">
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="PromotedProperty.inputDirectory" targetObject="//FCMComposite_1" targetPropertyId="inputDirectory"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.ChunkOverlap" targetObject="//FCMComposite_1" targetPropertyId="ChunkOverlap"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.ChunkSize" targetObject="//FCMComposite_1" targetPropertyId="ChunkSize"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.Dimension" targetObject="//FCMComposite_1" targetPropertyId="Dimension"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.IndexName" targetObject="//FCMComposite_1" targetPropertyId="IndexName"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.ProjectID" targetObject="//FCMComposite_1" targetPropertyId="ProjectID"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="PromotedProperty.filenamePattern" targetObject="//FCMComposite_1" targetPropertyId="filenamePattern"/>
+      </AnnotationTarget>
+    </patternAnnotations>
+  </eClassifiers>
+</ecore:EPackage>

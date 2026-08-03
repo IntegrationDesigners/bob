@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <inlinedXMLSchema>
+        <![CDATA[<?xml version="1.0" encoding="UTF-8" standalone="no"?> 
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"> 
+    
+        
+   
+  <xsd:element name="JMS" nillable="true"> 
+      
+     
+    <xsd:complexType> 
+        
+       
+      <xsd:sequence> 
+          
+         
+        <xsd:element name="destinationName" nillable="true" type="xsd:string"/> 
+          
+         
+        <xsd:element name="initialContext" nillable="true" type="xsd:string"/> 
+          
+         
+        <xsd:element name="JMSMessageID" nillable="true" type="xsd:string"/> 
+          
+         
+        <xsd:element name="JMSCorrelationID" nillable="true" type="xsd:string"/> 
+          
+       
+      </xsd:sequence> 
+        
+     
+    </xsd:complexType> 
+      
+   
+  </xsd:element> 
+    
+    
+ 
+</xsd:schema> 
+]]>
+    </inlinedXMLSchema>
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd" var="var2"/>
+    <input inlinedXMLSchema="true" path="../schema_0.xsd" var="var1"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/JsonDomainMsg.xsd" var="var"/>
+    <namespaces>
+        <namespace kind="supplement" prefix="out" uri="http://www.ibm.com/iib/msl/json"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="IBMMQtoJMS_Mapping">
+        <input path="$var2/mb:msg(BLOB,assembly,BLOB,LocalEnvironment,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <output namespace="http://www.ibm.com/iib/msl/json" path="$var/mb:msg(JSON,assembly,JSON,Properties)" var="ComIbmMessageAssembly_JSON">
+            <cast castType="userDefined" path="$ComIbmMessageAssembly_JSON/JSON/Data/type('anyType')" qualifier="{http://www.ibm.com/iib/msl/json}JSONObject" ref="var"/>
+            <cast castType="userDefined" path="$ComIbmMessageAssembly_JSON/JSON/spath('Data',2)/any" qualifier="JMS" ref="var1"/>
+        </output>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/Properties"/>
+            <output path="$ComIbmMessageAssembly_JSON/Properties"/>
+        </move>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/LocalEnvironment/WrittenDestination/JMS/DestinationData[1]/JMSCorrelationID"/>
+            <output path="$ComIbmMessageAssembly_JSON/JSON/spath('Data',2)/JMS/JMSCorrelationID"/>
+        </move>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/LocalEnvironment/WrittenDestination/JMS/DestinationData[1]/JMSMessageID"/>
+            <output path="$ComIbmMessageAssembly_JSON/JSON/spath('Data',2)/JMS/JMSMessageID"/>
+        </move>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/LocalEnvironment/WrittenDestination/JMS/DestinationData[1]/initialContext"/>
+            <output path="$ComIbmMessageAssembly_JSON/JSON/spath('Data',2)/JMS/initialContext"/>
+        </move>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/LocalEnvironment/WrittenDestination/JMS/DestinationData[1]/destinationName"/>
+            <output path="$ComIbmMessageAssembly_JSON/JSON/spath('Data',2)/JMS/destinationName"/>
+        </move>
+    </mappingDeclaration>
+</mappingRoot>

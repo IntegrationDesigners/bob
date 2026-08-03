@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MessagePool xmlns="http://wwww.ibm.com/iib/test/1.0.0">
+    <InputMessage timestamp="1720451797946" nodeId="FCMComposite_1_2" name="BLOBJSONMessage" id="1720451797946-79">
+        <plainText>%5B%7B%22LastName%22%3A%22Bloggs%22%2C+%22FirstName%22%3A%22Joe%22%2C+%22Address%22%3A%22Hursley+Park%22%2C+%22DateOfBirth%22%3A%221958-12-01%22%7D%2C%7B%22LastName%22%3A%22Doe%22%2C+%22FirstName%22%3A%22John%22%2C+%22Address%22%3A%221+New+Orchard+Rd%22%2C+%22DateOfBirth%22%3A%221964-10-31%22%7D%2C%7B%22LastName%22%3A%22Modaal%22%2C+%22FirstName%22%3A%22Jan%22%2C+%22Address%22%3A%22Johan+Huizingalaan+765%22%2C+%22DateOfBirth%22%3A%221978-01-01%22%7D%2C%7B%22LastName%22%3A%22Normalverbraucher%22%2C+%22FirstName%22%3A%22Otto%22%2C+%22Address%22%3A%22Schoenaicher+Strasse+220%22%2C+%22DateOfBirth%22%3A%221953-06-30%22%7D%5D</plainText>
+    </InputMessage>
+</MessagePool>

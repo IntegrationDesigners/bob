@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="/FixedLength.xsd"/>
+    <output path="/Delimited.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="FixedLengthtoDelimited_Mapping">
+        <input path="mb:msg(MessageFixedLength,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageFixedLength"/>
+        <output path="mb:msg(MessageDelimited,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageDelimited"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/Properties"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/Properties"/>
+            <override>
+                <assign value="{}:MessageDelimited">
+                    <output path="$ComIbmMessageAssembly_MessageDelimited/Properties/MessageType"/>
+                </assign>
+            </override>
+        </move>
+        <foreach>
+            <input path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item" var="Item"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item"/>
+            <move>
+                <input path="$Item/LastName"/>
+                <output path="LastName"/>
+            </move>
+            <move>
+                <input path="$Item/FirstName"/>
+                <output path="FirstName"/>
+            </move>
+            <move>
+                <input path="$Item/Address"/>
+                <output path="Address"/>
+            </move>
+            <move>
+                <input path="$Item/DateOfBirth"/>
+                <output path="DateOfBirth"/>
+            </move>
+        </foreach>
+    </mappingDeclaration>
+</mappingRoot>

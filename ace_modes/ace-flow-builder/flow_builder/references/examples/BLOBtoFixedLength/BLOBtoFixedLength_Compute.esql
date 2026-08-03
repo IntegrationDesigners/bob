@@ -1,0 +1,50 @@
+
+
+CREATE COMPUTE MODULE BLOBtoFixedLength_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+		-- ================================
+		-- OPTION 1 Simple Example
+		-- If the input data happens to be structured, even if it arrived in the BLOB domain,
+		-- then the code required to reparse the input BLOB as output Delimited is very short and simple.
+		-- ================================
+--		DECLARE CodedCharSetId INT 1208;
+--		SET OutputRoot.Properties = InputRoot.Properties;
+--		CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL')
+--		  PARSE(InputRoot.BLOB.BLOB TYPE '{}:MessageFixedLength' CCSID CodedCharSetId);
+
+		-- ================================			
+		-- Option 2 More Complex Example
+		-- The more detailed code below provides a deeper example 
+		-- String manipulation functions can be used to locate specific sections of the input BLOB 
+		-- ================================		
+		SET OutputRoot.Properties = InputRoot.Properties;		
+		CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL');
+		DECLARE CodedCharSetId INT 1208;
+		DECLARE InString CHAR CAST(InputRoot.BLOB.BLOB AS CHAR CCSID CodedCharSetId);
+		DECLARE I INTEGER;
+		SET I = 1;
+		WHILE I < 5 DO
+			DECLARE PosLastNameBegin INT 102*(I-1)+1;
+			DECLARE PosLastNameEnd INT 102*(I-1)+31;
+			DECLARE PosFirstNameBegin INT 102*(I-1)+31;
+			DECLARE PosFirstNameEnd INT 102*(I-1)+61;			
+			DECLARE PosAddressBegin INT 102*(I-1)+61;
+			DECLARE PosAddressEnd INT 102*(I-1)+91;			
+			DECLARE PosDateOfBirthBegin INT 102*(I-1)+91;
+			DECLARE PosDateOfBirthEnd INT 102*(I-1)+101;
+			SET OutputRoot.DFDL.MessageFixedLength.Item[I].LastName
+			  = SUBSTRING(InString FROM PosLastNameBegin FOR (PosLastNameEnd-PosLastNameBegin));  
+			SET OutputRoot.DFDL.MessageFixedLength.Item[I].FirstName
+			  = SUBSTRING(InString FROM PosFirstNameBegin FOR (PosFirstNameEnd-PosFirstNameBegin));
+			SET OutputRoot.DFDL.MessageFixedLength.Item[I].Address
+			  = SUBSTRING(InString FROM PosAddressBegin FOR (PosAddressEnd-PosAddressBegin));
+			SET OutputRoot.DFDL.MessageFixedLength.Item[I].DateOfBirth
+			  = SUBSTRING(InString FROM PosDateOfBirthBegin FOR (PosDateOfBirthEnd-PosDateOfBirthBegin));
+			SET I = I + 1;
+		END WHILE;
+
+		RETURN TRUE;
+	END;
+END MODULE;

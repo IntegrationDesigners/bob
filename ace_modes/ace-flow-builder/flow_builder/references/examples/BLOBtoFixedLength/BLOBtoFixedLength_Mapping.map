@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <output path="/FixedLength.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="BLOBtoFixedLength_Mapping">
+        <input path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <output path="mb:msg(MessageFixedLength,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageFixedLength"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/Properties"/>
+            <output path="$ComIbmMessageAssembly_MessageFixedLength/Properties"/>
+            <override>
+                <assign value="{}:MessageFixedLength">
+                    <output path="$ComIbmMessageAssembly_MessageFixedLength/Properties/MessageType"/>
+                </assign>
+            </override>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value"/>
+            <output path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item/LastName"/>
+            <code lang="xpath">substring(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value), $index, 1)),&#13;
+       $lonibble in (substring(string($value), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))),1,30)</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value1"/>
+            <output path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item/FirstName"/>
+            <code lang="xpath">substring(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value1)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value1), $index, 1)),&#13;
+       $lonibble in (substring(string($value1), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))),31,30)</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value2"/>
+            <output path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item/Address"/>
+            <code lang="xpath">substring(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value2)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value2), $index, 1)),&#13;
+       $lonibble in (substring(string($value2), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))),61,30)</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value3"/>
+            <output path="$ComIbmMessageAssembly_MessageFixedLength/MessageFixedLength/Item/DateOfBirth"/>
+            <code lang="xpath">substring(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value3)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value3), $index, 1)),&#13;
+       $lonibble in (substring(string($value3), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))),91,10)</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

@@ -1,0 +1,18 @@
+
+
+CREATE COMPUTE MODULE DelimitedtoBLOB_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('BLOB');
+		DECLARE options INTEGER BITOR(FolderBitStream, ValidateNone);
+		SET OutputRoot.BLOB.BLOB =
+			ASBITSTREAM(InputRoot.DFDL.MessageDelimited
+				OPTIONS options
+				CCSID InputRoot.Properties.CodedCharSetId);
+		
+		RETURN TRUE;
+	END;
+
+END MODULE;

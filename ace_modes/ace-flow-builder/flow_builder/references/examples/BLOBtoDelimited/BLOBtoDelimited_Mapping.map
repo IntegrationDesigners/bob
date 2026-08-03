@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <output path="/Delimited.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="BLOBtoDelimited_Mapping">
+        <input path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <output path="mb:msg(MessageDelimited,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageDelimited"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/Properties"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/Properties"/>
+            <override>
+                <assign value="{}:MessageDelimited">
+                    <output path="$ComIbmMessageAssembly_MessageDelimited/Properties/MessageType"/>
+                </assign>
+            </override>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value1"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item/LastName"/>
+            <code lang="xpath">tokenize(tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value1)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value1), $index, 1)),&#13;
+       $lonibble in (substring(string($value1), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), concat(codepoints-to-string(13),codepoints-to-string(10))&#13;
+       )[1],",")[1]</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value2"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item/FirstName"/>
+            <code lang="xpath">tokenize(tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value2)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value2), $index, 1)),&#13;
+       $lonibble in (substring(string($value2), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), concat(codepoints-to-string(13),codepoints-to-string(10))&#13;
+       )[1],",")[2]</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value3"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item/Address"/>
+            <code lang="xpath">tokenize(tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value3)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value3), $index, 1)),&#13;
+       $lonibble in (substring(string($value3), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), concat(codepoints-to-string(13),codepoints-to-string(10))&#13;
+       )[1],",")[3]</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value4"/>
+            <output path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item/DateOfBirth"/>
+            <code lang="xpath">tokenize(tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value4)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value4), $index, 1)),&#13;
+       $lonibble in (substring(string($value4), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), concat(codepoints-to-string(13),codepoints-to-string(10))&#13;
+       )[1],",")[4]</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <output path="/XMLSchema.xsd"/>
+    <namespaces>
+        <namespace kind="supplement" prefix="out" uri="http://ibm.com/example"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="BLOBtoXML_Mapping">
+        <input path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <output namespace="http://ibm.com/example" path="mb:msg(Message,assembly,XMLNSC,Properties)" var="MessageAssembly"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_BLOB/Properties"/>
+            <output path="$MessageAssembly/Properties"/>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value"/>
+            <output path="$MessageAssembly/Message/Item/LastName"/>
+            <code lang="xpath">substring-after((tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value), $index, 1)),&#13;
+       $lonibble in (substring(string($value), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), "&lt;/LastName&gt;"&#13;
+       )[1]),"&lt;LastName&gt;")</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value1"/>
+            <output path="$MessageAssembly/Message/Item/FirstName"/>
+            <code lang="xpath">substring-after((tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value1)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value1), $index, 1)),&#13;
+       $lonibble in (substring(string($value1), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), "&lt;/FirstName&gt;"&#13;
+       )[1]),"&lt;FirstName&gt;")</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value2"/>
+            <output path="$MessageAssembly/Message/Item/Address"/>
+            <code lang="xpath">substring-after((tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value2)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value2), $index, 1)),&#13;
+       $lonibble in (substring(string($value2), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), "&lt;/Address&gt;"&#13;
+       )[1]),"&lt;Address&gt;")</code>
+        </expression>
+        <expression>
+            <input path="$ComIbmMessageAssembly_BLOB/BLOB/text()" var="value3"/>
+            <output path="$MessageAssembly/Message/Item/DateOfBirth"/>
+            <code lang="xpath">substring-after((tokenize(codepoints-to-string(&#13;
+   for $index  in (1 to string-length(string($value3)))[. mod 2 = 1],&#13;
+       $hinibble in (substring(string($value3), $index, 1)),&#13;
+       $lonibble in (substring(string($value3), $index + 1, 1))&#13;
+   return&#13;
+       (16 * string-length(substring-before('0123456789ABCDEF', upper-case($hinibble)))) +&#13;
+       string-length(substring-before('0123456789ABCDEF', upper-case($lonibble)))), "&lt;/DateOfBirth&gt;"&#13;
+       )[1]),"&lt;DateOfBirth&gt;")</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

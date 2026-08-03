@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MessagePool xmlns="http://wwww.ibm.com/iib/test/1.0.0">
+    <InputMessage timestamp="1720601089103" nodeId="FCMComposite_1_2" name="FixedLengthMessage" id="1720601089103-1624">
+        <plainText>Bloggs++++++++++++++++++++++++Joe+++++++++++++++++++++++++++Hursley+Park++++++++++++++++++1958-12-01%0D%0ADoe+++++++++++++++++++++++++++John++++++++++++++++++++++++++1+New+Orchard+Rd++++++++++++++1964-10-31%0D%0AModaal++++++++++++++++++++++++Jan+++++++++++++++++++++++++++Johan+Huizingalaan+765++++++++1978-01-01%0D%0ANormalverbraucher+++++++++++++Otto++++++++++++++++++++++++++Schoenaicher+Strasse+220++++++1953-06-30</plainText>
+    </InputMessage>
+</MessagePool>

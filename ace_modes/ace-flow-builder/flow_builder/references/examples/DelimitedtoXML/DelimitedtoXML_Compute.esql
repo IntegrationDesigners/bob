@@ -1,0 +1,36 @@
+
+
+CREATE COMPUTE MODULE DelimitedtoXML_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('XMLNSC');
+		SET OutputRoot.XMLNSC.Message = InputRoot.DFDL.MessageDelimited;
+
+		-- The Delimited input message does not carry XML namespace information (which is an XML concept) 
+		-- so whilst copying the tree is very simple as shown in the above single statement, flow developers
+		-- may wish to specify namespaces should be used in the output XML.
+		-- To achieve this, you could add target namespace information into the Delimited message model,
+		-- so that it is already in the logical message tree when the inbound data is parsed using the Delimited message model.
+		-- Alternatively you can also update the target namspace using the following code which 
+		-- walks through the XMLNSC output message and will update the namespace of each field
+		DECLARE desirednamespace NAMESPACE 'http://ibm.com/example';
+		DECLARE ref REFERENCE TO OutputRoot.XMLNSC;
+		MOVE ref FIRSTCHILD;
+		CALL LoopAndUpdateNamespace(ref, desirednamespace);
+
+		RETURN TRUE;
+	END;
+
+ 	CREATE PROCEDURE LoopAndUpdateNamespace (IN ref REFERENCE, IN desirednamespace CHARACTER)
+  	BEGIN
+    	MOVE ref FIRSTCHILD;
+    	WHILE LASTMOVE(ref) DO
+			CALL LoopAndUpdateNamespace(ref, desirednamespace);
+      		SET ref NAMESPACE = desirednamespace;
+      		MOVE ref NEXTSIBLING;
+    	END WHILE;
+	END;
+
+END MODULE;

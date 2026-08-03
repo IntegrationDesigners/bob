@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<MessagePool xmlns="http://wwww.ibm.com/iib/test/1.0.0">
+    <InputMessage timestamp="1720641378058" nodeId="FCMComposite_1_2" name="XMLMessage" id="1720641378058-1908">
+        <plainText>%3CMessage%3E%3CItem%3E%3CLastName%3EBloggs%3C%2FLastName%3E%3CFirstName%3EJoe%3C%2FFirstName%3E%3CAddress%3EHursley+Park%3C%2FAddress%3E%3CDateOfBirth%3E1958-12-01%3C%2FDateOfBirth%3E%3C%2FItem%3E%3CItem%3E%3CLastName%3EDoe%3C%2FLastName%3E%3CFirstName%3EJohn%3C%2FFirstName%3E%3CAddress%3E1+New+Orchard+Rd%3C%2FAddress%3E%3CDateOfBirth%3E1964-10-31%3C%2FDateOfBirth%3E%3C%2FItem%3E%3CItem%3E%3CLastName%3EModaal%3C%2FLastName%3E%3CFirstName%3EJan%3C%2FFirstName%3E%3CAddress%3EJohan+Huizingalaan+765%3C%2FAddress%3E%3CDateOfBirth%3E1978-01-01%3C%2FDateOfBirth%3E%3C%2FItem%3E%3CItem%3E%3CLastName%3ENormalverbraucher%3C%2FLastName%3E%3CFirstName%3EOtto%3C%2FFirstName%3E%3CAddress%3ESchoenaicher+Strasse+220%3C%2FAddress%3E%3CDateOfBirth%3E1953-06-30%3C%2FDateOfBirth%3E%3C%2FItem%3E%3C%2FMessage%3E</plainText>
+    </InputMessage>
+</MessagePool>

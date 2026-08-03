@@ -1,0 +1,49 @@
+
+
+CREATE COMPUTE MODULE BLOBtoXML_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- ================================
+		-- OPTION 1 Simple Example
+		-- If the input data happens to be structured, even if it arrived in the BLOB domain,
+		-- then the code required to reparse the input BLOB as output XML is very short and simple.
+		-- ================================
+		DECLARE CodedCharSetId INT 1208;
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('XMLNSC')
+		  PARSE(InputRoot.BLOB.BLOB CCSID CodedCharSetId);
+
+		-- ================================			
+		-- Option 2 More Complex Example
+		-- The more detailed code below provides a deeper example
+		-- String manipulation functions can be used to locate specific sections of the input BLOB 
+		-- ================================		
+--		SET OutputRoot.Properties = InputRoot.Properties;		
+--		CREATE LASTCHILD OF OutputRoot DOMAIN('XMLNSC');
+--		DECLARE CodedCharSetId INT 1208;
+--		DECLARE InString CHAR CAST(InputRoot.BLOB.BLOB AS CHAR CCSID CodedCharSetId);
+--		DECLARE I INTEGER;
+--		SET I = 1;
+--		WHILE I < 5 DO
+--			DECLARE PosLastNameBegin INT POSITION('>' IN InString REPEAT 10*(I-1)+3);
+--			DECLARE PosLastNameEnd INT POSITION('<' IN InString REPEAT 10*(I-1)+4);
+--			DECLARE PosFirstNameBegin INT POSITION('>' IN InString REPEAT 10*(I-1)+5);
+--			DECLARE PosFirstNameEnd INT POSITION('<' IN InString REPEAT 10*(I-1)+6);			
+--			DECLARE PosAddressBegin INT POSITION('>' IN InString REPEAT 10*(I-1)+7);
+--			DECLARE PosAddressEnd INT POSITION('<' IN InString REPEAT 10*(I-1)+8);			
+--			DECLARE PosDateOfBirthBegin INT POSITION('>' IN InString REPEAT 10*(I-1)+9);
+--			DECLARE PosDateOfBirthEnd INT POSITION('<' IN InString REPEAT 10*(I-1)+10);
+--			SET OutputRoot.XMLNSC.Message.Item[I].LastName
+--			  = SUBSTRING(InString FROM PosLastNameBegin+1 FOR (PosLastNameEnd-PosLastNameBegin-1));  
+--			SET OutputRoot.XMLNSC.Message.Item[I].FirstName
+--			  = SUBSTRING(InString FROM PosFirstNameBegin+1 FOR (PosFirstNameEnd-PosFirstNameBegin-1));
+--			SET OutputRoot.XMLNSC.Message.Item[I].Address
+--			  = SUBSTRING(InString FROM PosAddressBegin+1 FOR (PosAddressEnd-PosAddressBegin-1));
+--			SET OutputRoot.XMLNSC.Message.Item[I].DateOfBirth
+--			  = SUBSTRING(InString FROM PosDateOfBirthBegin+1 FOR (PosDateOfBirthEnd-PosDateOfBirthBegin-1));
+--			SET I = I + 1;
+--		END WHILE;
+
+		RETURN TRUE;
+	END;
+END MODULE;

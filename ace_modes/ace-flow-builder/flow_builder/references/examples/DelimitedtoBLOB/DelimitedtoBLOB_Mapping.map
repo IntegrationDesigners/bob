@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="/Delimited.xsd"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="DelimitedtoBLOB_Mapping">
+        <input path="mb:msg(MessageDelimited,assembly,DFDL,Properties)" var="ComIbmMessageAssembly_MessageDelimited"/>
+        <output path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_MessageDelimited/Properties"/>
+            <output path="$ComIbmMessageAssembly_BLOB/Properties"/>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item[1]" var="Item1"/>
+            <input path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item[2]" var="Item2"/>
+            <input path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item[3]" var="Item3"/>
+            <input path="$ComIbmMessageAssembly_MessageDelimited/MessageDelimited/Item[4]" var="Item4"/>
+            <output path="$ComIbmMessageAssembly_BLOB/BLOB/text()"/>
+            <code lang="xpath">iib:hexBinaryValue(fn:concat(&#13;
+$Item1/LastName,',',&#13;
+$Item1/FirstName,',',&#13;
+$Item1/Address,',',&#13;
+$Item1/DateOfBirth,',',&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+$Item2/LastName,',',&#13;
+$Item2/FirstName,',',&#13;
+$Item2/Address,',',&#13;
+$Item2/DateOfBirth,',',&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+$Item3/LastName,',',&#13;
+$Item3/FirstName,',',&#13;
+$Item3/Address,',',&#13;
+$Item3/DateOfBirth,',',&#13;
+fn:codepoints-to-string(13),fn:codepoints-to-string(10),&#13;
+$Item4/LastName,',',&#13;
+$Item4/FirstName,',',&#13;
+$Item4/Address,',',&#13;
+$Item4/DateOfBirth,','&#13;
+))</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

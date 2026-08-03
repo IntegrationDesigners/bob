@@ -1,0 +1,18 @@
+CREATE COMPUTE MODULE SimpleHTTPResponse_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		-- Create a simple response message
+		SET OutputRoot.Properties = InputRoot.Properties;
+		SET OutputRoot.HTTPResponseHeader."Content-Type" = 'application/json';
+
+		-- Create JSON response body
+		CREATE FIELD OutputRoot.JSON.Data;
+		DECLARE refOutput REFERENCE TO OutputRoot.JSON.Data;
+
+		SET refOutput.status = 'success';
+		SET refOutput.message = 'message received';
+		SET refOutput.timestamp = CURRENT_TIMESTAMP;
+
+		RETURN TRUE;
+	END;
+END MODULE;

@@ -1,0 +1,13 @@
+
+
+CREATE COMPUTE MODULE XMLtoFixedLength_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('DFDL');
+		SET OutputRoot.DFDL.MessageFixedLength = InputRoot.XMLNSC.Message;
+		
+		RETURN TRUE;
+	END;
+END MODULE;

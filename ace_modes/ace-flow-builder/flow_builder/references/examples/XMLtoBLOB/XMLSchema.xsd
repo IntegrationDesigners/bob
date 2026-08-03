@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://ibm.com/example" xmlns:tns="http://ibm.com/example" elementFormDefault="unqualified">
+  <element name="Message">
+    <complexType>
+      <sequence>
+        <element name="Item" type="tns:ItemType" minOccurs="1" maxOccurs="unbounded"/>
+      </sequence>
+    </complexType>  
+  </element>
+  <complexType name="ItemType">
+    <sequence>
+      <element name="LastName" type="string"/>
+      <element name="FirstName" type="string"/>
+      <element name="Address" type="string"/>
+      <element name="DateOfBirth" type="string"/>                        
+    </sequence>
+  </complexType>  
+</schema>

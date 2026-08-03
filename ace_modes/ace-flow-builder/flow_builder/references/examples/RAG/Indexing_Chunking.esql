@@ -1,0 +1,54 @@
+
+
+CREATE COMPUTE MODULE Indexing_Chunking
+	
+	-- Declare and use UDPs
+	DECLARE ChunkSize EXTERNAL INTEGER;
+	DECLARE ChunkOverlap EXTERNAL INTEGER;
+	
+	DECLARE IndexName EXTERNAL CHARACTER;
+	DECLARE Dimension EXTERNAL INTEGER;
+	
+	DECLARE ProjectID EXTERNAL CHARACTER;
+	
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET Environment.Variable.IndexName = IndexName;
+		SET Environment.Variable.Dimension = Dimension;
+		
+		SET Environment.Variable.ProjectID = ProjectID;
+		
+		DECLARE fileText CHARACTER;
+    
+	    -- Read the file content from BLOB and convert to text
+	    SET fileText = CAST(InputRoot.BLOB.BLOB AS CHARACTER CCSID 1208);
+	    
+		CREATE FIELD OutputRoot.JSON.Data.lines IDENTITY(JSON.Array)lines;
+		DECLARE input_text REFERENCE TO OutputRoot.JSON.Data.lines;
+		
+		CALL CharacterSplit(fileText,ChunkSize,ChunkOverlap,input_text);
+	    
+		RETURN TRUE;
+	END;
+	
+	CREATE PROCEDURE CharacterSplit(IN string CHARACTER, IN chunk_size INTEGER, IN chunk_overlap INTEGER, INOUT result REFERENCE)
+	BEGIN
+		DECLARE index INTEGER 1;
+	    DECLARE lp INTEGER 1;
+	    DECLARE rp INTEGER;
+		DECLARE len INTEGER LENGTH(string);
+		
+		WHILE lp <= len DO
+			SET rp = lp + chunk_size;
+			IF rp > len THEN
+				SET rp = len;
+			END IF;
+			SET result.Item[index] = SUBSTRING(string FROM lp FOR rp - lp + 1);
+			SET lp = lp + chunk_size - chunk_overlap;
+			SET index = index + 1;
+		END WHILE;
+	
+	END;
+	
+END MODULE;

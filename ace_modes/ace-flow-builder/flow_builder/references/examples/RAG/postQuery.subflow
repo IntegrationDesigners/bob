@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode" xmlns:ComIbmApplicationConnectorRequest_pineconedb.msgnode="ComIbmApplicationConnectorRequest_pineconedb.msgnode" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmFlowOrder.msgnode="ComIbmFlowOrder.msgnode" xmlns:ComIbmJSONataMapping.msgnode="ComIbmJSONataMapping.msgnode" xmlns:ComIbmThrow.msgnode="ComIbmThrow.msgnode"
+    xmlns:RAGSharedLib_FindIndex.subflow="RAGSharedLib/FindIndex.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:patternAnnotation="http://www.ibm.com/patternAnnotation/2010" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="postQuery.subflow" nsPrefix="postQuery.subflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1" nodeLayoutStyle="RECTANGLE">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.IndexName" name="IndexName" lowerBound="1" defaultValueLiteral="demo">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.ProjectID" name="ProjectID" lowerBound="1">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="postQuery" bundleName="postQuery" pluginId="RAGQuery"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RAGQuery/icons/full/obj16/postQuery.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/RAGQuery/icons/full/obj30/postQuery.gif"/>
+    <composition>
+      <nodes xmi:type="eflow:FCMSource" xmi:id="InTerminal.Input_1" location="23,123">
+        <translation xmi:type="utility:TranslatableString" key="Input" bundleName="postQuery" pluginId="RAGQuery"/>
+      </nodes>
+      <nodes xmi:type="eflow:FCMSink" xmi:id="OutTerminal.Output_1" location="1324,173">
+        <translation xmi:type="utility:TranslatableString" key="Output" bundleName="postQuery" pluginId="RAGQuery"/>
+      </nodes>
+      <nodes xmi:type="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="368,124" applicationConnectorType="ibmwatsonxai" action="postMlV1TextEmbeddings" businessObject="postMlV1TextEmbeddings_model" displayName="undefined" schemaPrefix="gen/postQuery.IBM_watsonx.ai_Request" policyUrl="{RAGPolicyProject}:IBMwatsonx.ai1" mappingMode="jsonmap" messageSetProperty="gen/postQuery.IBM_watsonx.ai_Request.response.schema.json">
+        <translation xmi:type="utility:ConstantString" string="Generate Embeddings"/>
+        <connectorServiceOptions optionName="httpMethod" optionValue="post"/>
+        <connectorServiceOptions optionName="path" optionValue="resources/postMlV1TextEmbeddings_model/operations/postMlV1TextEmbeddings"/>
+        <connectorServiceOptions optionName="action" optionValue="custom"/>
+        <requestMap map="{&quot;mappings&quot;:[{&quot;inputs&quot;:{&quot;expression&quot;:&quot;[$mappingInput_Environment.Variable.query ]&quot;}},{&quot;model_id&quot;:{&quot;template&quot;:&quot;intfloat/multilingual-e5-large&quot;}},{&quot;project_id&quot;:{&quot;template&quot;:&quot;{{$mappingInput_Environment.Variable.ProjectID}}&quot;}},{&quot;version&quot;:{&quot;template&quot;:&quot;2024-03-14&quot;}}],&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f436f6d70757465&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f436f6d70757465&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;},{&quot;variable&quot;:&quot;mappingInput_Environment&quot;,&quot;$ref&quot;:&quot;#/mappingInputs/Environment&quot;}]}"/>
+        <mappingInput inputName="Environment" inputLocation="$Environment" messageDomain="" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <nodes xmi:type="ComIbmFlowOrder.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="551,124">
+        <translation xmi:type="utility:ConstantString" string="Flow Order"/>
+      </nodes>
+      <nodes xmi:type="ComIbmApplicationConnectorRequest_pineconedb.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="746,180" applicationConnectorType="pineconedb" action="postIndexesByIndexHostQuery" businessObject="Vectors" displayName="undefined" schemaPrefix="gen/postQuery.Query_vectors" policyUrl="{RAGPolicyProject}:PineconeVectorDatabase1" mappingMode="jsonmap" messageSetProperty="gen/postQuery.Query_vectors.response.schema.json">
+        <filter>
+          <filterElementObject type="where">
+            <connectorPropertyRef propertyName="index_host" compareAction=""/>
+          </filterElementObject>
+        </filter>
+        <translation xmi:type="utility:ConstantString" string="Query vectors"/>
+        <connectorProperty propertyName="index_host" displayName="Index host" propertyValue="[[$Environment/Variable/HostName]]" displayValue="[[$Environment/Variable/HostName]]"/>
+        <contextReference nodeName="Generate Embeddings" nodeType="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="JSON" schemaLocation="gen/postQuery.IBM_watsonx.ai_Request.response.schema.json" schemaRoot="" resultDataLocation="$ResultRoot" flowName=""/>
+        <connectorServiceOptions optionName="httpMethod" optionValue="post"/>
+        <connectorServiceOptions optionName="path" optionValue="resources/Indexes/{index_host}/Vectors/operations/postIndexesByIndexHostQuery"/>
+        <connectorServiceOptions optionName="action" optionValue="custom"/>
+        <requestMap map="{&quot;mappings&quot;:[{&quot;includeMetadata&quot;:{&quot;expression&quot;:&quot;true&quot;}},{&quot;includeValues&quot;:{&quot;expression&quot;:&quot;false&quot;}},{&quot;topK&quot;:{&quot;expression&quot;:&quot;5&quot;}},{&quot;vector&quot;:{&quot;expression&quot;:&quot;$context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773.Payload.Data.results.embedding &quot;}}],&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f436f6d70757465&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f436f6d70757465&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;}]}"/>
+      </nodes>
+      <nodes xmi:type="ComIbmThrow.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="961,31" messageText="&quot;You should provide an existing Index name for the Retrieval flow&quot;">
+        <translation xmi:type="utility:ConstantString" string="Throw"/>
+      </nodes>
+      <nodes xmi:type="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="939,178" applicationConnectorType="ibmwatsonxai" action="postMlV1TextGeneration" businessObject="postMlV1TextGeneration_model" displayName="undefined" schemaPrefix="gen/postQuery.Prompt" policyUrl="{RAGPolicyProject}:IBMwatsonx.ai1" mappingMode="jsonmap" messageSetProperty="gen/postQuery.Prompt.response.schema.json">
+        <translation xmi:type="utility:ConstantString" string="Prompt (Context + Question)"/>
+        <contextReference nodeName="Query vectors" nodeType="ComIbmApplicationConnectorRequest_pineconedb.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="JSON" schemaLocation="gen/postQuery.Query_vectors.response.schema.json" schemaRoot="" resultDataLocation="$ResultRoot" flowName=""/>
+        <connectorServiceOptions optionName="httpMethod" optionValue="post"/>
+        <connectorServiceOptions optionName="path" optionValue="resources/postMlV1TextGeneration_model/operations/postMlV1TextGeneration"/>
+        <connectorServiceOptions optionName="action" optionValue="custom"/>
+        <requestMap map="{&quot;mappings&quot;:[{&quot;input&quot;:{&quot;template&quot;:&quot;You are an enterprise assistant that strictly uses the following context to answer questions. Only provide answers if the information is explicitly found in the context. If the answer cannot be found, say, \&quot;The information is not available in the provided data.\&quot;, Use structured reasoning to derive insights. If the context is insufficient, do not guess.     #######Context:{{$join($context_2f6e6f64654e616d652f517565727920766563746f7273.Payload.Data.matches.metadata.text, \&quot;\\n\\n\&quot;)}}#######                         Question:{{$mappingInput_Environment.Variable.query}}&quot;}},{&quot;model_id&quot;:{&quot;template&quot;:&quot;ibm/granite-3-2-8b-instruct&quot;}},{&quot;parameters&quot;:{&quot;mappings&quot;:[{&quot;max_new_tokens&quot;:{&quot;expression&quot;:&quot;200&quot;}},{&quot;time_limit&quot;:{&quot;expression&quot;:&quot;1000&quot;}}]}},{&quot;project_id&quot;:{&quot;template&quot;:&quot;{{$mappingInput_Environment.Variable.ProjectID}}&quot;}},{&quot;version&quot;:{&quot;template&quot;:&quot;2024-03-14&quot;}}],&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f517565727920766563746f7273&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f517565727920766563746f7273&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f536176652055445073&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f536176652055445073&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;},{&quot;variable&quot;:&quot;mappingInput_Environment&quot;,&quot;$ref&quot;:&quot;#/mappingInputs/Environment&quot;}]}"/>
+        <mappingInput inputName="Environment" inputLocation="$Environment" messageDomain="" schemaLocation="" schemaRoot=""/>
+      </nodes>
+      <nodes xmi:type="ComIbmJSONataMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="1133,176" schemaPrefix="gen/postQuery.JSONata_Mapping" messageSetProperty="gen/postQuery.JSONata_Mapping.response.schema.json">
+        <translation xmi:type="utility:ConstantString" string="JSONata Mapping"/>
+        <contextReference nodeName="Prompt (Context + Question)" nodeType="ComIbmApplicationConnectorRequest_ibmwatsonxai.msgnode" nodeProps="" terminalName="OutTerminal.out" messageDomain="JSON" schemaLocation="gen/postQuery.Prompt.response.schema.json" schemaRoot="" resultDataLocation="$ResultRoot" flowName=""/>
+        <requestMap map="{&quot;customSchemas&quot;:{&quot;properties.`Data`&quot;:{&quot;type&quot;:&quot;object&quot;,&quot;properties&quot;:{&quot;Answer&quot;:{&quot;type&quot;:&quot;string&quot;}}}},&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f517565727920766563746f7273&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f517565727920766563746f7273&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f50726f6d70742028436f6e74657874202b205175657374696f6e29&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f50726f6d70742028436f6e74657874202b205175657374696f6e29&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f436f6d70757465&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f436f6d70757465&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;}],&quot;mappings&quot;:[{&quot;Data&quot;:{&quot;mappings&quot;:[{&quot;Answer&quot;:{&quot;template&quot;:&quot;{{$context_2f6e6f64654e616d652f50726f6d70742028436f6e74657874202b205175657374696f6e29.Payload.Data.results.generated_text}}&quot;}}]}}]}"/>
+      </nodes>
+      <nodes xmi:type="ComIbmJSONataMapping.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="1099,114" schemaPrefix="gen/postQuery.JSONata_Mapping1" messageSetProperty="gen/postQuery.JSONata_Mapping1.response.schema.json">
+        <translation xmi:type="utility:ConstantString" string="JSONata Mapping1"/>
+        <requestMap map="{&quot;customSchemas&quot;:{&quot;properties.`Data`&quot;:{&quot;type&quot;:&quot;object&quot;,&quot;properties&quot;:{&quot;ERROR&quot;:{&quot;type&quot;:&quot;string&quot;}}}},&quot;$map&quot;:&quot;http://ibm.com/appconnect/map/v1&quot;,&quot;input&quot;:[{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f47656e657261746520456d62656464696e6773&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f46696e64496e646578&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f46696e64496e646578&quot;},{&quot;variable&quot;:&quot;context_2f6e6f64654e616d652f436f6d70757465&quot;,&quot;$ref&quot;:&quot;#/contextReferences/context_2f6e6f64654e616d652f436f6d70757465&quot;},{&quot;variable&quot;:&quot;FlowDetails&quot;,&quot;$ref&quot;:&quot;#/FlowDetails&quot;},{&quot;variable&quot;:&quot;InvocationDetails&quot;,&quot;$ref&quot;:&quot;#/InvocationDetails&quot;}],&quot;mappings&quot;:[{&quot;Data&quot;:{&quot;mappings&quot;:[{&quot;ERROR&quot;:{&quot;template&quot;:&quot;Index does not exist. Please provide an existing index name&quot;}}]}}]}"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="191,124" computeExpression="esql://routine/#postQuery_Save_UDPs.Main">
+        <translation xmi:type="utility:ConstantString" string="Save UDPs"/>
+      </nodes>
+      <nodes xmi:type="RAGSharedLib_FindIndex.subflow:FCMComposite_1" xmi:id="FCMComposite_1_4" location="742,45">
+        <translation xmi:type="utility:ConstantString" string="FindIndex"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.second" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_7" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="OutTerminal.Output_1" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="OutTerminal.Output_1" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_1" sourceNode="InTerminal.Input_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.first" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Pinecone" configurable="true" userDefined="true" describedAttribute="Property.IndexName">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.IndexName" bundleName="postQuery" pluginId="RAGQuery"/>
+        <propertyDescriptor groupName="Group.Watsonx" configurable="true" userDefined="true" describedAttribute="Property.ProjectID">
+          <propertyName xmi:type="utility:TranslatableString" key="Property.ProjectID" bundleName="postQuery" pluginId="RAGQuery"/>
+        </propertyDescriptor>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <stickyBoard/>
+    <patternAnnotations>
+      <AnnotationTarget targetObjects="//FCMComposite_1">
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.IndexName" targetObject="//FCMComposite_1" targetPropertyId="IndexName"/>
+        <PatternAnnotation xmi:type="patternAnnotation:PropertyPatternAnnotation" aliasId="UserDefinedProperty.ProjectID" targetObject="//FCMComposite_1" targetPropertyId="ProjectID"/>
+      </AnnotationTarget>
+    </patternAnnotations>
+  </eClassifiers>
+</ecore:EPackage>

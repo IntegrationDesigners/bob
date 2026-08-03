@@ -1,0 +1,28 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "title": "Message",
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "LastName": {
+    	  "type": "string"			 
+        },
+        "FirstName": {
+          "type": "string"
+        },
+        "Address": {
+          "type": "string"
+        },
+        "DateOfBirth": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "LastName",
+        "FirstName",
+        "Address",
+        "DateOfBirth"
+      ]
+    }          
+}

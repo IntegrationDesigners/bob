@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<mappingRoot xmlns="http://www.ibm.com/2008/ccl/Mapping" xmlns:map="default" domainID="com.ibm.msl.mapping.xml" domainIDExtension="mb" mainMap="true" targetNamespace="default" version="8.0.5.0">
+    <input path="/XMLSchema.xsd"/>
+    <output path="jar:file://!com/ibm/etools/mft/map/xsds/predefined/BlobMessage.xsd"/>
+    <namespaces>
+        <namespace kind="supplement" prefix="in" uri="http://ibm.com/example"/>
+    </namespaces>
+    <generation engine="xquery"/>
+    <mappingDeclaration name="XMLtoBLOB_Mapping">
+        <input namespace="http://ibm.com/example" path="mb:msg(Message,assembly,XMLNSC,Properties)" var="ComIbmMessageAssembly_Message"/>
+        <output path="mb:msg(BLOB,assembly,BLOB,Properties)" var="ComIbmMessageAssembly_BLOB"/>
+        <move>
+            <input path="$ComIbmMessageAssembly_Message/Properties"/>
+            <output path="$ComIbmMessageAssembly_BLOB/Properties"/>
+        </move>
+        <expression>
+            <input path="$ComIbmMessageAssembly_Message/Message/Item[1]" var="Item1"/>
+            <input path="$ComIbmMessageAssembly_Message/Message/Item[2]" var="Item2"/>
+            <input path="$ComIbmMessageAssembly_Message/Message/Item[3]" var="Item3"/>
+            <input path="$ComIbmMessageAssembly_Message/Message/Item[4]" var="Item4"/>
+            <output path="$ComIbmMessageAssembly_BLOB/BLOB/text()"/>
+            <code lang="xpath">iib:hexBinaryValue(fn:concat(&#13;
+'&lt;Message&gt;&lt;Item&gt;',&#13;
+'&lt;LastName&gt;',$Item1/LastName,'&lt;/LastName&gt;',&#13;
+'&lt;FirstName&gt;',$Item1/FirstName,'&lt;/FirstName&gt;',&#13;
+'&lt;Address&gt;',$Item1/Address,'&lt;/Address&gt;',&#13;
+'&lt;DateOfBirth&gt;',$Item1/DateOfBirth,'&lt;/DateOfBirth&gt;',&#13;
+'&lt;/Item&gt;',&#13;
+'&lt;Item&gt;',&#13;
+'&lt;LastName&gt;',$Item2/LastName,'&lt;/LastName&gt;',&#13;
+'&lt;FirstName&gt;',$Item2/FirstName,'&lt;/FirstName&gt;',&#13;
+'&lt;Address&gt;',$Item2/Address,'&lt;/Address&gt;',&#13;
+'&lt;DateOfBirth&gt;',$Item2/DateOfBirth,'&lt;/DateOfBirth&gt;',&#13;
+'&lt;/Item&gt;',&#13;
+'&lt;Item&gt;',&#13;
+'&lt;LastName&gt;',$Item3/LastName,'&lt;/LastName&gt;',&#13;
+'&lt;FirstName&gt;',$Item3/FirstName,'&lt;/FirstName&gt;',&#13;
+'&lt;Address&gt;',$Item3/Address,'&lt;/Address&gt;',&#13;
+'&lt;DateOfBirth&gt;',$Item3/DateOfBirth,'&lt;/DateOfBirth&gt;',&#13;
+'&lt;/Item&gt;',&#13;
+'&lt;Item&gt;',&#13;
+'&lt;LastName&gt;',$Item4/LastName,'&lt;/LastName&gt;',&#13;
+'&lt;FirstName&gt;',$Item4/FirstName,'&lt;/FirstName&gt;',&#13;
+'&lt;Address&gt;',$Item4/Address,'&lt;/Address&gt;',&#13;
+'&lt;DateOfBirth&gt;',$Item4/DateOfBirth,'&lt;/DateOfBirth&gt;',&#13;
+'&lt;/Item&gt;&lt;/Message&gt;'&#13;
+))</code>
+        </expression>
+    </mappingDeclaration>
+</mappingRoot>

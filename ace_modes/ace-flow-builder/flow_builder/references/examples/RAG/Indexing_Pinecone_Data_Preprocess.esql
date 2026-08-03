@@ -1,0 +1,35 @@
+
+
+CREATE COMPUTE MODULE Indexing_Pinecone_Data_Preprocess
+	
+	-- DECLARE Namespace EXTERNAL CHARACTER;
+	
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		IF EXISTS(InputRoot.JSON.Data.results[]) THEN
+			DECLARE N INTEGER;
+			DECLARE M INTEGER;
+			SET N = CARDINALITY(InputRoot.JSON.Data.results.*[]);
+			CREATE FIELD OutputRoot.JSON.Data.vectors IDENTITY(JSON.Array)vectors;
+			DECLARE I INTEGER 1;
+			DECLARE J INTEGER;
+			SET M = CARDINALITY(InputRoot.JSON.Data.results.Item[I].embedding.*[]);
+			WHILE I <= N DO
+				SET OutputRoot.JSON.Data.vectors.Item[I].id = UUIDASCHAR;
+				CREATE FIELD OutputRoot.JSON.Data.vectors.Item[I].values IDENTITY(JSON.Array)values;
+				SET J = 1;
+				WHILE J <= M DO
+					SET OutputRoot.JSON.Data.vectors.Item[I].values.Item[J] = InputRoot.JSON.Data.results.Item[I].embedding.Item[J];
+					SET J = J + 1;
+				END WHILE;
+				-- SET OutputRoot.JSON.Data.vectors.Item[I].metadata.text = Environment.Variable.MyInput.Item[I];
+				SET OutputRoot.JSON.Data.vectors.Item[I].metadata.text = Context.Nodes.Chunking.Payload.Data.lines.Item[I];
+				SET I = I + 1;
+			END WHILE;
+			
+			-- SET OutputRoot.JSON.Data.namespace = Namespace;
+		END IF;
+		RETURN TRUE;
+	END;
+
+END MODULE;

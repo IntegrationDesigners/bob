@@ -1,0 +1,35 @@
+# GitLab CI/CD Pipeline for Bob Modes Repository
+# Validates .bobmodes YAML files for syntax correctness
+
+stages:
+  - validate
+
+# YAML Validation Job
+validate_bobmodes:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - pip install pyyaml
+  script:
+    - echo "Validating .bobmodes files..."
+    - python .gitlab/validate_bobmodes.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_COMMIT_BRANCH =~ /^feature\/.*/'
+
+# Optional: Run validation on all branches
+validate_bobmodes_all:
+  stage: validate
+  image: python:3.11-slim
+  before_script:
+    - pip install pyyaml
+  script:
+    - echo "Validating .bobmodes files..."
+    - python .gitlab/validate_bobmodes.py
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "push"'
+      when: manual
+  allow_failure: true
+
+# Made with Bob

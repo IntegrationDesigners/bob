@@ -1,0 +1,8 @@
+# Define a QueueConnectionFactory
+# This sets up a MQ client binding.
+DEF QCF(exampleqcf) TRANSPORT(CLIENT) QMANAGER(JMSQM) PORT(2414)
+
+# Define Queue Destinations
+DEF Q(IBMMQtoJMSQueue) QUEUE(IBMMQ.TO.JMS) QMANAGER(JMSQM)
+
+END

@@ -1,0 +1,14 @@
+
+
+CREATE COMPUTE MODULE XMLtoJSON_Compute
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('JSON');
+		CREATE FIELD OutputRoot.JSON.Data IDENTITY (JSON.Array)Data;
+		SET OutputRoot.JSON.Data = InputRoot.XMLNSC.Message;
+		
+		RETURN TRUE;
+	END;
+END MODULE;
