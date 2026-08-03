@@ -183,6 +183,36 @@ This directory contains specialized Bob modes for IBM App Connect Enterprise (AC
 
 ---
 
+### 🆘 ACE Support Case (`ace-support-case`)
+
+**Purpose:** Walks you through collecting a complete diagnostic bundle for an IBM ACE support case (PMR / ticket), then writes a ready-to-paste IBM case submission - so IBM Support gets everything it needs the first time, with no back-and-forth.
+
+**When to use:**
+- You need to open an IBM support case / PMR / ticket for ACE
+- You need to gather diagnostics for IBM
+- You hit error codes such as `BIP2111` or `BIP2060`, a crash, or abend files
+- You want to know what logs or information IBM needs
+
+**What it does:**
+- **Triage** - a conversational set of questions to understand the symptom, timing, scope, and recent changes, then classifies the problem (crash/abend, performance, functional, deployment, database/ODBC, SSL/TLS/GSKit, or general)
+- **Runtime access check** - either runs the collection commands directly on the server, or generates a ready-to-run script for someone who has access
+- **Baseline collection** - `mqsiservice -v` plus **aceDataCollector**, the single most complete automated diagnostic tool
+- **Problem-specific diagnostics** - a decision tree of exactly what to gather for each problem type (event-log windows, user/service trace, ODBC trace, abend/dump files, GSKit library-ordering checks, and more)
+- **Analysis and case generation** - self-assessment of the collected data and a ready-to-paste IBM case submission block (title, product, version, severity, business impact, structured description), with the bundle assembled into an `ACE_SupportCase_<NodeName>_<YYYYMMDD>/` folder, compressed and ready to attach
+
+**Key features:**
+- Distilled from IBM's ACE 13 "Troubleshooting and support" documentation; `references/manifest.csv` links the relevant IBM doc pages by URL
+- The diagnostic commands must be run from an ACE Console (Windows) or after sourcing `mqsiprofile` (Linux/UNIX) - the mode generates the commands and scripts, you run them against your own environment
+- Assumes ACE v11.0.0.8 or later for the bundled aceDataCollector; v12 and v13 fully supported
+
+**Custom rules:** the mode reads `custom-rules/rules.md`, empty out of the box. Add your organisation's house trace / data-collection procedure, where your logs actually live (custom work-dirs, containers, Splunk/ELK), data-handling policy (redaction, approved upload channel), IBM entitlement (ICN, site ID, support tier, named callers), and internal governance (incident tickets, severity mapping). A custom rule that conflicts with a default step wins - the mode follows it and says so.
+
+**Boundary:** if you want the failing code fixed rather than a case opened, use `ace-review` instead. If the assessment starts from a CVE or security bulletin, that is `cve-analysis`.
+
+**Location:** `ace-support-case/`
+
+---
+
 ## Mode Workflow
 
 ### Typical Development Flow
@@ -349,6 +379,8 @@ After importing modes (either globally or locally):
    - 🏗️ ACE Flow Builder
    - 🎨 ACE Flow Designer
    - 🔍 ACE Review
+   - 🛡️ ACE/MQ CVE Analysis
+   - 🆘 ACE Support Case
 
 If modes don't appear, check:
 - The `.bob/custom_modes.yaml` file syntax (YAML is whitespace-sensitive)
@@ -393,4 +425,4 @@ These modes are part of the i8c Bob Modes collection. For questions, issues, or 
 
 ---
 
-*Last Updated: June 2026*
+*Last Updated: August 2026*

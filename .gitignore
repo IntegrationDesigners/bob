@@ -1,13 +1,16 @@
 # Per-mode private files. These hold real environment detail and must never be
 # committed; the .env.sample templates beside them are kept.
 #
-# cve-analysis/.env  - estate baseline: exact ACE/MQ fix-pack levels, install
-#                      method, HA topology, which endpoints are internet-facing
+# cve-analysis/.env         - estate baseline: exact ACE/MQ fix-pack levels, install
+#                             method, HA topology, which endpoints are internet-facing
+# ibm-champion-report/.env  - personal identity: Champion Program ID, name, emails
 ace_modes/*/.env
+general_modes/*/.env
 
 # CVE decision log when it falls back to the mode folder instead of a durable
 # location set in custom-rules; local record of what was assessed and deferred
 ace_modes/*/log/
+general_modes/*/log/
 
 # Per-project Bob output created when importing modes into a target project
 .bob/

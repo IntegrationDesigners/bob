@@ -16,8 +16,17 @@ Specialized modes for IBM App Connect Enterprise (ACE) development:
 - **ace-flow-designer** - Requirements gathering and design
 - **ace-review** - Code review and quality analysis (git-scoped incremental reviews, tailorable via custom rules)
 - **cve-analysis** - Exploitability assessment of CVEs and IBM security bulletins for ACE and MQ (affected vs exploitable, component mapping, batch triage, persistent decision log)
+- **ace-support-case** - IBM support-case preparation: guided diagnostic collection (aceDataCollector, traces, abend files) and a ready-to-paste case submission
 
 [View detailed ACE modes documentation →](ace_modes/README.md)
+
+### 🧰 General Modes (`general_modes/`)
+
+Modes for general developer and advocacy workflows, not tied to ACE:
+- **ibm-champion-report** - assembles an IBM Champion act-of-advocacy submission: prefilled champ-report form URL plus a copy-paste field sheet (never auto-submits)
+- **prompt-forge** - turns a rough idea or brain dump into a clean prompt tuned for a specific target model; the deliverable is the prompt, not the task's output
+
+[View detailed general modes documentation →](general_modes/README.md)
 
 ## Getting Started
 
@@ -61,7 +70,7 @@ After importing, reload your VS Code window to activate the new modes.
 ## Repository Structure
 
 ```
-bobmodes/
+bob/
 ├── README.md                    # This file
 ├── Import-BobModes.ps1          # Mode import utility
 ├── ace_modes/                   # ACE integration modes
@@ -70,7 +79,13 @@ bobmodes/
 │   ├── ace-readme/             # Documentation generator mode
 │   ├── ace-flow-builder/       # Flow builder mode
 │   ├── ace-flow-designer/      # Flow designer mode
-│   └── ace-review/             # Code review mode (review/ + custom-rules/rules.md)
+│   ├── ace-review/             # Code review mode (review/ + custom-rules/rules.md)
+│   ├── cve-analysis/           # CVE / security-bulletin exploitability assessment
+│   └── ace-support-case/       # IBM support-case diagnostics and submission
+├── general_modes/               # Modes not tied to ACE
+│   ├── README.md               # Detailed general modes documentation
+│   ├── ibm-champion-report/    # IBM Champion activity report builder
+│   └── prompt-forge/           # Model-tuned prompt builder
 └── [future mode collections]/
 ```
 
@@ -154,4 +169,4 @@ Refer to your organization's policies regarding code reuse and distribution.
 ---
 
 **Version:** 1.0
-**Last Updated:** June 2026
+**Last Updated:** August 2026
