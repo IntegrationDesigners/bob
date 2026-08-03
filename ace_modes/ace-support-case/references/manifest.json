@@ -1,0 +1,1352 @@
+[
+  {
+    "number": "01",
+    "title": "Troubleshooting and support",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=software-troubleshooting-support",
+    "pdf_file": "01 - Troubleshooting and support.pdf",
+    "parent_chain": [],
+    "has_children": true
+  },
+  {
+    "number": "01.01",
+    "title": "Troubleshooting overview",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-troubleshooting-overview",
+    "pdf_file": "01 - Troubleshooting and support\\01.01 - Troubleshooting overview.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02",
+    "title": "Making initial checks",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-making-initial-checks",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.02.01",
+    "title": "Did you log off Windows while IBM App Connect Enterprise components were active?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=mic-did-you-log-off-windows-while-app-connect-enterprise-components-were-active",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.01 - Did you log off Windows while IBM App Connect Enterprise components were active_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.02",
+    "title": "Are the Linux and UNIX environment variables set correctly?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-are-linux-unix-environment-variables-set-correctly",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.02 - Are the Linux and UNIX environment variables set correctly_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.03",
+    "title": "Are there any error messages or return codes that explain the problem?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=mic-are-there-any-error-messages-return-codes-that-explain-problem",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.03 - Are there any error messages or return codes that explain the problem_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.04",
+    "title": "Can you see all of your files and folders?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-can-you-see-all-your-files-folders",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.04 - Can you see all of your files and folders_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.05",
+    "title": "Can you reproduce the problem?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-can-you-reproduce-problem",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.05 - Can you reproduce the problem_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.06",
+    "title": "Has the message flow run successfully before?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-has-message-flow-run-successfully-before",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.06 - Has the message flow run successfully before_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.07",
+    "title": "Have you made any changes since the last successful run?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=mic-have-you-made-any-changes-since-last-successful-run",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.07 - Have you made any changes since the last successful run_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.08",
+    "title": "Is there a problem with descriptive text for a command?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-is-there-problem-descriptive-text-command",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.08 - Is there a problem with descriptive text for a command_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.09",
+    "title": "Is there a problem with a database?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-is-there-problem-database",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.09 - Is there a problem with a database_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.10",
+    "title": "Is there a problem with the network?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-is-there-problem-network",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.10 - Is there a problem with the network_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.11",
+    "title": "Does the problem affect all users?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-does-problem-affect-all-users",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.11 - Does the problem affect all users_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.12",
+    "title": "Have you recently changed a password?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-have-you-recently-changed-password",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.12 - Have you recently changed a password_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.13",
+    "title": "Have you applied any service updates?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=checks-have-you-applied-any-service-updates",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.13 - Have you applied any service updates_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.02.14",
+    "title": "Do you have a component that is running slowly?",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=mic-do-you-have-component-that-is-running-slowly",
+    "pdf_file": "01 - Troubleshooting and support\\01.02 - Making initial checks\\01.02.14 - Do you have a component that is running slowly_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Making initial checks"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03",
+    "title": "Dealing with problems",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-dealing-problems",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.01",
+    "title": "Resolving problems when you install IBM App Connect Enterprise",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-when-you-install-app-connect-enterprise",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.01 - Resolving problems when you install IBM App Connect Enterprise.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.02",
+    "title": "Resolving problems when you uninstall IBM App Connect Enterprise",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-when-you-uninstall-app-connect-enterprise",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.02 - Resolving problems when you uninstall IBM App Connect Enterprise.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.03",
+    "title": "Resolving problems when running commands",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-running-commands",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.03 - Resolving problems when running commands.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.04",
+    "title": "Resolving problems when creating resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-creating-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.04 - Resolving problems when creating resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.05",
+    "title": "Resolving problems when renaming resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-renaming-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.05 - Resolving problems when renaming resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.06",
+    "title": "Resolving problems when starting an integration node",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-starting-integration-node",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.06 - Resolving problems when starting an integration node.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.07",
+    "title": "Resolving problems when starting resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-starting-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.07 - Resolving problems when starting resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.08",
+    "title": "Resolving problems that occur when migrating or importing resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-that-occur-when-migrating-importing-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.08 - Resolving problems that occur when migrating or importing resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.08.01",
+    "title": "Resolving problems when migrating or importing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=resources-resolving-problems-when-migrating-importing-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.08 - Resolving problems that occur when migrating or importing resources\\01.03.08.01 - Resolving problems when migrating or importing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when migrating or importing resources"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.08.02",
+    "title": "Resolving problems when migrating or importing message models",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=resources-resolving-problems-when-migrating-importing-message-models",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.08 - Resolving problems that occur when migrating or importing resources\\01.03.08.02 - Resolving problems when migrating or importing message models.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when migrating or importing resources"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.08.03",
+    "title": "Resolving problems when migrating or importing other resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=resources-resolving-problems-when-migrating-importing-other",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.08 - Resolving problems that occur when migrating or importing resources\\01.03.08.03 - Resolving problems when migrating or importing other resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when migrating or importing resources"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.09",
+    "title": "Resolving problems when stopping resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-stopping-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.09 - Resolving problems when stopping resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.10",
+    "title": "Resolving problems when deleting resources",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-deleting-resources",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.10 - Resolving problems when deleting resources.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11",
+    "title": "Resolving problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-developing-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.11.01",
+    "title": "Resolving appearance problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-appearance-problems-when-developing-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.01 - Resolving appearance problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.02",
+    "title": "Resolving problems when you use callable flow nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmf-resolving-problems-when-you-use-callable-flow-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.02 - Resolving problems when you use callable flow nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.03",
+    "title": "Resolving problems when you use CORBA nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-you-use-corba-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.03 - Resolving problems when you use CORBA nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.04",
+    "title": "Resolving problems when you use Email nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-you-use-email-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.04 - Resolving problems when you use Email nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.05",
+    "title": "Resolving ESQL problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-esql-problems-when-developing-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.05 - Resolving ESQL problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.06",
+    "title": "Problems when developing message flows with file nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-problems-when-developing-message-file-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.06 - Problems when developing message flows with file nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.07",
+    "title": "Resolving problems when you use HTTP and SOAP nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmf-resolving-problems-when-you-use-http-soap-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.07 - Resolving problems when you use HTTP and SOAP nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.08",
+    "title": "Resolving implementation problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-implementation-problems-when-developing-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.08 - Resolving implementation problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.09",
+    "title": "Resolving problems when you use IMS nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-you-use-ims-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.09 - Resolving problems when you use IMS nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.10",
+    "title": "Resolving problems when you use Salesforce nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-you-use-salesforce-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.10 - Resolving problems when you use Salesforce nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.11",
+    "title": "Resolving problems when using Kafka nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-using-kafka-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.11 - Resolving problems when using Kafka nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.12",
+    "title": "Resolving mapping and message reference problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmf-resolving-mapping-message-reference-problems-when-developing-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.12 - Resolving mapping and message reference problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.13",
+    "title": "Resolving trace problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-trace-problems-when-developing-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.13 - Resolving trace problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.14",
+    "title": "Resolving problems when developing message flows with WebSphere Adapters nodes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmf-resolving-problems-when-developing-message-flows-websphere-adapters-nodes",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.14 - Resolving problems when developing message flows with WebSphere Adapters nodes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.11.15",
+    "title": "Resolving other problems when developing message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-other-problems-when-developing-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.11 - Resolving problems when developing message flows\\01.03.11.15 - Resolving other problems when developing message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when developing message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.12",
+    "title": "Resolving problems when deploying message flows or message sets",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-when-deploying-message-flows-message-sets",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.12 - Resolving problems when deploying message flows or message sets.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.12.01",
+    "title": "Resolving problems that occur when preparing to deploy message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmfms-resolving-problems-that-occur-when-preparing-deploy-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.12 - Resolving problems when deploying message flows or message sets\\01.03.12.01 - Resolving problems that occur when preparing to deploy message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when deploying message flows or message sets"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.12.02",
+    "title": "Resolving problems that occur during deployment of message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmfms-resolving-problems-that-occur-during-deployment-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.12 - Resolving problems when deploying message flows or message sets\\01.03.12.02 - Resolving problems that occur during deployment of message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when deploying message flows or message sets"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.12.03",
+    "title": "Resolving problems that occur after deployment of message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwdmfms-resolving-problems-that-occur-after-deployment-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.12 - Resolving problems when deploying message flows or message sets\\01.03.12.03 - Resolving problems that occur after deployment of message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when deploying message flows or message sets"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.13",
+    "title": "Resolving problems that occur when debugging message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-that-occur-when-debugging-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.13 - Resolving problems that occur when debugging message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.13.01",
+    "title": "Resolving problems that occur when starting and stopping the debugger",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rptowdmf-resolving-problems-that-occur-when-starting-stopping-debugger",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.13 - Resolving problems that occur when debugging message flows\\01.03.13.01 - Resolving problems that occur when starting and stopping the debugger.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when debugging message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.13.02",
+    "title": "Resolving problems when debugging message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-when-debugging-message",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.13 - Resolving problems that occur when debugging message flows\\01.03.13.02 - Resolving problems when debugging message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when debugging message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.13.03",
+    "title": "Resolving problems that occur after debugging:",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=flows-resolving-problems-that-occur-after-debugging",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.13 - Resolving problems that occur when debugging message flows\\01.03.13.03 - Resolving problems that occur after debugging_.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems that occur when debugging message flows"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.14",
+    "title": "Resolving diagnostic data collection errors",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-diagnostic-data-collection-errors",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.14 - Resolving diagnostic data collection errors.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.15",
+    "title": "Resolving problems when developing message models",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-developing-message-models",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.15 - Resolving problems when developing message models.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.16",
+    "title": "Resolving problems when using messages",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-using-messages",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.16 - Resolving problems when using messages.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.17",
+    "title": "Resolving problems when you are writing business rules",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-when-you-are-writing-business-rules",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.17 - Resolving problems when you are writing business rules.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.18",
+    "title": "Resolving problems when you use the IBM App Connect Enterprise Toolkit",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=dp-resolving-problems-when-you-use-app-connect-enterprise-toolkit",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.18 - Resolving problems when you use the IBM App Connect Enterprise Toolkit.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.03.18.01",
+    "title": "Resolving problems that occur when connecting the IBM App Connect Enterprise Toolkit and an integration node",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwyuacet-resolving-problems-that-occur-when-connecting-app-connect-enterprise-toolkit-integration-node",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.18 - Resolving problems when you use the IBM App Connect Enterprise Toolkit\\01.03.18.01 - Resolving problems that occur when connecting the IBM App Connect Enterprise Toolkit and an integration node.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when you use the IBM App Connect Enterprise Toolkit"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.18.02",
+    "title": "Resolving errors that occur when using the IBM App Connect Enterprise Toolkit",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwyuacet-resolving-errors-that-occur-when-using-app-connect-enterprise-toolkit",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.18 - Resolving problems when you use the IBM App Connect Enterprise Toolkit\\01.03.18.02 - Resolving errors that occur when using the IBM App Connect Enterprise Toolkit.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when you use the IBM App Connect Enterprise Toolkit"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.18.03",
+    "title": "Resolving problems relating to the appearance of IBM App Connect Enterprise Toolkit",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwyuacet-resolving-problems-relating-appearance-app-connect-enterprise-toolkit",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.18 - Resolving problems when you use the IBM App Connect Enterprise Toolkit\\01.03.18.03 - Resolving problems relating to the appearance of IBM App Connect Enterprise Toolkit.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when you use the IBM App Connect Enterprise Toolkit"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.18.04",
+    "title": "Resolving non-specific problems when using the IBM App Connect Enterprise Toolkit",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=rpwyuacet-resolving-non-specific-problems-when-using-app-connect-enterprise-toolkit",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.18 - Resolving problems when you use the IBM App Connect Enterprise Toolkit\\01.03.18.04 - Resolving non-specific problems when using the IBM App Connect Enterprise Toolkit.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems",
+      "Resolving problems when you use the IBM App Connect Enterprise Toolkit"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.19",
+    "title": "Resolving problems when using Data Analysis",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-using-data-analysis",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.19 - Resolving problems when using Data Analysis.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.20",
+    "title": "Resolving problems when using databases",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-using-databases",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.20 - Resolving problems when using databases.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.21",
+    "title": "Resolving problems when using publish/subscribe",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-using-publishsubscribe",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.21 - Resolving problems when using publish_subscribe.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.22",
+    "title": "Resolving problems with performance",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-performance",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.22 - Resolving problems with performance.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.23",
+    "title": "Resolving problems when you monitor message flows",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-you-monitor-message-flows",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.23 - Resolving problems when you monitor message flows.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.24",
+    "title": "Resolving problems when developing custom integration applications",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-developing-custom-integration-applications",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.24 - Resolving problems when developing custom integration applications.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.25",
+    "title": "Resolving problems when using an MQ Service",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-when-using-mq-service",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.25 - Resolving problems when using an MQ Service.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.03.26",
+    "title": "Resolving problems with user-defined extensions",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=problems-resolving-user-defined-extensions",
+    "pdf_file": "01 - Troubleshooting and support\\01.03 - Dealing with problems\\01.03.26 - Resolving problems with user-defined extensions.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Dealing with problems"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.04",
+    "title": "Resolving problems when creating secured connections that use GSKit libraries",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=ts-resolving-problems-when-creating-secured-connections-that-use-gskit-libraries",
+    "pdf_file": "01 - Troubleshooting and support\\01.04 - Resolving problems when creating secured connections that use GSKit libraries.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.05",
+    "title": "Using logs",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-using-logs",
+    "pdf_file": "01 - Troubleshooting and support\\01.05 - Using logs.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.05.01",
+    "title": "Windows: Viewing the local error log",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=logs-windows-viewing-local-error-log",
+    "pdf_file": "01 - Troubleshooting and support\\01.05 - Using logs\\01.05.01 - Windows_ Viewing the local error log.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using logs"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.05.02",
+    "title": "Linux and UNIX systems: Configuring the syslog daemon",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=logs-linux-unix-systems-configuring-syslog-daemon",
+    "pdf_file": "01 - Troubleshooting and support\\01.05 - Using logs\\01.05.02 - Linux and UNIX systems_ Configuring the syslog daemon.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using logs"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.05.03",
+    "title": "Viewing the Eclipse error log",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=logs-viewing-eclipse-error-log",
+    "pdf_file": "01 - Troubleshooting and support\\01.05 - Using logs\\01.05.03 - Viewing the Eclipse error log.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using logs"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.05.04",
+    "title": "Viewing the exception log",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=logs-viewing-exception-log",
+    "pdf_file": "01 - Troubleshooting and support\\01.05 - Using logs\\01.05.04 - Viewing the exception log.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using logs"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.06",
+    "title": "Using ACELogAnalyser",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-using-aceloganalyser",
+    "pdf_file": "01 - Troubleshooting and support\\01.06 - Using ACELogAnalyser.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07",
+    "title": "Using trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-using-trace",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.07.01",
+    "title": "User trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-user",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.01 - User trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.07.01.01",
+    "title": "Starting user trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-starting-user",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.01 - User trace\\01.07.01.01 - Starting user trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "User trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.01.02",
+    "title": "Changing user trace options",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-changing-user-options",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.01 - User trace\\01.07.01.02 - Changing user trace options.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "User trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.01.03",
+    "title": "Stopping user trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-stopping-user",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.01 - User trace\\01.07.01.03 - Stopping user trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "User trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.01.04",
+    "title": "User trace example",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-user-example",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.01 - User trace\\01.07.01.04 - User trace example.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "User trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.02",
+    "title": "Service trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-service",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.02 - Service trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.07.02.01",
+    "title": "Starting service trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-starting-service",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.02 - Service trace\\01.07.02.01 - Starting service trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "Service trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.02.02",
+    "title": "Changing service trace options",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-changing-service-options",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.02 - Service trace\\01.07.02.02 - Changing service trace options.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "Service trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.02.03",
+    "title": "Stopping service trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-stopping-service",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.02 - Service trace\\01.07.02.03 - Stopping service trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace",
+      "Service trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.03",
+    "title": "Interpreting trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-interpreting",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.03 - Interpreting trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.04",
+    "title": "Clearing old information from trace files",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-clearing-old-information-from-files",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.04 - Clearing old information from trace files.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.05",
+    "title": "ODBC trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-odbc",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.05 - ODBC trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.06",
+    "title": "IBM Integration API trace",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-integration-api",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.06 - IBM Integration API trace.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.07.07",
+    "title": "Switching Trace nodes on and off",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=trace-switching-nodes-off",
+    "pdf_file": "01 - Troubleshooting and support\\01.07 - Using trace\\01.07.07 - Switching Trace nodes on and off.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using trace"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.08",
+    "title": "Using dumps and abend files",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-using-dumps-abend-files",
+    "pdf_file": "01 - Troubleshooting and support\\01.08 - Using dumps and abend files.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.08.01",
+    "title": "Checking for dumps",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=files-checking-dumps",
+    "pdf_file": "01 - Troubleshooting and support\\01.08 - Using dumps and abend files\\01.08.01 - Checking for dumps.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using dumps and abend files"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.08.02",
+    "title": "Checking for abend files",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=files-checking-abend",
+    "pdf_file": "01 - Troubleshooting and support\\01.08 - Using dumps and abend files\\01.08.02 - Checking for abend files.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Using dumps and abend files"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.09",
+    "title": "Obtaining support to resolve a problem",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-obtaining-resolve-problem",
+    "pdf_file": "01 - Troubleshooting and support\\01.09 - Obtaining support to resolve a problem.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.10",
+    "title": "Collecting diagnostics",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-collecting-diagnostics",
+    "pdf_file": "01 - Troubleshooting and support\\01.10 - Collecting diagnostics.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.11",
+    "title": "Searching knowledge bases",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-searching-knowledge-bases",
+    "pdf_file": "01 - Troubleshooting and support\\01.11 - Searching knowledge bases.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.12",
+    "title": "Getting product fixes",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-getting-product-fixes",
+    "pdf_file": "01 - Troubleshooting and support\\01.12 - Getting product fixes.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13",
+    "title": "Diagnostic messages",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=support-diagnostic-messages",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages.pdf",
+    "parent_chain": [
+      "Troubleshooting and support"
+    ],
+    "has_children": true
+  },
+  {
+    "number": "01.13.01",
+    "title": "BIP1001 - BIP1999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip1001-bip1999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.01 - BIP1001 - BIP1999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.02",
+    "title": "BIP2001 - BIP2999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip2001-bip2999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.02 - BIP2001 - BIP2999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.03",
+    "title": "BIP3001 - BIP3999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip3001-bip3999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.03 - BIP3001 - BIP3999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.04",
+    "title": "BIP4000 - BIP4999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip4000-bip4999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.04 - BIP4000 - BIP4999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.05",
+    "title": "BIP5000 - BIP5912",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip5000-bip5912",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.05 - BIP5000 - BIP5912.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.06",
+    "title": "BIP6021 - BIP6617",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip6021-bip6617",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.06 - BIP6021 - BIP6617.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.07",
+    "title": "BIP7001 - BIP7999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip7001-bip7999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.07 - BIP7001 - BIP7999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.08",
+    "title": "BIP8000 - BIP8999",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip8000-bip8999",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.08 - BIP8000 - BIP8999.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.09",
+    "title": "BIP9016 - BIP9998",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip9016-bip9998",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.09 - BIP9016 - BIP9998.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.10",
+    "title": "BIP10000 - BIP10240",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip10000-bip10240",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.10 - BIP10000 - BIP10240.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.11",
+    "title": "BIP11001 - BIP11517",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip11001-bip11517",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.11 - BIP11001 - BIP11517.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.12",
+    "title": "BIP12001 - BIP12099",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip12001-bip12099",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.12 - BIP12001 - BIP12099.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.13",
+    "title": "BIP13001 - BIP13098",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip13001-bip13098",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.13 - BIP13001 - BIP13098.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.14",
+    "title": "BIP14050 - BIP14050",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip14050-bip14050",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.14 - BIP14050 - BIP14050.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.15",
+    "title": "BIP15001 - BIP15421",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip15001-bip15421",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.15 - BIP15001 - BIP15421.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.16",
+    "title": "BIP16510 - BIP16529",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip16510-bip16529",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.16 - BIP16510 - BIP16529.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.17",
+    "title": "BIP17857 - BIP17870",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip17857-bip17870",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.17 - BIP17857 - BIP17870.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.18",
+    "title": "BIP19909 - BIP19910",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip19909-bip19910",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.18 - BIP19909 - BIP19910.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  },
+  {
+    "number": "01.13.19",
+    "title": "BIP20000 - BIP20057",
+    "url": "https://www.ibm.com/docs/en/app-connect/13.0.x?topic=messages-bip20000-bip20057",
+    "pdf_file": "01 - Troubleshooting and support\\01.13 - Diagnostic messages\\01.13.19 - BIP20000 - BIP20057.pdf",
+    "parent_chain": [
+      "Troubleshooting and support",
+      "Diagnostic messages"
+    ],
+    "has_children": false
+  }
+]
