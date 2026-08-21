@@ -107,15 +107,16 @@ For each axis below, apply the recipes in `extraction_guide.md`, and for every f
 11. **Monitoring / audit** - monitoring events, activity log, trace conventions.
 
 ### Correctness cross-check sources (read, do not duplicate)
-- `../../ace-flow-builder/references/validated_rules.md` - correctness rules. Always wins on conflict.
-- `../../ace-flow-builder/references/esql_style.md` - naming / readability conventions.
-- `../../ace-flow-builder/references/refactoring_patterns.md` - anti-patterns and their fixes.
-- `../../ace-review/references/guidelines/esql_guidelines.md`
-- `../../ace-review/references/guidelines/flow_guidelines.md`
-- `../../ace-review/references/guidelines/error_handling_guidelines.md`
-- `../../ace-review/references/guidelines/security_guidelines.md`
-- `../../ace-review/references/guidelines/performance_monitoring_guidelines.md`
-- `../../ace-review/references/guidelines/ten_ace_message_flow_mistakes.md`
+Resolve these by skill name: each path is rooted at that skill's installed folder, wherever it lives.
+- `ace-flow-builder/references/validated_rules.md` - correctness rules. Always wins on conflict.
+- `ace-flow-builder/references/esql_style.md` - naming / readability conventions.
+- `ace-flow-builder/references/refactoring_patterns.md` - anti-patterns and their fixes.
+- `ace-review/references/guidelines/esql_guidelines.md`
+- `ace-review/references/guidelines/flow_guidelines.md`
+- `ace-review/references/guidelines/error_handling_guidelines.md`
+- `ace-review/references/guidelines/security_guidelines.md`
+- `ace-review/references/guidelines/performance_monitoring_guidelines.md`
+- `ace-review/references/guidelines/ten_ace_message_flow_mistakes.md`
 
 ---
 

@@ -80,9 +80,10 @@ customModes:
       naming, configuration/externalization, project/package structure, message modeling/
       formats, security/credentials, transaction/recovery, monitoring/audit. Every finding
       carries support (X of N), confidence, a prescriptive/descriptive flag, and a
-      correctness cross-check against ../ace-flow-builder/references/{validated_rules,esql_style,
-      refactoring_patterns}.md and ../ace-review/references/guidelines/*. These cross-checks
-      require the full bob_modes repo to be installed; if the sibling skills are absent
+      correctness cross-check against the installed ace-flow-builder skill's
+      references/{validated_rules,esql_style,refactoring_patterns}.md and the installed
+      ace-review skill's references/guidelines/* - resolve both by skill name, wherever
+      those skills are installed. If the sibling skills are absent
       (standalone deployment), skip the cross-check, lower confidence accordingly, and note
       in the profile that the correctness cross-check was not performed. A consistent pattern
       that conflicts with a correctness rule or known anti-pattern is flagged
