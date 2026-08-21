@@ -27,7 +27,7 @@ If the user can't phrase the goal, offer a draft from the trigger + endpoints an
 ## D1 - Pattern
 
 No question bank - this is a recognition step. Match against
-`../flow_builder/references/ace_patterns_catalog.md` and name the pattern. Only ask a question if the
+`../../ace-flow-builder/references/ace_patterns_catalog.md` and name the pattern. Only ask a question if the
 description is genuinely ambiguous between two patterns ("are you *reading from* a queue, or
 *exposing* an endpoint that writes to one?").
 
@@ -45,7 +45,7 @@ description is genuinely ambiguous between two patterns ("are you *reading from*
 
 A *subflow* = a reusable mini-flow you wire into several parent flows so the shared logic lives once.
 
-When a subflow is chosen, the terminal wiring is a flow_builder blocker (it otherwise guesses how the
+When a subflow is chosen, the terminal wiring is a ace-flow-builder blocker (it otherwise guesses how the
 parent's success and error paths enter the subflow). Capture it in the *Shape* section: the subflow's
 input terminals (e.g. happy + error) and which parent-flow output goes to each - exactly as the
 MQEventReader gold-standard spec does ("`out` → happy input; `failure`/`catch` → error input").
@@ -71,14 +71,14 @@ MQEventReader gold-standard spec does ("`out` → happy input; `failure`/`catch`
 | Filename (File output) | "Same filename every time, or computed per message (e.g. with a date/id)?" | Static |
 
 A *contract / target shape* is the **data structure** to produce (a sample payload or field list) -
-this is design, not code. You never write ESQL/Java here; you describe the shape flow_builder must hit.
+this is design, not code. You never write ESQL/Java here; you describe the shape ace-flow-builder must hit.
 
 If there is more than one input or output, capture each as its own labelled block.
 
-*Routing-source check (a flow_builder BLOCKER - must be answered, never defaulted):* if a later
+*Routing-source check (a ace-flow-builder BLOCKER - must be answered, never defaulted):* if a later
 routing/filter decision reads a value that could exist in more than one place (MQRFH2 folder vs HTTP
 header vs `Environment.Variables` vs `LocalEnvironment`), ask which single source is authoritative.
-flow_builder stops and asks this if the spec doesn't pin it down.
+ace-flow-builder stops and asks this if the spec doesn't pin it down.
 
 ---
 
@@ -101,7 +101,7 @@ if the user names a concrete Java trigger (an existing Java library, parsing MQ 
 event messages, or genuinely heavy logic), or if an earlier answer already hinted at one. **If Java
 is confirmed:** capture the intended **class name** (e.g. `shared.HandleEvent_JavaCompute`) and pair
 it with the **output contract** from D3 - still no code, just the class, the shape it produces, and a
-one-line note on what it does. If unsure, mark `[CONFIGURE: compute language]` and let flow_builder
+one-line note on what it does. If unsure, mark `[CONFIGURE: compute language]` and let ace-flow-builder
 help decide during the build.
 
 ---
@@ -115,11 +115,11 @@ help decide during the build.
 | Retry | "Retry transient failures? How many times, how far apart?" | Retry only a named transient dependency; else no retry |
 | Retry params | (if retry) "Attempts and interval?" | 3 attempts, fixed 30s, then DLQ |
 | HTTP retry classification | **(ask ONLY if the flow calls an HTTP API)** "When the API call fails, should the flow retry on timeouts and connection problems, or stop right away?" | Timeouts / connection loss / HTTP 408, 429, 5xx → retry; other 4xx → stop |
-| Timer / delayed-retry | **(ask ONLY if retry is delayed, or the flow is timer-driven)** "How long between tries, how many tries, and one retry at a time or several at once?" | Single-flight; interval + count as stated. Identifier *value* is flow_builder's job - strategy only. |
+| Timer / delayed-retry | **(ask ONLY if retry is delayed, or the flow is timer-driven)** "How long between tries, how many tries, and one retry at a time or several at once?" | Single-flight; interval + count as stated. Identifier *value* is ace-flow-builder's job - strategy only. |
 
 The HTTP and timer rows are **conditional** - skip them entirely for a flow with no outbound HTTP
 call and no timer, and write "n/a" in those spec sections. Behind the friendly HTTP question:
-flow_builder sees two failure kinds on separate terminals - a *connection failure* (no response at
+ace-flow-builder sees two failure kinds on separate terminals - a *connection failure* (no response at
 all) and an *HTTP error response* (a 4xx/5xx came back) - and needs the split so it wires and handles
 both. You don't need to explain that to a junior; the default classification is the standard
 transient-vs-fatal split.
@@ -184,8 +184,8 @@ environment at deploy time without editing the flow.
 
 When D1 identifies a **REST API** (the user wants to *expose* HTTP operations / has an OpenAPI or
 Swagger file), do NOT run the normal Input/Output (D3) and Processing (D4) topics - a REST API has a
-different shape and flow_builder builds it on a dedicated track. Run this branch instead, then
-continue with D5-D8 as normal. This mirrors flow_builder's **two-question gate**.
+different shape and ace-flow-builder builds it on a dedicated track. Run this branch instead, then
+continue with D5-D8 as normal. This mirrors ace-flow-builder's **two-question gate**.
 
 | Ask | Junior-friendly framing | Default |
 |---|---|---|
@@ -198,7 +198,7 @@ continue with D5-D8 as normal. This mirrors flow_builder's **two-question gate**
 
 Capture the operations as a table (operation | method | path | request shape | response shape |
 business logic) in the spec's *REST API* section. If the user has an existing spec file, record its
-path and note flow_builder should drive generation from it.
+path and note ace-flow-builder should drive generation from it.
 
 An *operation* = one method+path the API exposes (e.g. `GET /things/{id}`). A *handler* = one of the
-three shared error subflows (Catch / Failure / Timeout) flow_builder always generates for a REST API.
+three shared error subflows (Catch / Failure / Timeout) ace-flow-builder always generates for a REST API.

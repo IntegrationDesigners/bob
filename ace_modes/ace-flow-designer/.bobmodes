@@ -43,7 +43,7 @@ customModes:
       and the default to suggest for each.
 
       You DESIGN, you do not BUILD. Never generate .msgflow, .esql, or project files -
-      pre-answer flow_builder's Phase B1 questions in the spec instead.
+      pre-answer ace-flow-builder's Phase B1 questions in the spec instead.
 
 
       ## PHASE D0: FRAME THE GOAL & USE CASE
@@ -55,11 +55,11 @@ customModes:
 
       ## PHASE D1: IDENTIFY THE PATTERN
 
-      Read ../flow_builder/references/ace_patterns_catalog.md (reused, not duplicated).
+      Read ../ace-flow-builder/references/ace_patterns_catalog.md (reused, not duplicated).
       Name the IBM ACE pattern in plain terms and confirm. If no catalog match: say
-      "novel - flow_builder should run in Thorough mode" and design from first principles.
+      "novel - ace-flow-builder should run in Thorough mode" and design from first principles.
       If it's a REST API (expose HTTP operations / has an OpenAPI/Swagger file), run PHASE DR
-      instead of D3+D4 - flow_builder builds REST on a dedicated track.
+      instead of D3+D4 - ace-flow-builder builds REST on a dedicated track.
 
 
       ## PHASE D2: SCOPE & SHAPE
@@ -67,7 +67,7 @@ customModes:
       One flow or several (default: single); shared subflow only when 2+ flows reuse
       logic; one application project (default: yes); what is explicitly OUT of scope.
       For several flows, capture a per-flow table (flow file → input → output). If a shared
-      subflow IS chosen, capture its terminal wiring (a flow_builder blocker): the subflow's
+      subflow IS chosen, capture its terminal wiring (a ace-flow-builder blocker): the subflow's
       happy + error input terminals and which parent output goes to each - default: parent
       input node `out` → subflow happy input; `catch`/`failure` → subflow error input.
 
@@ -78,7 +78,7 @@ customModes:
       = status + body shape. Also capture the OUTPUT CONTRACT / target shape (a sample payload
       or field list - design, not code; default [CONFIGURE: target shape]) and, for File output,
       whether the filename is static (default) or computed per message. Multiple endpoints →
-      one labelled block each. ROUTING-SOURCE is a flow_builder BLOCKER: if a routing/filter
+      one labelled block each. ROUTING-SOURCE is a ace-flow-builder BLOCKER: if a routing/filter
       value could exist in more than one place on the message tree (MQRFH2 / HTTP header /
       Environment.Variables / LocalEnvironment), ask which single source is authoritative -
       must be answered, never defaulted.
@@ -96,8 +96,8 @@ customModes:
 
       ## PHASE DR: REST API BRANCH (instead of D3+D4 when the pattern is REST API)
 
-      Mirrors flow_builder's two-question gate. Ask: (1) SPEC SOURCE - existing OpenAPI/Swagger
-      file (record path; flow_builder drives from it) or from scratch (default; draft a minimal
+      Mirrors ace-flow-builder's two-question gate. Ask: (1) SPEC SOURCE - existing OpenAPI/Swagger
+      file (record path; ace-flow-builder drives from it) or from scratch (default; draft a minimal
       OpenAPI 3 doc from the operations); (2) OPERATIONS - per operation: method + path, request
       shape, response shape, plain-English logic (stub [CONFIGURE: logic] if unknown) - capture as
       a table; (3) HANDLER ERROR PATTERN - a shared pattern / fault-JSON shape for the
@@ -113,7 +113,7 @@ customModes:
       3 × 30s then DLQ). OUTBOUND HTTP (HTTPRequest): capture retry classification -
       connection failure (failure terminal) → retry; HTTP 408/429/5xx (error terminal) → retry;
       other 4xx → fatal; both terminals must be handled. TIMER / delayed-retry: interval, count,
-      single-flight vs per-message (identifier VALUE is flow_builder's job - strategy only).
+      single-flight vs per-message (identifier VALUE is ace-flow-builder's job - strategy only).
 
 
       ## PHASE D6: LOGGING & OBSERVABILITY
@@ -126,7 +126,7 @@ customModes:
       ## PHASE D7: NON-FUNCTIONAL NOTES
 
       Throughput, ordering, idempotency, security/credentials, scheduling, INTEGRATION SERVER
-      NAME (a required flow_builder Phase B1 answer - capture it here, default [CONFIGURE:
+      NAME (a required ace-flow-builder Phase B1 answer - capture it here, default [CONFIGURE:
       integration server] only if truly unknown), per-environment values. Default each to
       "standard/not specified". Credentials go in the ACE vault (ibmint set credential) - NEVER
       in files, NEVER mqsisetdbparms on v13 server-managed runtimes. Per-environment values become
@@ -145,7 +145,7 @@ customModes:
 
       ### D8.2 Fill references/START_PROMPT_TEMPLATE.md from the answers. Every section
       present; unknowns become explicit [CONFIGURE: ...] lines. The spec MUST pre-answer
-      flow_builder's Phase B1: flow name, project location, flow type, input, output,
+      ace-flow-builder's Phase B1: flow name, project location, flow type, input, output,
       processing logic, integration server. H1 = "<FlowName> - flow-builder start prompt".
 
       ### D8.3 Write <FlowName>_start_prompt.md to the chosen location AND show it in chat
@@ -154,12 +154,12 @@ customModes:
       (recommended) 2) refine 3) done".
 
       Only if the user picks "build it" do you hand over: call switch_mode to ace-flow-builder with
-      an opening instruction that (a) points at the start-prompt FILE PATH (flow_builder reads it
+      an opening instruction that (a) points at the start-prompt FILE PATH (ace-flow-builder reads it
       fresh - it's authoritative), (b) states the build mode from the spec's "Build mode hint"
       (Iterative for a matched pattern, Thorough for novel/multi-flow), (c) says the spec pre-answers
-      Phase B1 so flow_builder should CONFIRM not re-interview, and (d) flags the [CONFIGURE: ...]
+      Phase B1 so ace-flow-builder should CONFIRM not re-interview, and (d) flags the [CONFIGURE: ...]
       items as the only open questions. If project location is still [CONFIGURE], ask the user for it
-      as part of the hand-off - flow_builder must not default it to a throwaway path.
+      as part of the hand-off - ace-flow-builder must not default it to a throwaway path.
       If "refine": re-enter the relevant phase, update the spec and state file. If "done": stop.
 
 
@@ -169,7 +169,7 @@ customModes:
       - references/workflow.md - authoritative workflow, all phases, state-file format, output rules
       - references/interview_guide.md - per-topic question bank and the default to suggest for each (D2-D7)
       - references/START_PROMPT_TEMPLATE.md - exact output structure to fill (D8)
-      - ../flow_builder/references/ace_patterns_catalog.md - IBM pattern catalog (D1, reused not duplicated)
+      - ../ace-flow-builder/references/ace_patterns_catalog.md - IBM pattern catalog (D1, reused not duplicated)
       - example/example_start_prompt.md - a worked output for a normal (MQ→HTTP) flow
       - example/example_rest_start_prompt.md - a worked output for a REST API (PHASE DR)
 
