@@ -6,6 +6,8 @@ A curated collection of specialized Bob modes for enterprise integration and dev
 
 This repository contains custom Bob modes designed to enhance productivity across various technology domains. Each mode collection provides expert assistance for specific development tasks, from code generation to documentation and review.
 
+Most of them ship in two forms from the same folder: a **Bob mode** (`.bobmodes`, which you pick from the mode selector) and a **skill** (`SKILL.md`, which Bob selects itself when your request matches, and which Claude Code can use too). They install differently - see **[SKILLS.md](SKILLS.md)** for where Bob looks, what a multi-root VS Code workspace means for skill scope, and the naming rule that decides whether a skill loads at all.
+
 ## Available Mode Collections
 
 ### 🔧 ACE Modes (`ace_modes/`)
@@ -47,9 +49,35 @@ This comprehensive guide covers:
 
 ### Quick Start
 
-### Installation
+### Installing the skills
 
-Use the provided PowerShell script to import modes into your projects:
+Skills are discovered from a skills directory, and the folder name there is the skill's
+identity. Install them globally - one command, and they are available in every folder, every
+workspace and every window:
+
+```powershell
+.\scripts\Install-Skills.ps1 -WhatIf    # preview, changes nothing
+.\scripts\Install-Skills.ps1            # junction every skill into %USERPROFILE%\.bob\skills
+```
+
+```bash
+./scripts/install-skills.sh --dry-run     # macOS / Linux
+./scripts/install-skills.sh
+```
+
+The script junctions (or copies) each skill into `~/.bob/skills`, refuses to install anything
+if a folder name, `SKILL.md` `name:` and `.bobmodes` `slug:` disagree, leaves skills from
+other sources alone, and backs up - never deletes - anything it replaces. Add
+`-ProjectPath <path>` / `--project <path>` to install into a single project instead, and
+`-Agent Both` / `--agent both` to cover `~/.claude/skills` as well.
+
+**Working in a multi-root VS Code workspace?** Install globally. A project-scoped skill only
+applies to tasks started in that one workspace folder, and Bob binds each task to a single
+folder. [SKILLS.md](SKILLS.md) explains the whole discovery model.
+
+### Installing the modes
+
+Use the PowerShell script to import modes into a project:
 
 ```powershell
 .\Import-BobModes.ps1 -SourcePath ".\ace_modes" -TargetProjectPath "D:\Projects\YourProject"
@@ -60,30 +88,35 @@ The script will:
 - Create or update `.bob/custom_modes.yaml` in your project
 - Merge modes intelligently, avoiding duplicates
 
-After importing, reload your VS Code window to activate the new modes.
+After importing, reload your VS Code window to activate the new modes. A `.bobmodes` edit
+alone changes nothing - re-run the import first.
 
 ### Usage
 
-1. Import the modes you need into your project
-2. Open Bob's mode selector in VS Code
-3. Choose the appropriate mode for your task
-4. Follow the mode's guided workflow
+1. Install the skills, or import the modes you need into your project
+2. Describe your task - Bob picks a matching skill on its own, or you name it
+3. For a mode, open Bob's mode selector in VS Code and choose it
+4. Follow the guided workflow
 
 ## Repository Structure
 
 ```
 bob/
 ├── README.md                    # This file
+├── SKILLS.md                    # Skill discovery, workspace scope, installation
 ├── Import-BobModes.ps1          # Mode import utility
+├── scripts/
+│   ├── Install-Skills.ps1      # Skill installer (Windows)
+│   └── install-skills.sh       # Skill installer (macOS / Linux)
 ├── ace_modes/                   # ACE integration modes
 │   ├── README.md               # Detailed ACE modes documentation
 │   ├── Import-BobModes.ps1     # ACE-specific import script
-│   ├── ace-readme/             # Documentation generator mode
-│   ├── ace-flow-builder/       # Flow builder mode
-│   ├── ace-flow-designer/      # Flow designer mode
+│   ├── ace-readme/             # Documentation generator (Bob mode only, no SKILL.md)
+│   ├── ace-flow-builder/       # Flow builder
+│   ├── ace-flow-designer/      # Flow designer
 │   ├── ace-flow-harness/       # Deploy-and-test harness (provisions, deploys, runs, verifies)
 │   ├── ace-conventions-profiler/ # House-style conventions extractor (profile for flow-builder)
-│   ├── ace-review/             # Code review mode (review/ + custom-rules/rules.md)
+│   ├── ace-review/             # Code review (custom-rules/rules.md)
 │   ├── cve-analysis/           # CVE / security-bulletin exploitability assessment
 │   └── ace-support-case/       # IBM support-case diagnostics and submission
 ├── general_modes/               # Modes not tied to ACE
@@ -92,6 +125,11 @@ bob/
 │   └── prompt-forge/           # Model-tuned prompt builder
 └── [future mode collections]/
 ```
+
+Each mode folder holds a `.bobmodes` (the Bob mode), usually a `SKILL.md` (the skill entry
+point), and a `references/` directory with the workflow and guideline files it loads on
+demand. The folder name is the skill's identity: it must match the `SKILL.md` `name:` and the
+`.bobmodes` `slug:`, and the installers refuse to run when it does not.
 
 ## Contributing
 

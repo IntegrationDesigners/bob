@@ -59,9 +59,31 @@ This directory contains Bob modes that are not tied to IBM App Connect Enterpris
 
 Each mode directory contains:
 - `.bobmodes` - Mode definition file (configuration for Bob)
-- `SKILL.md` - Detailed skill documentation (optional, for reference)
+- `SKILL.md` - Skill entry point: what Bob (and Claude Code) load when the skill is selected. The folder name is the skill's identity and must equal this file's `name:` and the `.bobmodes` `slug:`
 - `references/` - Reference files, templates, and guidelines used by the mode
 - `.env.sample` - template for private per-user facts (where applicable). Copy to `.env` and fill in; `.env` is gitignored and must never be committed
+
+---
+
+## Installing the Skills
+
+Both modes here also ship as **skills**, which Bob selects itself when your request matches
+and which Claude Code can use too. They install into a skills directory, where the folder name
+is the name you invoke:
+
+```powershell
+..\scripts\Install-Skills.ps1 -WhatIf                  # preview, changes nothing
+..\scripts\Install-Skills.ps1 -Name prompt-forge       # or leave -Name off for all of them
+```
+
+```bash
+../scripts/install-skills.sh --dry-run                 # macOS / Linux
+../scripts/install-skills.sh
+```
+
+A global install (`~/.bob/skills`, the default) applies to every folder and every workspace;
+a project install applies to one VS Code workspace folder only. **[SKILLS.md](../SKILLS.md)**
+covers the discovery order, the multi-root workspace caveat and the naming rule Bob enforces.
 
 ---
 

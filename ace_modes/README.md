@@ -319,7 +319,7 @@ The modes are designed to work together and will suggest transitions when approp
 
 Each mode directory contains:
 - `.bobmodes` - Mode definition file (configuration for Bob)
-- `SKILL.md` - Detailed skill documentation (optional, for reference)
+- `SKILL.md` - Skill entry point: what Bob (and Claude Code) load when the skill is selected. The folder name is the skill's identity and must equal this file's `name:` and the `.bobmodes` `slug:`. `ace-readme` has no `SKILL.md` - it ships as a Bob mode only
 - `references/` - Reference files, templates, and guidelines used by the mode
 - `examples/` - Example inputs and outputs (where applicable)
 - `custom-rules/rules.md` - your organisation's house rules, applied on top of the built-in workflow (where applicable; empty by default)
@@ -327,16 +327,46 @@ Each mode directory contains:
 
 ---
 
+## Installing the Skills
+
+Every mode here except `ace-readme` also ships as a **skill** - the same workflow, discovered
+by Bob itself when your request matches its description, and usable from Claude Code as well.
+Skills install into a skills directory rather than into `custom_modes.yaml`, and the folder
+name there is the name you invoke.
+
+```powershell
+..\scripts\Install-Skills.ps1 -WhatIf       # preview, changes nothing
+..\scripts\Install-Skills.ps1               # junction every skill into %USERPROFILE%\.bob\skills
+..\scripts\Install-Skills.ps1 -Name ace-review ace-flow-builder
+```
+
+```bash
+../scripts/install-skills.sh --dry-run      # macOS / Linux
+../scripts/install-skills.sh
+```
+
+Bob reads skills from `~/.bob/skills`, `~/.agents/skills` and `~/.claude/skills` globally, and
+from `.bob/skills`, `.agents/skills` and `.claude/skills` inside a **workspace folder**. Which
+matters if you open a multi-root VS Code workspace rather than a single project: a Bob task is
+bound to one workspace folder, so a project-scoped skill installed in one root is invisible to
+a task started in another. A global install sidesteps that entirely.
+
+**[SKILLS.md](../SKILLS.md)** has the full discovery order, the naming rule Bob enforces (and
+silently drops skills over), the junction-versus-copy trade-off, and a troubleshooting table.
+
+---
+
 ## Importing Modes into Bob
 
-There are two ways to make these ACE modes available in Bob: **Global Setup** (user-wide) and **Local Setup** (project-specific).
+There are two ways to make these ACE modes available as **modes** in Bob: **Global Setup**
+(user-wide) and **Local Setup** (project-specific).
 
 ### Automated Import (Recommended)
 
 Use the included PowerShell script to automatically import modes into any project:
 
 ```powershell
-.\Import-BobModes.ps1 -SourcePath "D:\git\i8c_bobmodes\ace_modes" -TargetProjectPath "D:\Projects\YourProject"
+.\Import-BobModes.ps1 -SourcePath ".\ace_modes" -TargetProjectPath "D:\Projects\YourProject"
 ```
 
 The script will:
@@ -353,35 +383,34 @@ After running the script, reload your VS Code window (Ctrl+Shift+P → "Reload W
 
 Global setup makes modes available across all your projects. This is ideal when you work with ACE regularly across multiple projects.
 
-**Configuration location:** Bob's global settings (typically in VS Code user settings)
+**Configuration location:** `%USERPROFILE%\.bob\settings\custom_modes.yaml` (`~/.bob/settings/custom_modes.yaml`)
 
 **How it works:**
-- Modes are defined once in your user configuration
-- Available in every project you open in VS Code
-- Changes to mode definitions require updating the global configuration
+- Modes are defined once in that file
+- Available in every folder and every workspace you open
+- Changes to mode definitions require editing it again
 
 **When to use:**
 - You work with ACE across multiple projects
+- You open multi-root workspaces, where a per-project file only covers one root
 - You want consistent mode availability everywhere
-- You're the primary user of your development machine
 
 **Setup steps:**
-1. Open VS Code Settings (Ctrl+,)
-2. Search for "Bob Custom Modes"
-3. Edit the global custom modes configuration
-4. Add the ACE mode definitions from the `.bobmodes` files
-5. Reload VS Code window
+1. Open `%USERPROFILE%\.bob\settings\custom_modes.yaml` (it already exists, holding `customModes: []`)
+2. Paste the mode definitions from the `.bobmodes` files under the `customModes:` key
+3. Keep the indentation - YAML is whitespace-sensitive
+4. Reload VS Code window
 
 #### Local Setup (Project-Specific)
 
-Local setup makes modes available only within a specific project. This is the pattern used in the reference example at `D:\Projects\Lineas\.bob\custom_modes.yaml`.
+Local setup makes modes available only within a specific project - strictly, within one VS Code **workspace folder**.
 
 **Configuration location:** `.bob/custom_modes.yaml` in your project root
 
 **How it works:**
 - Each project has its own `.bob/` directory
 - The `custom_modes.yaml` file contains mode definitions specific to that project
-- Modes are only available when working in that project
+- Modes are only available to tasks running in that folder; in a multi-root workspace, each root needs its own file
 - The file is typically committed to version control, so team members get the same modes
 
 **When to use:**
@@ -435,11 +464,11 @@ customModes:
 
 | Aspect | Global Setup | Local Setup |
 |--------|-------------|-------------|
-| **Scope** | All projects | Single project |
-| **Configuration** | User settings | `.bob/custom_modes.yaml` |
+| **Scope** | All folders, all workspaces | One workspace folder |
+| **Configuration** | `~/.bob/settings/custom_modes.yaml` | `.bob/custom_modes.yaml` |
 | **Team Sharing** | No | Yes (via version control) |
 | **Maintenance** | Update once for all projects | Update per project |
-| **Best For** | Individual developers | Team projects |
+| **Best For** | Individual developers, multi-root workspaces | Team projects |
 
 ### Verifying Installation
 
@@ -461,6 +490,11 @@ If modes don't appear, check:
 - The `.bob/custom_modes.yaml` file syntax (YAML is whitespace-sensitive)
 - VS Code's Output panel for Bob-related errors
 - That you've reloaded the window after making changes
+
+For **skills**, check Settings > Skills instead - they need no reload, and the installer
+prints what it did. A skill that is missing everywhere almost always has a folder name that
+is not kebab-case; a skill that is listed but never used was installed into a different
+workspace folder than the one your task is running in. See [SKILLS.md](../SKILLS.md).
 
 ---
 
