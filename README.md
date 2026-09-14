@@ -29,6 +29,7 @@ Specialized modes for IBM App Connect Enterprise (ACE) development:
 Modes for general developer and advocacy workflows, not tied to ACE:
 - **ibm-champion-report** - assembles an IBM Champion act-of-advocacy submission: prefilled champ-report form URL plus a copy-paste field sheet (never auto-submits)
 - **prompt-forge** - turns a rough idea or brain dump into a clean prompt tuned for a specific target model; the deliverable is the prompt, not the task's output
+- **id-deck-builder** - builds Integration Designers house-style PowerPoint decks from a marp/markdown deck or outline: slides rebuilt on the template carcass with python-pptx, speaker notes carried over, every slide rendered for a visual check
 
 [View detailed general modes documentation →](general_modes/README.md)
 
@@ -122,7 +123,8 @@ bob/
 ├── general_modes/               # Modes not tied to ACE
 │   ├── README.md               # Detailed general modes documentation
 │   ├── ibm-champion-report/    # IBM Champion activity report builder
-│   └── prompt-forge/           # Model-tuned prompt builder
+│   ├── prompt-forge/           # Model-tuned prompt builder
+│   └── id-deck-builder/        # ID house-style PowerPoint deck builder
 └── [future mode collections]/
 ```
 

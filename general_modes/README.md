@@ -55,6 +55,31 @@ This directory contains Bob modes that are not tied to IBM App Connect Enterpris
 
 ---
 
+### 🖼️ ID Deck Builder (`id-deck-builder`)
+
+**Purpose:** Turns deck content (a marp/markdown deck, an outline, a blog post, talking points) into a PowerPoint deck in the Integration Designers (ID) house style. Slides are built from scratch on the template carcass with python-pptx - applying the template to an export does not work - speaker notes are carried over, and every slide is rendered through PowerPoint for a visual check before hand-off.
+
+**When to use:**
+- You want an ID-style deck ("turn this marp deck into an ID-style pptx", "rebuild this deck on our template")
+- You want the same content as an existing deck, restyled or re-targeted for another audience
+- You want a branded PowerPoint that looks like the existing IBM Bob / ACE decks
+
+**What it does:**
+- **Introspect** - extracts layouts, theme and shape geometry from an example deck (`scripts/introspect_deck.py`) so a new template or recipe is measured, not guessed
+- **Build** - opens an existing ID deck as a carcass (theme, masters, layouts, logo media), drops its slides, and adds new ones from a JSON content spec with the recipe library (`scripts/build_deck.py`, `scripts/id_deck.py`); marp speaker notes are carried over by slide index
+- **Render and look** - exports every slide to PNG through PowerPoint COM (`scripts/render_qa.ps1`) so the result is inspected, not trusted
+
+**Key features:**
+- Nine slide recipes (title/section, stats, cards, tall cards, left-panel cards, code + bullets, quote panel, circle trio, closer); anything else is built by hand on the same primitives
+- House colours, fonts and geometry documented in `references/house_style.md`; the content spec format in `references/content_spec.md`; a 12-slide example spec in `assets/example_spec.json`
+- Never writes over a hand-finished deck: output goes to `<name>_generated.pptx` unless told otherwise
+
+**Requirements:** an existing ID template deck, python-pptx and lxml on the default python, and PowerPoint installed (Windows only, for the render step).
+
+**Location:** `id-deck-builder/`
+
+---
+
 ## File Structure
 
 Each mode directory contains:
