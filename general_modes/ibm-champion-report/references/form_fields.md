@@ -1,7 +1,8 @@
 # IBM Champion Activity Report - form field reference
 
 Authoritative, **browser-verified** field spec for the **IBM Champion Program -
-Activity Report** form (verified 2026-06-29, field by field, against the live form).
+Activity Report** form (verified 2026-06-29, field by field, against the live form;
+Appendix A/B option lists re-scraped 2026-09-15).
 
 - **Form URL:** https://airtable.com/appuwf3eOGdO6x1oS/pagF5IfVT7m6unCbG/form
 - **Short URL:** https://www.ibm.biz/champ-report
@@ -28,7 +29,8 @@ Airtable prefills via query params: `?prefill_<KEY>=<URLEncodedValue>`, joined w
   (`prefill_fldXXXXXXXXXXXXXX`).
 - Select values must match an option **exactly** (see Appendix A/B).
 - Multi-select: comma-separate values inside one param.
-- Email values: `@` -> `%40`. Date values: `D/M/YYYY` (leading zeros optional).
+- Email values: `@` -> `%40`. Date values: `yyyy-mm-dd` (the date fields render as
+  `yyyy-mm-dd` text inputs and only that format lands - `D/M/YYYY` leaves the field empty).
 - Some fields cannot be prefilled at all (no column-name match and no field ID is
   exposed on the public form). Those are **manual** - they go in the copy-paste sheet.
 
@@ -63,6 +65,9 @@ Load from the skill's `.env`; do not prompt for them.
 If `.env` is missing, fall back to the `.env.sample` shape and ask the user to copy it
 to `.env` and fill real values once (it is gitignored and stays private).
 
+`.env` also carries `ACTIVITY_LOG`, the path of the private activity log. It is not a
+form field and never lands on the form - see SKILL.md step 5C.
+
 ---
 
 ## Per-activity fields
@@ -91,8 +96,10 @@ not listed, select **Other** and type the product name."
 - **Prefill:** `prefill_fldTWgIi3n3KNErJJ=<opt>` (**field ID only** - the display-label
   param does NOT work). Multiple values: comma-separate in one param, e.g.
   `prefill_fldTWgIi3n3KNErJJ=IBM%20App%20Connect,IBM%20MQ`.
-- Values must match Appendix B exactly. There is **no** "App Connect Enterprise" / "ACE"
-  entry - the closest is **`IBM App Connect`**.
+- Values must match Appendix B exactly. Since the 2026-09-15 re-scrape the list has
+  **`App Connect Enterprise (ACE)`** next to **`IBM App Connect`** and **`IBM MQ`**
+  (plus `App Connect`, `IBM App Connect (Developer)`, `IBM MQ (Developer)`); pick the
+  entry that names the product the user actually means.
 - Anything not in Appendix B goes via **Other -> type the name**; a free-typed Other
   value cannot be prefilled, so do it manually after the form opens.
 
@@ -113,19 +120,38 @@ not listed, select **Other** and type the product name."
 ### 5. Can IBM Amplify this activity? (checkbox)
 
 - **NOT prefillable** -> manual. Ask the user; do not assume.
+- **Bob / browsermcp add-on:** `browser_click` on the checkbox ref lands on the outer
+  wrapper and does not tick it. After typing the Link value the Link field is already
+  focused - do NOT re-focus it with an empty `browser_type` (that clears the field).
+  Press `Tab` once (focus moves to the checkbox), press `Space`.
 
 ### 6. Approximate date of activity (date, required)
 
-- **Prefill:** `prefill_fld0aJmUIrBMO2BWh=<D/M/YYYY>` (field ID).
-- Format `D/M/YYYY` slash-separated; **leading zeros optional** (`22/5/2026` and
-  `22/05/2026` both land; display normalizes to `22/5/2026`).
+- **Prefill:** `prefill_fld0aJmUIrBMO2BWh=<yyyy-mm-dd>` (field ID). The field renders as
+  a `yyyy-mm-dd` text input and the prefill must use that exact format - `D/M/YYYY` leaves
+  the field empty while the other prefills land (verified in-browser 2026-09-02).
+- **Filling it manually is fiddly - two traps, both silent:**
+  1. `form_input` / setting `.value` writes the DOM but not React state: the field looks
+     right, then **clears the moment it loses focus**. Do not use form_input here.
+  2. Typing into it **appends** rather than replaces (produced `2026-08-052026-08-05`).
+     Triple-click to select the existing content first.
+  Reliable sequence: triple-click the field -> type `yyyy-mm-dd` -> then **click the day
+  cell in the open calendar** (gridcell named e.g. `Wed Aug 05 2026`) to commit. Re-read
+  the field after committing; `find` does not always report its value, so screenshot it.
 - "Only report activities contributed in the last year." First-of-month if unknown.
 
 ### 7. How many MORE Acts of Advocacy to add (single-select, required)
 
 - Options: **Zero**, **1**, **2**. **NOT prefillable** (defaults to `1`); set manually.
+- **Bob / browsermcp add-on:** `browser_click` does not open the option list in the a11y
+  snapshot. After typing the Link value the Link field is already focused - do NOT
+  re-focus it with an empty `browser_type` (that clears the field). Press `Tab` three
+  times (Amplify, Date, then this combobox), type the option one key at a time with
+  `browser_press_key` (`Z` `e` `r` `o`, or `1` / `2`), then `Enter`. No `browser_snapshot`
+  between the Tab presses and `Enter` - a snapshot closes the dropdown.
 - The 2nd/3rd-act fields are manual too, except the **2nd-activity Date**
-  (`prefill_fldsYCztbwXKtlxiT=<D/M/YYYY>`). If the user has more than 3 activities,
+  (`prefill_fldsYCztbwXKtlxiT=<yyyy-mm-dd>`, same input type as the 1st-activity
+  date). If the user has more than 3 activities,
   tell them to submit the form again for the overflow.
 
 ### 8. PRIVACY consent (checkbox, required)
@@ -137,16 +163,17 @@ not listed, select **Other** and type the product name."
 
 ## Prefilled-form URL (PROVEN)
 
-Regression-verified in-browser: all 8 prefillable fields land together. Build this from
+Verified in-browser (2026-09-02): all 8 prefillable fields land together. Build this from
 `.env` identity + the assembled 1st-act values. URL-encode values (`@`->`%40`,
 space->`%20`).
 
 ```
-https://airtable.com/appuwf3eOGdO6x1oS/pagF5IfVT7m6unCbG/form?prefill_fldt6UIOXVxQBNSgl=<CHAMPION_PROGRAM_ID>&prefill_First%20name=<FIRST_NAME>&prefill_Last%20name=<LAST_NAME>&prefill_Primary%20Email=<PRIMARY_EMAIL>&prefill_Alternate%20Email=<ALTERNATE_EMAIL>&prefill_1st%20Act%20of%20Advocacy=<ACT_OPTION>&prefill_fldTWgIi3n3KNErJJ=<PRODUCTS_COMMA_SEP>&prefill_fld0aJmUIrBMO2BWh=<D/M/YYYY>
+https://airtable.com/appuwf3eOGdO6x1oS/pagF5IfVT7m6unCbG/form?prefill_fldt6UIOXVxQBNSgl=<CHAMPION_PROGRAM_ID>&prefill_First%20name=<FIRST_NAME>&prefill_Last%20name=<LAST_NAME>&prefill_Primary%20Email=<PRIMARY_EMAIL>&prefill_Alternate%20Email=<ALTERNATE_EMAIL>&prefill_1st%20Act%20of%20Advocacy=<ACT_OPTION>&prefill_fldTWgIi3n3KNErJJ=<PRODUCTS_COMMA_SEP>&prefill_fld0aJmUIrBMO2BWh=<yyyy-mm-dd>
 ```
 
 **Prefills (8):** Champion Program ID, First name, Last name, Primary Email, Alternate
-Email, 1st Act of Advocacy, Product(s), 1st-activity Date.
+Email, 1st Act of Advocacy, Product(s), 1st-activity Date (`yyyy-mm-dd` - see the
+date-field note above).
 
 **Always manual after the URL opens (cannot be prefilled):** Description, Link, Can IBM
 Amplify, How-many-more, PRIVACY consent, and all 2nd/3rd-act fields except their date.
@@ -184,6 +211,16 @@ e.g. Claude-in-Chrome or browsermcp.io). The form sits behind `ibm.biz/champ-rep
 fresh logged-out profile may hit a login wall. If it does, stop and ask the user to log
 in (or switch to an extension-based MCP), then resume.
 
+**Autosaved drafts override the prefill (verified 2026-09-15 in the logged-in Chrome).**
+Airtable keeps an unsent draft of the manual fields per browser (`localStorage` key
+`AirtableLocalPersister.formPageElementSavedFormDataByElementId.<app>.<page>.<element>`,
+columns Description, Link and the 1st-activity Date) and applies it AFTER the URL
+prefill: a stale draft re-fills Description and Link and nulls the prefilled Date, so the
+snapshot shows 7 of 8 fields with the date empty. A fresh profile never has one. Before
+typing anything, read the draft back and show it to the user (it may be an unfiled
+activity); only with their go-ahead remove that key and re-navigate to the prefilled
+URL. Typing into the form overwrites the draft in place.
+
 ### Fill procedure (fill + verify, never submit)
 
 1. **Navigate** to the proven prefilled URL above (identity + Act + Product + Date land
@@ -195,7 +232,11 @@ in (or switch to an extension-based MCP), then resume.
    coordinate captured from an earlier screenshot silently misses (the URL lands
    nowhere, the checkbox stays empty). Use the browser MCP's find-by-label / ref
    mechanism and act on the returned ref. Verified stable names on this form:
-   - Description textarea: **"AoA1 Description"** (label "Description of this Activity.")
+   - Description textarea: accessible name **"A1_DESCRIPTION"** (label "Description of this
+     Activity."). Verified 2026-08-05; it was "AoA1 Description" at the 2026-06-29 calibration,
+     so match on the label text, not the name. It is a **contenteditable DIV, not a textarea** -
+     `form_input` fails with `Element type "DIV" is not a supported form input`; click it and
+     type instead.
    - Link input: labelled **"Please provide a link to this material if possible."**
    - Amplify checkbox: **"Can IBM Amplify this activity?"**
    - How-many-more dropdown: combobox **"How many MORE Acts of Advocacy..."**
@@ -209,6 +250,62 @@ in (or switch to an extension-based MCP), then resume.
    failures once. Prefer reading values back via the a11y tree over pixel-reading.
 8. **Stop before submit.** Do **NOT** tick the **PRIVACY** consent checkbox and do
    **NOT** click **Submit**. Leave the filled form open and hand control back.
+
+### Bob / Playwright MCP add-on (preferred; dry run completed from Bob 2026-09-15)
+
+Use this section when the live tool list carries the Playwright MCP tools
+(`browser_navigate`, `browser_snapshot`, `browser_find`, `browser_click`, `browser_type`,
+`browser_press_key`, `browser_select_option`, `browser_fill_form`, `browser_evaluate`,
+`browser_wait_for`, `browser_take_screenshot`). It is the preferred server for Bob: ref
+clicks reach every control on this form and `browser_evaluate` reads values back. The
+browsermcp add-on below is the fallback when these tools are absent. Install and wiring:
+`dependency.md` in the skill folder.
+
+Deltas to the generic procedure above:
+
+- **Steps 1-2:** `browser_navigate` to the prefilled URL, then `browser_wait_for` with
+  `text: "Champion Program ID"` before anything else - Airtable renders after navigate
+  returns, and an early snapshot or evaluate sees an empty shell titled "Interface Form"
+  (measured 2026-09-15). Then `browser_snapshot` and confirm the 8 prefilled fields.
+- **Step 3:** targets are the refs from that snapshot (or from `browser_find`), never
+  coordinates. Refs change after any select changes value - re-snapshot before the next
+  click.
+- **Step 4:** `browser_type` on the Description ref (a contenteditable DIV; add
+  `slowly: true` if characters are dropped) and on the Link ref.
+- **Step 5:** `browser_click` on the Amplify checkbox ref.
+- **Step 6:** `browser_click` on the How-many-more combobox ref, `browser_type` the
+  option text (`Zero`, `1` or `2`) so the list filters to one entry, then click that
+  option's ref (or `browser_press_key` `Enter`).
+- **Step 7:** verify with `browser_evaluate`, for example
+  `() => ({ act: document.querySelector("[role=combobox]").innerText, amplify: document.querySelector("[role=checkbox]").getAttribute("aria-checked"), date: document.querySelector("input[placeholder=yyyy-mm-dd]").value, more: [...document.querySelectorAll("[role=combobox]")].at(-1).innerText })`
+  and re-snapshot; retry failures once.
+- Tool names differ from browsermcp's despite the shared prefix: `browser_take_screenshot`
+  (not `browser_screenshot`), `browser_wait_for` (not `browser_wait`),
+  `browser_console_messages` (not `browser_get_console_logs`). Do not copy an
+  auto-approve list from one server to the other.
+- With `--browser chrome` the server drives the installed Chrome under its own profile,
+  not the logged-in one; the autosaved-draft note above does not apply there, but a
+  cookie banner does appear on the first load. With `--extension` (logged-in Chrome) the
+  draft note applies.
+
+### Bob / browsermcp add-on (fallback; verified by Bob on browsermcp, 2026-09)
+
+Deltas to the procedure above when the browser MCP is **browsermcp** (Bob's default).
+Every other rule above still applies - in particular step 3 (resolve by label / ref).
+
+- **Tab binding:** call `browser_snapshot` immediately after `browser_navigate` and
+  before the first `browser_type` / `browser_press_key`; without it those calls fail with
+  "No tab with given id". Sequence: `browser_navigate` -> `browser_snapshot` -> type/key.
+- **Step 4 (Description, Link):** `browser_type` on the refs from that snapshot.
+- **Step 5 (Amplify):** `browser_click` on the checkbox ref lands on the outer wrapper.
+  After typing the Link value the Link field is already focused - do NOT re-focus it
+  with an empty `browser_type` (that clears the field). `Tab` once, `Space`.
+- **Step 6 (How many MORE):** `browser_click` does not open the option list. The Link
+  field is still focused after step 4 (or after the `Space` in step 5 if Amplify was
+  ticked). `Tab` three times (Amplify, Date, combobox), then `browser_press_key` for
+  each character of the option (`Z` `e` `r` `o`, or `1` / `2`) and `Enter`. No
+  `browser_snapshot` between the Tab presses and `Enter` - it closes the dropdown.
+- **Step 7 (verify):** re-snapshot only after `Enter`; retry failures once.
 
 ### If the browser MCP starts erroring mid-fill
 
@@ -235,19 +332,19 @@ of different extension`. Recovery that works:
 
 ---
 
-## Appendix A: Act of Advocacy options (verified, 40)
+## Appendix A: Act of Advocacy options (verified 2026-09-15, 40)
 
 Map the user's activity to **one of these exactly**:
 
 - All other videos (e.g. Youtube)
 - Analyst Reference
-- Attend in-person User Group meeting
+- Attend User Group meeting
 - Blog or Article
 - Blog on IBM property
 - Board Member or UG Leader
 - Case Study (Contribute to an IBM Case Study, or Attributed Author, or Quoted)
 - Contributing to community.ibm.com (Discussion Threads, Questions)
-- Host or Organize IBM-Related Event (multi-customer/non-sales)
+- Host or Organize IBM-Related Event (multi-customer, non-sales)
 - Host or Organize IBM-Related Event (single customer/sales)
 - Host Podcast
 - Ideas portal
@@ -275,12 +372,12 @@ Map the user's activity to **one of these exactly**:
 - Case Study (unattributed business/BP-published case study)
 - Complete a Product Review
 - Contribute Code, App, or Templates for Community use
-- Participate in IBM-Sponsored Advisory Committees/Boards
+- Participate on IBM-Sponsored Advisory Committees/Boards
 - Share a Quote (Testimonial) for use by IBM
-- Speaker at User Group or Meetup
+- Speaker at a User Group or Meetup
 - Other
 
-## Appendix B: Product(s) options (verified, 516)
+## Appendix B: Product(s) options (verified 2026-09-15, 1097)
 
 Use one or more of these **exactly**. If a product is absent, select "Other" and type the name (manual; cannot be prefilled).
 
@@ -800,3 +897,584 @@ Use one or more of these **exactly**. If a product is absent, select "Other" and
 - z16
 - zCX
 - Zero Trust
+- SKILL_SHORT
+- AI Infrastructure IT Infrastructure
+- AI on Power
+- AIX (Developer)
+- AIX/Oracle
+- API Connect Essentials
+- API Management
+- API-Led Integration
+- APM/Predictive Maintenance
+- Access Management
+- ActiveMQ
+- Akamai API Security
+- Akka
+- Amazon Web Services (AWS)
+- Analytics
+- Analytics Content Hub
+- Analytics for batch resiliency
+- Angular
+- Anomaly Analytics with Watson for Z
+- Apache Cassandra
+- Apache Cordova
+- Apache Hadoop
+- App Connect
+- App Connect Enterprise (ACE)
+- App Metrics
+- Application Delivery Foundation for z/OS (ADFZ)
+- Application Development
+- Application Environment Deployment
+- Application Integration
+- Application Lifecycle Management
+- Application Modernization
+- Application Modernization Accelerator (AMA)
+- Application Performance Management Connect for Z
+- Application Server
+- Apptio One
+- Artificial Intelligence
+- Assembler
+- Assembly
+- Asset Lifecycle Management
+- Asset Maintenance (EAM)
+- Asset Management (General)
+- Automating your Business
+- Azure
+- Batch Resiliency for Z
+- Big Data
+- Blockchain
+- Blockchain (Developer)
+- Business Analytics
+- Business Automation Manager Open Edition
+- Business Automation Workflow
+- Business Intelligence
+- Business Process Management
+- Business Process Management (IBM BPM, BAW, Case Manager)
+- C
+- C#
+- C++
+- CICS VSAM Recovery
+- COBOL (Developer)
+- CPACF
+- Case Management
+- Chat Ops for Z
+- Chatbots
+- Cloud
+- Cloud Computing
+- Cloud Infrastructure
+- Cloud Integration
+- Cloud Native Apps with AI on IBM Cloud
+- Cloud Native Development
+- Cloud Object Storage
+- Cloud Pak for AIOps
+- Cloud Pak for Applications (CP4Apps)
+- Cloud security
+- Cloudability
+- Cloudera
+- Code for IBM i
+- Cognos Analytics
+- Confidential Containers
+- Connective Vehicle Insights
+- Container registry
+- Containers
+- Content Management
+- Content Management and Capture
+- Continuous Availability
+- Controller
+- Crypto Analytics Tool (CAT)
+- Crypto Express / TKE
+- Crystal programming language
+- Cybersecurity
+- DB2 AI for z/OS
+- DRA on PowerVS
+- DS8K SafeGuarded Copy
+- Dashbot
+- Data Governance
+- Data Management
+- Data Privacy for Diagnostics
+- Data Product Hub
+- Data Protection
+- Data Quality
+- Data Science
+- Data Security
+- Data Stores
+- Data Warehousing
+- Data lake
+- DataOps
+- DataStage
+- DataStax Astra DB
+- Databases
+- Datacap Open Editions
+- Db2 (Developer)
+- Db2 Analytics Accelerator for z/OS
+- Db2 Event Store (Developer)
+- Db2 Warehouse (Developer)
+- Db2 for z/OS Data Gate
+- Db2 tools for z/OS
+- Deep Learning
+- Deployable Architectures on IBM Cloud
+- Detection and Response
+- DevSecOps
+- Developer Tooling
+- Developer for z/OS (IDZ)
+- Development on IBM LinuxONE (Developer)
+- Digital Operational Resilience Act (DORA)
+- Digital Process Automation
+- Digital Transformation
+- Digital Trust
+- Disaster Recovery
+- Distributed ledgers
+- Document Exchange
+- Edge Computing
+- Encryption
+- Encryption Facility
+- Encryption everywhere
+- Engineering Lifecycle Management (General)
+- Enterprise Application Runtimes (EAR)
+- Enterprise Application Service for Java (EASeJ)
+- Enterprise Computing
+- Envizi (Developer)
+- Envizi ESG Suite
+- Event-Led Integration
+- Fabric for Deep Learning
+- Flexible compute
+- Food Trust (Developer)
+- Fraud Protection
+- Front End Development
+- GDPR
+- Go
+- Google Cloud
+- Grafana
+- Groovy
+- Guardium Data Encryption
+- Guardium Data Security Center
+- Guardium Discover and Classify
+- Guardium S TAPs for z/OS
+- HashiCorp Boundary
+- HashiCorp Cloud Platform
+- HashiCorp Consul
+- HashiCorp Nomad
+- HashiCorp Packer
+- HashiCorp Terraform
+- HashiCorp Vagrant
+- HashiCorp Vault
+- HashiCorp Waypoint
+- High Availability
+- High Performance Computing
+- High Performance Computing - Spectrum LSF
+- High Performance Computing - Spectrum Symphony
+- Hybrid Cloud
+- Hybrid Cloud Mesh
+- Hyperledger Fabric
+- IBM API Connect (Developer)
+- IBM Access Manager
+- IBM App Connect (Developer)
+- IBM Apptio
+- IBM Apptio Platform
+- IBM Blockchain Platform  (Developer)
+- IBM Cloud (Developer)
+- IBM Cloud Code Engine (Developer)
+- IBM Cloud Hyper Protect Services (Developer)
+- IBM Cloud Logs
+- IBM Cloud Monitoring
+- IBM Cloud Object Storage (IaaS)
+- IBM Cloud Pak for AIOps (Developer)
+- IBM Cloud Pak for Applications (Developer)
+- IBM Cloud Pak for Business Automation (Developer)
+- IBM Cloud Pak for Data (Developer)
+- IBM Cloud Pak for Integration (Developer)
+- IBM Cloud Pak for Security (Developer)
+- IBM Cloud Paks (Developer)
+- IBM Cloud for SAP Certified Instances VMware VCF
+- IBM Cloud for SAP in Classic with Certified Instances (Bare Metal)
+- IBM Cloud for SAP on PowerVS with Certified Instances
+- IBM Cloud for SAP on VPC with Certified Instances
+- IBM Cloudability
+- IBM Concert
+- IBM Concert for Z
+- IBM Content Manager
+- IBM Crypto Discovery and Inventory
+- IBM DS8A00
+- IBM Databand
+- IBM Db2 Mirror for i
+- IBM Db2 Warehouse on Power
+- IBM Db2 for i
+- IBM Defender Data Protect
+- IBM DevOps
+- IBM DevOps Loop
+- IBM DevOps Platform
+- IBM Diamondback Tape Library
+- IBM Encryption Platform
+- IBM Engineering Requirements Management DOORS
+- IBM Engineering Requirements Management DOORS Next
+- IBM Engineering Test Management (ETM)
+- IBM Engineering Workflow (EWM)
+- IBM Enterprise COBOL for z/OS
+- IBM Environmental Intelligence
+- IBM Environmental Intelligence  APIs
+- IBM Event Automation
+- IBM Fusion
+- IBM GDPS® for business continuity
+- IBM Granite models (Developer)
+- IBM Guardium Discover and Classify
+- IBM Guardium Key Lifecycle Manager
+- IBM Identity Governance & Intelligence
+- IBM JSphere for Java
+- IBM Knowledge Catalog
+- IBM Kubecost
+- IBM Kubernetes Services
+- IBM Langflow
+- IBM LinuxONE (Hardware)
+- IBM LinuxONE Emperor 5
+- IBM MQ (Developer)
+- IBM Managed Security Services
+- IBM Manta Data Lineage
+- IBM Maximo Application Suite (General)
+- IBM Maximo Application Suite - Assist
+- IBM Maximo Application Suite - Field Service Management
+- IBM Maximo Application Suite - Health
+- IBM Maximo Application Suite - IT
+- IBM Maximo Application Suite - Industry Solutions
+- IBM Maximo Application Suite - Integration (ERP, CRM, or other third-party applications)
+- IBM Maximo Application Suite - Manage
+- IBM Maximo Application Suite - Mobile
+- IBM Maximo Application Suite - Monitor
+- IBM Maximo Application Suite - Predict
+- IBM Maximo Application Suite - Reliability Strategies
+- IBM Maximo Application Suite - Visual Inspection
+- IBM Maximo Application Suite - Work Order Intelligence (GenAI)
+- IBM Maximo Visual Inspection (Developer)
+- IBM Power (Developer)
+- IBM Power E1150
+- IBM Power E1180
+- IBM Power L1122
+- IBM Power L1124
+- IBM Power S1122
+- IBM Power S1124
+- IBM Power Virtual Server
+- IBM Power with IBM Storage Solutions
+- IBM PowerHA System Mirror
+- IBM PowerSC
+- IBM PowerVC
+- IBM PowerVM
+- IBM Rational Developer for i
+- IBM Rhapsody Systems Engineering
+- IBM Runtimes for Business (IRB)
+- IBM Secret Server
+- IBM Semeru Runtimes
+- IBM Sterling B2B Integration (SaaS)
+- IBM Sterling B2B Integrator
+- IBM Sterling Managed File Transfer
+- IBM Sterling Order Management
+- IBM Sterling Secure File Transfer
+- IBM Sterling Transformation Extender
+- IBM Storage Archive
+- IBM Storage Ceph
+- IBM Storage Copy Data Management
+- IBM Storage DS8000
+- IBM Storage Deep Archive
+- IBM Storage Defender
+- IBM Storage Discover
+- IBM Storage FlashSystem
+- IBM Storage FlashSystem 5200
+- IBM Storage FlashSystem 5300
+- IBM Storage FlashSystem 7300
+- IBM Storage FlashSystem 9500
+- IBM Storage Protect
+- IBM Storage Protect for Cloud
+- IBM Storage Scale
+- IBM Storage Scale System
+- IBM Storage Sentinel
+- IBM Storage Software
+- IBM Storage Tape
+- IBM Storage Virtualize
+- IBM Storage for AI
+- IBM TS7780 Virtual Tape Library
+- IBM Targetprocess
+- IBM Technical Expert Labs
+- IBM Terraform Self-Managed for Z and LinuxONE 1.1
+- IBM TradeLens (Developer)
+- IBM Transformation Advisor (TA)
+- IBM Trusteer
+- IBM Trusteer Mobile
+- IBM Trusteer Pinpoint Assure
+- IBM Trusteer Pinpoint Detect
+- IBM Trusteer Pinpoint Verify
+- IBM Trusteer Rapport
+- IBM VM Recovery Manager
+- IBM Vault for Z (HashiCorp)
+- IBM Verify Access
+- IBM Verify Privilege Manager
+- IBM Verify Privilege Vault
+- IBM Verify Trust
+- IBM Workload Automation
+- IBM Z & IBM LinuxONE Hybrid Cloud Platform
+- IBM Z (Hardware)
+- IBM Z Decision Support
+- IBM Z Digital Integration Hub
+- IBM Z Enterprise AI
+- IBM Z IntelliMagic Vision for z/OS
+- IBM Z Multi-Factor Authentication (IBM Z MFA)
+- IBM Z Open Editor (Developer)
+- IBM Z Seucirty Portal
+- IBM Z Skills
+- IBM Z Test Accelerator
+- IBM Z and LinuxONE Security and Compliance Center (zSCC)
+- IBM Z and LinuxONE Sustainability
+- IBM Z cryptographic hardware
+- IBM developer for z/OS (Developer)
+- IBM i (Developer)
+- IBM i Development Pack
+- IBM i Modernization Engine for Lifecycle Integration
+- IBM z/OS Debugger (Developer)
+- IBM zSecure
+- IBM zSecure Admin
+- IBM zSecure Alert
+- IBM zSecure Audit
+- IBM zSecure CICS Toolkit
+- IBM zSecure Command Verifier
+- IBM zSecure Manager for z/VM
+- IBM zSecure Multi-factor Authentication
+- IBM zSecure RACF/zVM
+- IBM zSecure Visual
+- IBM® Application Discovery and Delivery Intelligence (ADDI)
+- ICSF
+- IDZ (Developer)
+- IMS
+- IT Infrastructure
+- Identity and Access Management (IAM)
+- Industry Cloud and Solutions
+- InfoSphere Master Data Management
+- InfoSphere Optim
+- Informix (On Prem or Cloud)
+- Infrastructure and Endpoint Security
+- Instana (Developer)
+- InstructLab
+- IntelliMagic with Apptio
+- Intelligence Analysis and Investigations
+- Internet of Things / IoT
+- Ionic
+- JanusGraph
+- Java
+- Java Development
+- JavaScript
+- Jenkins
+- KServe
+- Kabanero
+- Keras
+- Kitura
+- Knowledge Discovery
+- Knowledge Studio
+- Kotlin
+- Kubeflow
+- Lenovo
+- Linux
+- Linux on IBM Power (Developer)
+- LoopBack
+- Lucky Application Framework
+- Machine Learning
+- Master Data Management
+- Matlab
+- Maximo Application Suite (Developer)
+- Memory Encryption
+- Messaging
+- Microservices
+- Mobile Development
+- Mobile Security
+- Modernized Runtime Extension for Java (MoRE)
+- MongoDB
+- Monitoring for Z
+- NEC
+- NS1
+- NVIDIA
+- Natural Language Processing
+- NetView for Z
+- Netcool Insights
+- Netcool Omnibus
+- Netcool family (NOI, NPI)
+- Netezza Performance Server (Developer)
+- Network Security
+- Neural Network
+- Nimbix Cloud Computing Platform
+- NoSQL
+- Node.js
+- OCI
+- ODPi
+- OKD
+- OMEGAMON (all) for Z
+- OMEGAMON Grafana UI
+- OMEGAMON for Storage on Z
+- Objective-C
+- Observability by Instana APM on z/OS
+- Odata
+- Open Neural Network Exchange
+- Open Source
+- Open Source Library Support
+- OpenAPI
+- OpenCAPI
+- OpenCV
+- OpenJ9
+- Operating Systems
+- Operational Decision Manager
+- Operational Log and Data Analytics (and CDP) for Z
+- Optimize Enterprise VMware Workloads
+- Oracle on IBM Power
+- PHP
+- Partner Engagement Manager
+- Performance and Capacity Analytics for Z
+- Pervasive Encryption
+- PixieDust
+- Pixit Media
+- Planning Analytics
+- Platform as a Service
+- Postgres
+- Power Private Cloud
+- Power Virtual Server (Iaas)
+- PowerVS (Cloud)
+- PowerVS AIX
+- PowerVS Db2
+- PowerVS IBMi
+- PowerVS Linux
+- PowerVS Networking
+- PowerVS Networking Updates
+- PowerVS Oracle
+- Predictive Analytics
+- Privacy and Security
+- Process Automation
+- Prometheus
+- Provenance
+- PyTorch
+- Python
+- QRadar EDR
+- QRadar Log Insights
+- QRadar Suite (Developer)
+- Quantum Computing
+- Quantum Safe System
+- R
+- RISE With SAP on IBM Power Virtual Server
+- RabbitMQ
+- React Native
+- Reactive Systems
+- Real Time Payment (Developer)
+- Red Hat Ansible Automation Platform (Developer)
+- Red Hat Ansible IBM Z and LinuxONE (Developer)
+- Red Hat Enterprise Linux (Developer)
+- Red Hat Open Shift IBM Z and LinuxONE
+- Red Hat OpenShift (Developer)
+- Red Hat OpenShift AI (Developer)
+- Red Hat OpenShift on IBM Cloud (Developer)
+- Red Hat OpenShift on IBM Power (Developer)
+- Risk Quantification
+- Robotic Process Automation
+- Rohde & Schwarz
+- Ruby
+- SAP
+- SAP RISE
+- SIEM (Security Information and Event Management)
+- SIOC
+- SOAR (Security Orchestration
+- SPSS Modeler (Developer)
+- SQL
+- Scala
+- Secure Boot
+- Secure Execution for Linux
+- Security
+- Security Operations
+- Security Strategy and Risk
+- Serverless
+- Service Automation Suite for Z
+- Service Management Unite for Z
+- Smart Contracts
+- Speech and Empathy
+- Spyre Accelerator for IBM Z
+- Sterling (Developer)
+- Sterling Data Exchange (General)
+- StreamSets
+- Supply Chain Intelligence Suite - Blockchain
+- Supply Chain Intelligence Suite - Control Tower
+- Supply Chain Intelligence Suite - IBM Food Trust
+- Supply Chain Intelligence Suite - MRO IO
+- Sustainability
+- Swift
+- System Automation for Z
+- Systems Management for Z
+- TRIRIGA Application Suite (General)
+- TRIRIGA Application Suite - Capital Planning Projects
+- TRIRIGA Application Suite - Facilities Lease Management
+- TRIRIGA Application Suite - Maintenance and Operations
+- TRIRIGA Application Suite - Space Planning and Management
+- Table Accelerator for Z
+- Telum II for IBM Z
+- Threat Detection
+- Threat Detection for z/OS
+- Threat Management
+- Tivoli for IBM Z
+- Tokenization
+- Tools and Run-time Development
+- Traceability
+- Turbonomic (Developer)
+- Twilio
+- TypeScript
+- UKO / EKMF Workstation
+- Unified Governance
+- Unix
+- VMRM Solution Planning
+- VMWare
+- VMware Cloud Foundation (VCF) as a service
+- VMware Cloud Foundation (VCF) for VPC
+- VMware Cloud Foundation (VCF) for classic
+- Validated Boot for z/OS
+- Verify (Developer)
+- Verify SaaS
+- Vert.x
+- Video
+- Vim
+- Virtualization
+- Vision
+- Visual Studio Code
+- Vue Javascript Framework
+- Watson Assistant
+- Watson Studio (Developer)
+- Wazi-as-a-service
+- WebSphere Hybrid Edition (Developer)
+- WebSphere Liberty
+- Websphere Liberty Core
+- Workload Interaction Navigator for Z
+- Workload Scheduler for IBM Z
+- XFTI​ Verify Access
+- XForce Red Services
+- Z Open Automation Utilities (ZOAU)
+- Z Security and Compliance Center (ZSCC)
+- Zipkin
+- Zowe
+- django
+- perl
+- watsonx (Developer)
+- watsonx Assistant (Developer)
+- watsonx Assistant for Z
+- watsonx BI Assistant
+- watsonx Code Assistant for Enterprise JAVA
+- watsonx Code Assistant for Red Hat Ansible
+- watsonx Code Assistant for Z (Developer)
+- watsonx Data Lakehouse
+- watsonx Discovery
+- watsonx Orchestrate (Developer)
+- watsonx. Governance (Developer)
+- watsonx.ai (Developer)
+- watsonx.data (Developer)
+- webMethods
+- z/OS Anomoly Analytics
+- z/OS Change Tracker
+- z/OS Connect
+- z/OS Sysplex EDR
+- z17
+- zACS / zACM
+- zERT
+- zSecure
+- zSecure Adaptors for SIEM
+- zSecure Admin
+- zSecure Alert
+- zSecure Audit
+- zSecure CICS Toolkit
+- zSecure Command Verifier
+- zSecure Manager for z/VM

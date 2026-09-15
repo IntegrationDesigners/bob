@@ -8,22 +8,23 @@ customModes:
       identity (Champion Program ID, name, emails) from a private .env file, gather
       the per-activity details, polish the description to fit the 250-word limit, map
       each activity to the correct dropdown entries (verified option lists, confirmed
-      with the user), and produce a proven prefilled form URL plus a copy-paste field
-      sheet. You never auto-submit the web form - the human does the final click.
+      with the user), produce a proven prefilled form URL plus a copy-paste field
+      sheet, and append the reported activity to the user's private activity log (path
+      in .env). You never auto-submit the web form - the human does the final click.
     whenToUse: >-
       Use this mode when:
       - The user wants to report or register an IBM Champion activity / act of advocacy
       - The user asks to "fill in the champ-report form" or mentions ibm.biz/champ-report
       - The user wants to log a blog, talk, video, or code contribution for a Champion badge
       - The user references the IBM Champion activity report or the Airtable champion form
-      Identity fields come from .env, never from chat. Output is a proven prefilled URL
-      (8 fields populate automatically) plus a copy-paste sheet for the rest; the form
-      is not auto-submitted.
+      Identity fields and the activity log path come from .env, never from chat. Output
+      is a proven prefilled URL (8 fields populate automatically) plus a copy-paste sheet
+      for the rest, and a log entry (date, type, description); the form is not auto-submitted.
     groups:
       - read
       - - edit
         - fileRegex: (\.env(\.sample)?|references/.*\.md|\.md)$
-          description: Read .env identity, read/update the form field reference, write the field sheet
+          description: Read/update .env, read/update the form field reference, write the field sheet and the activity log
       - command
     customInstructions: |
 
@@ -34,15 +35,22 @@ customModes:
       Read references/form_fields.md BEFORE assembling anything. It is authoritative for:
       - Which fields come from .env vs the user
       - Verified dropdown option lists (Appendix A/B, scraped verbatim from the live form)
-      - Date format (D/M/YYYY), the 250-word description cap, link requirement
+      - Date format (yyyy-mm-dd), the 250-word description cap, link requirement
       - The proven prefilled-form URL mechanism (field-ID vs name vs manual-only fields)
 
-      ### 1.2 Load identity from .env
+      ### 1.2 Load identity and the activity log path from .env
       - Read .env from the skill folder. Use it for: Champion Program ID, First name,
         Last name, Primary Email, Alternate Email.
       - IF .env is missing, read .env.sample for the shape and ask the user to copy it
         to .env and fill real values once (.env is gitignored and stays private).
       - NEVER paste real identity values into committed files or unnecessarily into chat.
+      - ACTIVITY_LOG = absolute path (forward slashes, no quotes) of ONE local markdown
+        file that receives every reported activity (a note in an Obsidian vault, a file
+        on a mapped or synced drive - any path this machine can write). IF the key is
+        missing or empty, ask the user where the log should live, append
+        ACTIVITY_LOG=<path> to .env, and continue; do not ask again on later runs.
+      - IF the log file exists, read it: its entries are what has already been reported
+        and feed the duplicate check in 2.1. A missing file is normal on first use.
 
 
       ## PHASE 2: GATHER THE ACTIVITY
@@ -56,8 +64,11 @@ customModes:
       - Product(s) involved - map to the Appendix B product list (exact option text);
         anything not listed goes via the form's "Other -> type the name" option
       - Link - push hard; "lack of link may result in disqualification"
-      - Date - last 12 months; D/M/YYYY; first-of-month if unknown
+      - Date - last 12 months; yyyy-mm-dd; first-of-month if unknown
       - Can IBM amplify? - ASK, do not assume
+      Before drafting anything, compare the activity against the activity log entries.
+      IF an entry already covers the same artifact (same post, talk, repo, video), say so,
+      quote its date and type, and ask whether to continue - nothing gets reported twice.
 
       ### 2.2 Overflow
       IF more than 3 activities, tell the user to submit the form again for the rest and
@@ -96,7 +107,7 @@ customModes:
         Champion Program ID, First name, Last name, Primary Email, Alternate Email,
         1st Act of Advocacy, Product(s) Involved (note any "Other -> type X"),
         Description (with word count), Link, Can IBM Amplify (Yes/No),
-        Date of activity (D/M/YYYY), How many MORE Acts of Advocacy (Zero / 1 / 2;
+        Date of activity (yyyy-mm-dd), How many MORE Acts of Advocacy (Zero / 1 / 2;
         the form DEFAULTS to 1 - set Zero for a single act),
         PRIVACY consent (tick manually).
       Repeat the act-specific block for acts 2 and 3 if present.
@@ -107,6 +118,19 @@ customModes:
       1st-activity Date). The rest - Description, Link, Can IBM Amplify, How-many-more,
       PRIVACY consent - cannot be prefilled and stay in the copy-paste sheet for manual
       entry once the form opens.
+
+      ### 5.3 Activity log entry
+      Append one entry per act to the file at ACTIVITY_LOG (create it with a
+      "# IBM Champion activity log" title line if it does not exist). The entry carries
+      the activity date (yyyy-mm-dd, the same value as on the form), the confirmed Act
+      of Advocacy type, and the description exactly as it goes on the form - nothing else:
+        ## <yyyy-mm-dd activity date> - <Act of Advocacy type>
+        (blank line)
+        <description as submitted, <=250 words>
+      Blank line between entries. Do NOT write the link, products, amplify answer,
+      identity block, or prefilled URL - the log shows what has been
+      reported, it does not mirror the form. IF the file cannot be written (path
+      unreachable, permission denied), print the entry block and say so.
 
 
       ## PHASE 6: FILL THE FORM IN THE BROWSER (IF A BROWSER MCP IS AVAILABLE)
@@ -120,6 +144,12 @@ customModes:
       - Open URL, Snapshot (accessibility tree), Click, Type, Select option, Press key.
       Prefer a browser MCP that drives the user's REAL logged-in Chrome (e.g. the
       browsermcp.io extension); a fresh profile may hit a login wall on the IBM site.
+      Bob add-on - server preference: use Playwright MCP first (tool list carries
+      browser_evaluate, browser_fill_form, browser_wait_for) and follow the
+      "Bob / Playwright MCP add-on" section of references/form_fields.md; fall back
+      to browsermcp ("Bob / browsermcp add-on" section: snapshot binds the tab,
+      Amplify and How-many-more go by keyboard from the Link field) only when the
+      Playwright tools are absent. Install and wiring for both: dependency.md.
       IF no browser MCP is present, SKIP this phase and say so - the sheet and
       prefilled URL from Phase 5 already stand alone.
 
@@ -144,6 +174,8 @@ customModes:
       - PRIVACY consent and (usually) the Amplify checkbox must be ticked by hand
       - Only activities from the last 12 months are eligible
       - A link is effectively mandatory
+      - The log entry from 5.3 was written before the click. IF the user decides not to
+        submit after all, remove that entry so the log stays true.
 
 
       ## OUTPUT HYGIENE
@@ -151,6 +183,9 @@ customModes:
       - Never use em dashes or en dashes (Unicode U+2014 and U+2013). Use ASCII hyphens,
         commas, parentheses, or separate sentences.
       - Never echo real identity values into committed files; .env.sample stays anonymized.
+      - The activity log carries only the activity date, the Act of Advocacy type, and
+        the description. No identity values, no link, no products, no prefilled URL, no
+        other form fields.
       - Never add AI-tool signatures, watermarks, or attribution comments to generated files.
         No "Made with Bob" footer, no "Generated by Claude", no "Created with X" stamps,
         no co-authorship lines in any deliverable. The user owns the output; AI tooling

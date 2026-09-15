@@ -1,10 +1,10 @@
 ---
 name: ibm-champion-report
-description: "Use this skill when the user wants to report or register an IBM Champion / Rising Champion activity (an 'act of advocacy') on the IBM Champion Program Activity Report form. Triggers on requests like 'report my IBM Champion activity', 'log a champion act of advocacy', 'fill in the champ-report form', 'register this blog/talk/repo for my IBM Champion badge', 'submit my champion activity', or when the user mentions the IBM Champion activity report, ibm.biz/champ-report, or the Airtable champion form. Produces a proven prefilled form URL plus a copy-paste field sheet; it does not auto-submit the web form."
+description: "Use this skill when the user wants to report or register an IBM Champion / Rising Champion activity (an 'act of advocacy') on the IBM Champion Program Activity Report form. Triggers on requests like 'report my IBM Champion activity', 'log a champion act of advocacy', 'fill in the champ-report form', 'register this blog/talk/repo for my IBM Champion badge', 'submit my champion activity', or when the user mentions the IBM Champion activity report, ibm.biz/champ-report, or the Airtable champion form. Produces a proven prefilled form URL plus a copy-paste field sheet and appends the reported activity to a private activity log; it does not auto-submit the web form."
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   status: stable
-  last_updated: 2026-07-02
+  last_updated: 2026-09-15
 ---
 
 # IBM Champion Activity Report
@@ -14,7 +14,8 @@ the IBM Champion Program Activity Report form. You assemble every value the user
 needs, polish the free-text description to fit the 250-word limit, pull their identity
 from a private `.env` file, and produce a proven prefilled form URL (8 of the form's
 fields populate automatically) plus a copy-paste sheet for the fields that cannot be
-prefilled.
+prefilled. Every reported activity is also appended to a private activity log (one
+local markdown file, path in `.env`) so the user can see what has already been reported.
 
 If a browser-automation MCP is available you can open the form and fill it in place,
 then verify each field. You never tick the consent checkbox and never submit - the
@@ -32,15 +33,20 @@ are manual-only).
 
 ---
 
-## Identity comes from `.env`, never from the chat
+## Identity and the activity log path come from `.env`, never from the chat
 
-The user's stable identity (Champion Program ID, name, emails) lives in this skill's
-`.env` file. It is gitignored and private.
+The user's stable identity (Champion Program ID, name, emails) and the path of their
+activity log live in this skill's `.env` file. It is gitignored and private.
 
 1. Read `.env` from the skill folder. Use those values for the identity fields.
 2. If `.env` is missing, read [`.env.sample`](.env.sample) for the shape and ask the
    user to copy it to `.env` and fill in their real values once. Do not paste real
    identity values into chat history or any committed file.
+3. `ACTIVITY_LOG` is the absolute path (forward slashes, no quotes) of ONE local
+   markdown file that receives every reported activity - a note inside an Obsidian
+   vault, a file on a mapped or synced drive, any path this machine can write. If the
+   key is missing or empty, ask the user where the log should live, append
+   `ACTIVITY_LOG=<path>` to `.env`, and continue. Do not ask again on later runs.
 
 ---
 
@@ -51,6 +57,10 @@ The user's stable identity (Champion Program ID, name, emails) lives in this ski
 - Read [`references/form_fields.md`](references/form_fields.md).
 - Read `.env`. Confirm the identity block silently (do not echo full emails unless
   the user asks); if a required key is missing, ask the user to fill `.env`.
+- Resolve `ACTIVITY_LOG` (ask and write it back if missing, see above). If the file
+  exists, read it: its entries are what has already been reported and feed the
+  duplicate check in step 2. A missing file is normal on first use - it is created
+  in step 5C.
 
 ### 2. Gather the activity (one act at a time)
 
@@ -62,8 +72,13 @@ Each submission carries 1 to 3 acts of advocacy. For each act, collect:
 - **Product(s) involved** - map to the verified Appendix B product list; anything not
   listed goes in via the form's **Other -> type the name** option.
 - **Link** - push hard for one. "Lack of link may result in disqualification."
-- **Date** - last 12 months; format `D/M/YYYY`; first-of-month if unknown.
+- **Date** - last 12 months; format `yyyy-mm-dd`; first-of-month if unknown.
 - **Can IBM amplify?** - ask, do not assume.
+
+Before drafting anything, compare the activity against the entries in the activity
+log. If an entry already covers the same artifact (same post, talk, repo, video), say
+so, quote the entry's date and type, and ask whether to continue - the point of the log
+is that nothing gets reported twice.
 
 If the user has more than 3 activities, tell them to submit the form again for the
 overflow and set "How many MORE" accordingly (Zero / 1 / 2) for this run. **Warning:
@@ -107,7 +122,7 @@ Product(s) Involved: <comma-separated; note any 'Other -> type X'>
 Description: <polished, <=250 words>  (word count: N)
 Link: <url>
 Can IBM Amplify this activity?: <Yes/No>
-Date of activity: <D/M/YYYY>
+Date of activity: <yyyy-mm-dd>
 How many MORE Acts of Advocacy: <Zero|1|2>  (form DEFAULTS to 1 - set Zero for a single act)
 PRIVACY consent: [ ] tick manually before submitting
 ```
@@ -119,6 +134,24 @@ pre-populates 8 fields (Champion Program ID, First/Last name, both emails, 1st A
 Advocacy, Product(s), 1st-activity Date). The remaining fields - Description, Link,
 Can IBM Amplify, How-many-more, and PRIVACY consent - cannot be prefilled and stay in
 the copy-paste sheet for manual entry once the form opens.
+
+**C. Activity log entry** - append one entry per act to the file at `ACTIVITY_LOG`.
+Create the file with a `# IBM Champion activity log` title line if it does not exist.
+The entry carries the activity date (yyyy-mm-dd, the same value as on the form), the
+confirmed Act of Advocacy type, and the description exactly as it goes on the form -
+nothing else:
+
+```
+## <yyyy-mm-dd activity date> - <Act of Advocacy type>
+
+<description as submitted, <=250 words>
+```
+
+Keep a blank line between entries. Do not write the link, the products, the amplify
+answer, the identity block, or the prefilled URL - the log exists
+so the user can see what has been reported, not to mirror the form. If the file cannot
+be written (path unreachable, permission denied), print the entry block and say so,
+so the user can paste it themselves.
 
 ### 6. Offer to fill the form in the browser (if a browser MCP is available)
 
@@ -141,6 +174,18 @@ is the most convenient path since the form is on a logged-in site. Follow the
 - **Do NOT tick the PRIVACY consent checkbox and do NOT click Submit.** Leave the
   filled form open and hand control back for the user to review, consent, and submit.
 
+**Bob add-on - which browser MCP:** prefer **Playwright MCP** (`@playwright/mcp`; its
+tool list carries `browser_evaluate`, `browser_fill_form` and `browser_wait_for`) and
+follow the **Bob / Playwright MCP add-on** section of
+[`references/form_fields.md`](references/form_fields.md): ref clicks reach every control
+on this form and `browser_evaluate` reads the field values back. Fall back to
+**browsermcp** only when the Playwright tools are not in the live tool list -
+browsermcp needs a `browser_snapshot` right after `browser_navigate` and before the
+first `browser_type` / `browser_press_key` (it binds the tab), and its `browser_click`
+cannot reach the Amplify checkbox or the How-many-more options - both go by keyboard
+from the Link field; exact key sequences in the **Bob / browsermcp add-on** section of
+the same file. Installing and wiring either server: [`dependency.md`](dependency.md).
+
 If **no** browser MCP is available, say so - the sheet + prefilled URL from step 5
 already stand alone.
 
@@ -150,6 +195,8 @@ already stand alone.
   ticked by hand - you cannot consent for the user.
 - Remind them only activities from the **last 12 months** are eligible.
 - A link is effectively mandatory.
+- The log entry from step 5C was written before the click. If the user decides not to
+  submit after all, remove that entry so the log stays true.
 
 ---
 
@@ -158,11 +205,13 @@ already stand alone.
 | File | When to read |
 |---|---|
 | [`references/form_fields.md`](references/form_fields.md) | **Read before assembling anything** - full field spec, dropdown option lists, date format, word limits, prefilled-URL mechanism, and browser-automation procedure (tool-agnostic fill + verify, never submit) |
-| [`.env`](.env) | Private identity values (gitignored). Read each run. |
+| [`.env`](.env) | Private identity values and the `ACTIVITY_LOG` path (gitignored). Read each run. |
 | [`.env.sample`](.env.sample) | Shape/placeholder for `.env` when the real file is missing |
+| the file at `ACTIVITY_LOG` | Private activity log, outside the skill folder. Read in step 1 for the duplicate check, appended in step 5C. |
 
 ## Output Hygiene
 
 - **Never use em dashes or en dashes** (Unicode U+2014 and U+2013) in any generated output. Use ASCII hyphens (`-`), commas, parentheses, or separate sentences instead.
 - **Never echo the user's real identity values into committed files or anywhere they would persist beyond the private `.env`.** The `.env.sample` must stay anonymized.
+- **The activity log carries only the activity date, the Act of Advocacy type, and the description.** No identity values, no link, no products, no prefilled URL, no other form fields.
 - **Never add AI-tool signatures, watermarks, or attribution comments to generated files.** No `<!-- Made with Bob -->`, no `<!-- Generated by Claude -->`, no `# AI-assisted` footers, no co-authorship lines inside the body of any deliverable, no "Created with X" stamps. The user owns the output; AI tooling stays invisible. This applies to every file the skill produces.
