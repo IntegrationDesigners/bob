@@ -17,13 +17,13 @@ ace-flow-builder. Example: *"Build an ACE v13 application that reads order event
 - **Source system → target system:** <from> → <to>
 
 ## Pattern
-<Named IBM ACE pattern from D1, plain-language.> <If novel: "No catalog match - flow_builder should
+<Named IBM ACE pattern from D1, plain-language.> <If novel: "No catalog match - ace-flow-builder should
 run in Thorough mode.">
 
 ## Scope
 - **In scope:** <what this flow does>
 - **Out of scope:** <non-goals captured in D2>
-- **Build mode hint for flow_builder:** <Iterative if a catalog pattern matched; Thorough if novel/multi-flow>
+- **Build mode hint for ace-flow-builder:** <Iterative if a catalog pattern matched; Thorough if novel/multi-flow>
 
 ## Shape
 <Single flow, or several. For several, a table:>
@@ -35,7 +35,7 @@ run in Thorough mode.">
 <If a shared subflow: describe its terminals and the happy/error split, mirroring the worked example.>
 
 ## REST API (only when the pattern is REST API - otherwise delete this whole section)
-flow_builder builds REST APIs on a **separate track** (OpenAPI spec + `restapi.descriptor` +
+ace-flow-builder builds REST APIs on a **separate track** (OpenAPI spec + `restapi.descriptor` +
 builder-generated `gen/<Api>.msgflow` + one subflow per operation + Catch/Failure/Timeout handlers).
 This section answers its two-question gate up front. When this section is present, the per-operation
 detail below replaces the single Input/Output blocks in *Interfaces*.
@@ -72,7 +72,7 @@ detail below replaces the single Input/Output blocks in *Interfaces*.
 
 **Routing source (if any) - MUST be decided, not guessed:** <which single place on the message tree
 the routing/filter value is read from - MQRFH2 folder / HTTP header / Environment.Variables /
-LocalEnvironment. flow_builder blocks on this when the value exists in more than one place.>
+LocalEnvironment. ace-flow-builder blocks on this when the value exists in more than one place.>
 
 ## Processing logic
 <Per compute step, in plain English. Field mapping as a table where it helps:>
@@ -107,7 +107,7 @@ LocalEnvironment. flow_builder blocks on this when the value exists in more than
 - **Interval:** <fixed delay or backoff schedule>
 - **Count:** <number of fires, or "until success">
 - **Retry identity:** <single-flight (one retry at a time) or per-message (concurrent retries).
-  The identifier *value* is flow_builder's job; state the strategy only.>
+  The identifier *value* is ace-flow-builder's job; state the strategy only.>
 
 ## Logging & observability
 - **What to log:** <errors only / +entry-exit / key ids / full payload>
@@ -135,7 +135,7 @@ LocalEnvironment. flow_builder blocks on this when the value exists in more than
 - **`ibmint package` must succeed** against the application project with dependencies resolvable on
   the workspace.
 
-## flow_builder Phase B1 answers (so the build can start without re-asking)
+## ace-flow-builder Phase B1 answers (so the build can start without re-asking)
 - **Flow name:** `<FlowName>`
 - **Project location:** `<path - never D:\tmp>`
 - **Flow type:** <HTTP Request-Reply | MQ Input-Output | File Input | Scheduled | REST API | Other>

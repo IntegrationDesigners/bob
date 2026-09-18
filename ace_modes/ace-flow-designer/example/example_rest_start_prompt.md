@@ -15,15 +15,15 @@ Expose a small product-catalog REST API on ACE so internal apps can read and cre
 - **Source system → target system:** internal client apps (HTTP) → product datastore.
 
 ## Pattern
-**REST API** - exposes HTTP operations. flow_builder builds this on its dedicated REST track.
+**REST API** - exposes HTTP operations. ace-flow-builder builds this on its dedicated REST track.
 
 ## Scope
 - **In scope:** two operations (get-by-id, create); request validation; structured error responses.
 - **Out of scope:** auth (handled by the gateway in front); pagination; bulk import.
-- **Build mode hint for flow_builder:** Thorough (REST track, multi-operation).
+- **Build mode hint for ace-flow-builder:** Thorough (REST track, multi-operation).
 
 ## REST API
-flow_builder builds REST APIs on a separate track (OpenAPI spec + `restapi.descriptor` +
+ace-flow-builder builds REST APIs on a separate track (OpenAPI spec + `restapi.descriptor` +
 builder-generated `gen/ProductCatalogApi.msgflow` + one subflow per operation +
 Catch/Failure/Timeout handler subflows + a REST-natured project).
 
@@ -43,7 +43,7 @@ Catch/Failure/Timeout handler subflows + a REST-natured project).
 Per operation, in plain English (see the table above). Both operations:
 - **Enrichment:** `createProduct` generates the `id`.
 - **Calculations:** none.
-- **Routing / branching:** none beyond operation dispatch (flow_builder's RouteToLabel handles that).
+- **Routing / branching:** none beyond operation dispatch (ace-flow-builder's RouteToLabel handles that).
 - **Filtering:** none.
 - **Implementation language:** ESQL.
 
@@ -80,11 +80,11 @@ Per operation, in plain English (see the table above). Both operations:
 
 ## Deployability requirements
 - **Application project natures:** REST API natures (`com.ibm.etools.mft.restapi.ui.Nature` +
-  `applicationNature` + `messageBrokerProjectNature`) - flow_builder's REST `.project` variant.
+  `applicationNature` + `messageBrokerProjectNature`) - ace-flow-builder's REST `.project` variant.
 - **Java / shared-library dependencies:** none.
 - **`ibmint package` must succeed** against the REST API project.
 
-## flow_builder Phase B1 answers
+## ace-flow-builder Phase B1 answers
 - **Flow name:** `ProductCatalogApi`
 - **Project location:** `[CONFIGURE: ACE workspace path]`
 - **Flow type:** REST API

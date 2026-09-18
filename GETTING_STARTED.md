@@ -25,6 +25,8 @@ Bob modes are specialized AI assistant configurations that provide expert guidan
 
 Think of modes as expert colleagues who specialize in different areas - you switch to the right expert for each task.
 
+Most of them ship a second entry point from the same folder: a `SKILL.md`, which makes the workflow available as a **skill**. Same content, different mechanism - a mode is one you pick, a skill is one Bob picks when your request matches its description (and Claude Code can use it too). Where skills live and how they install is in [SKILLS.md](SKILLS.md).
+
 ---
 
 ## Quick Start
@@ -34,7 +36,27 @@ Think of modes as expert colleagues who specialize in different areas - you swit
 - VS Code with Bob extension installed
 - Access to this repository or a copy of the modes you want to use
 
-### Installation
+### Installation - as skills (recommended)
+
+Skills need no per-project import and no window reload. One command makes them available in
+every folder and every workspace:
+
+```powershell
+.\scripts\Install-Skills.ps1 -WhatIf    # preview, changes nothing
+.\scripts\Install-Skills.ps1            # junction every skill into %USERPROFILE%\.bob\skills
+```
+
+```bash
+./scripts/install-skills.sh --dry-run   # macOS / Linux
+./scripts/install-skills.sh
+```
+
+Then describe your task and Bob picks the matching skill, or name it yourself. Add
+`-ProjectPath <path>` / `--project <path>` to install into a single project instead - but note
+that a project-scoped skill only applies to tasks started in that one workspace folder. See
+[SKILLS.md](SKILLS.md).
+
+### Installation - as modes
 
 1. **Import modes into your project:**
 
@@ -202,6 +224,12 @@ customModes:
     customInstructions: >-
       [Your workflow instructions here]
 ```
+
+> **Naming rule:** the `slug` here, the `name:` in the folder's `SKILL.md` and the folder name
+> itself must be the same kebab-case string. Bob takes a skill's identity from the folder name,
+> so anything else means the skill loads under a name none of the documents mention - and a
+> folder name that is not kebab-case (`my_mode`) does not load at all, without an error.
+> `scripts/Install-Skills.ps1` refuses to install anything while they disagree.
 
 #### Phase 4: Create Templates
 
@@ -392,6 +420,15 @@ IMPORTANT: [Critical note or warning]
 **Issue: Mode not appearing in selector**
 - Solution: Reload VS Code window after importing modes
 - Check `.bob/custom_modes.yaml` exists in your project
+
+**Issue: Skill not appearing under Settings > Skills**
+- Check the folder name in the skills directory: it must be kebab-case (`ace-review`, not `ace_review` or `AceReview`) and equal to the `name:` in its `SKILL.md`. Bob drops an invalid name without any error
+- Skills need no reload, but reloading the window is a fair sanity check
+- Full discovery model and a troubleshooting table: [SKILLS.md](SKILLS.md)
+
+**Issue: Skill is listed but Bob never uses it in a task**
+- The task is running in a different workspace folder than the one the skill was installed into. Bob binds each task to one workspace folder, and only that folder's `.bob/skills` counts. Install globally instead
+- Or the workspace is untrusted, in which case Bob keeps only global skills
 
 **Issue: YAML syntax errors**
 - Solution: Validate your `.bobmodes` file with the CI pipeline

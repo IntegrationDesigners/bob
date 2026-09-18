@@ -25,7 +25,7 @@ Also read:
 - **`references/extraction_guide.md`** before Phase 1 - the concrete detection recipes (project natures, library reference counting, node/ESQL indexing, per-axis recipes), grounded in real ACE v13 file shapes. Note the **[CALIBRATE]** markers: items not fully verifiable on the development estate that must be confirmed against a real referencing project before their output is trusted.
 - **`references/profile_template.md`** before Phase 5 - the exact section schema of the emitted profile. This schema is the contract `ace-flow-builder` reads; do not deviate from it.
 
-**Co-installation note:** the correctness cross-checks reference sibling skills (`../ace-flow-builder/references/...`, `../ace-review/references/guidelines/...`) and therefore require the full bob_modes repo to be installed. If those siblings are absent (standalone deployment), skip the cross-check, lower confidence accordingly, and note in the profile that the correctness cross-check was not performed.
+**Co-installation note:** the correctness cross-checks read reference files from the installed `ace-flow-builder` and `ace-review` skills - resolve them by skill name, wherever those skills are installed (the exact file list is in `references/workflow.md`). If those siblings are absent (standalone deployment), skip the cross-check, lower confidence accordingly, and note in the profile that the correctness cross-check was not performed.
 
 ---
 

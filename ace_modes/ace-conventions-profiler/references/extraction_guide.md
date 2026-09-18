@@ -99,12 +99,12 @@ For every finding: support count (occurrences / total examined), confidence, pre
 
 ## F. Correctness cross-check (Phase 3)
 
-Before canonicalising any finding, check it against these (read, never duplicate):
-- `../../ace-flow-builder/references/validated_rules.md`
-- `../../ace-flow-builder/references/esql_style.md`
-- `../../ace-flow-builder/references/refactoring_patterns.md`
-- `../../ace-review/references/guidelines/{esql,flow,error_handling,security,performance_monitoring}_guidelines.md`
-- `../../ace-review/references/guidelines/ten_ace_message_flow_mistakes.md`
+Before canonicalising any finding, check it against these (read, never duplicate; resolve by skill name - each path is rooted at that skill's installed folder):
+- `ace-flow-builder/references/validated_rules.md`
+- `ace-flow-builder/references/esql_style.md`
+- `ace-flow-builder/references/refactoring_patterns.md`
+- `ace-review/references/guidelines/{esql,flow,error_handling,security,performance_monitoring}_guidelines.md`
+- `ace-review/references/guidelines/ten_ace_message_flow_mistakes.md`
 
 If a consistent pattern matches a known anti-pattern or violates a validated rule, mark it `CONFLICT - <rule> - replicate anyway or fix?` and carry it to Phase 4 unresolved. The user's curation decision becomes the entry's `resolution` (replicate / encourage / fix / dropped - see `profile_template.md`).
 

@@ -64,7 +64,7 @@ Do not proceed to D1 until the user confirms the framing.
 
 ## Phase D1: Identify the pattern
 
-Read `../flow_builder/references/ace_patterns_catalog.md` (reused from the flow_builder skill - do
+Read `../../ace-flow-builder/references/ace_patterns_catalog.md` (reused from the ace-flow-builder skill - do
 not duplicate it here). Match the user's description to a named IBM ACE pattern and state it in plain
 terms, giving the user the vocabulary:
 
@@ -78,7 +78,7 @@ Common signals (full catalog in the referenced file):
 | Read from a queue, call an API | IBM MQ to HTTP (Protocol Transformation) |
 | Pick up a file, put to a queue | File to IBM MQ (Protocol Transformation) |
 | Convert XML to JSON (or vice versa) | Format Transformation |
-| Expose REST operations / OpenAPI / Swagger | REST API (note it; flow_builder has a dedicated REST track) |
+| Expose REST operations / OpenAPI / Swagger | REST API (note it; ace-flow-builder has a dedicated REST track) |
 | Split a batch into individual messages | Splitter (Scatter-Gather) |
 | Fan out and combine responses | Aggregation (Scatter-Gather) |
 | Put to a queue, don't wait | Messaging Fire-and-Forget |
@@ -87,13 +87,13 @@ Common signals (full catalog in the referenced file):
 | Run on a timer / every N seconds | Scheduling |
 
 If nothing matches cleanly, say so - "this looks novel, no catalog match" - and design it from first
-principles. A novel pattern is fine; it just means flow_builder will run in Thorough mode.
+principles. A novel pattern is fine; it just means ace-flow-builder will run in Thorough mode.
 
 Confirm the named pattern before continuing.
 
 **REST API branch.** If the pattern is **REST API** (the user wants to *expose* HTTP operations, or
 has an OpenAPI/Swagger file), do NOT run D3 (Interfaces) and D4 (Processing) - a REST API has a
-different shape and flow_builder builds it on a dedicated track. Run **Phase DR** instead (below),
+different shape and ace-flow-builder builds it on a dedicated track. Run **Phase DR** instead (below),
 then continue at D5. All other phases (D2, D5-D8) still apply.
 
 ---
@@ -107,14 +107,14 @@ Establish the *structure* of what will be built. One topic, asked as a short bat
 2. **Shared logic / subflows?** "If there are several, do they share logic that should live in one
    subflow?" - Default: extract shared logic to a subflow only when 2+ flows need it.
 3. **One application project?** Default: yes, one ACE application project.
-4. **Explicitly out of scope.** "What should this flow *not* do?" - capture non-goals so flow_builder
+4. **Explicitly out of scope.** "What should this flow *not* do?" - capture non-goals so ace-flow-builder
    doesn't over-build. Default: nothing extra.
 
 Where there are several flows, capture them as a table (flow file → input → output) - this becomes
 the *Shape* section of the spec and mirrors the worked example.
 
 **Subflow terminal wiring (ask only when a shared subflow is chosen).** A subflow usually has a
-separate happy path and error path. flow_builder needs to know how the parent flow's terminals route
+separate happy path and error path. ace-flow-builder needs to know how the parent flow's terminals route
 in - which is a blocker, like routing-source - so capture: the subflow's input terminals (e.g. a
 happy input and an error input) and which parent output goes to each. Default and common shape: the
 parent input node's `out` terminal → the subflow's happy input; its `catch` and `failure` terminals →
@@ -138,25 +138,25 @@ first, then the output side.
 - Destination and transport. Default: symmetric with the trigger unless the goal says otherwise.
 - Format and structure, or - for HTTP - the success status code and response body shape.
 - **Output contract / target shape** - the data structure to produce: a sample payload or a field
-  list. This is design, not code (you never write ESQL/Java) - it gives flow_builder a concrete
+  list. This is design, not code (you never write ESQL/Java) - it gives ace-flow-builder a concrete
   target instead of a guess. Offer to derive it from the D4 mapping; else `[CONFIGURE: target shape]`.
 - **Filename (File output only)** - static, or computed per message (e.g. with a date/id). Default:
-  static. flow_builder needs this to decide between a node attribute and an ESQL-set destination.
+  static. ace-flow-builder needs this to decide between a node attribute and an ESQL-set destination.
 
 If the flow has more than one input or output endpoint, capture each as its own labelled block.
 
-**Routing-source decision (a flow_builder BLOCKER - must be answered, never defaulted):** if a
+**Routing-source decision (a ace-flow-builder BLOCKER - must be answered, never defaulted):** if a
 routing/filter decision value could exist in more than one place on the message tree (an MQRFH2
 folder, an HTTP header, `Environment.Variables`, `LocalEnvironment`), ask which single source is
-authoritative and record it. flow_builder stops and asks this if the spec doesn't pin it down. (See
-flow_builder `validated_rules.md` §1.)
+authoritative and record it. ace-flow-builder stops and asks this if the spec doesn't pin it down. (See
+ace-flow-builder `validated_rules.md` §1.)
 
 ---
 
 ## Phase D4: Processing logic
 
 Capture what the compute step(s) do, in **plain English** - never write ESQL here, that is
-flow_builder's job. Walk these prompts:
+ace-flow-builder's job. Walk these prompts:
 
 - **Field mapping** - which input fields become which output fields (a small table is ideal).
 - **Enrichment** - any lookups, added constants, timestamps, generated ids.
@@ -174,20 +174,20 @@ Default for each: "none unless you say so." For a junior who can't articulate th
 infer a 1:1 passthrough with field-rename and confirm.
 
 Record the result as a per-compute "in plain English" description - this is exactly the
-`Processing logic` outline flow_builder asks for in its Thorough-mode Phase B2.
+`Processing logic` outline ace-flow-builder asks for in its Thorough-mode Phase B2.
 
 ---
 
 ## Phase DR: REST API branch (runs instead of D3 + D4 when the pattern is REST API)
 
-A REST API is a different shape from a normal flow: flow_builder builds it on a **dedicated track**
+A REST API is a different shape from a normal flow: ace-flow-builder builds it on a **dedicated track**
 (an OpenAPI spec + `restapi.descriptor` + a builder-generated `gen/<Api>.msgflow` + one subflow per
 operation + Catch/Failure/Timeout handler subflows + a REST-natured project). This phase collects
-exactly what that track needs, mirroring flow_builder's **two-question gate**. Use the DR table in
+exactly what that track needs, mirroring ace-flow-builder's **two-question gate**. Use the DR table in
 `interview_guide.md` for framings and defaults.
 
 1. **Spec source** - "Do you have an OpenAPI/Swagger file already, or are we starting from scratch?"
-   - Existing → record the file path; flow_builder drives generation from it.
+   - Existing → record the file path; ace-flow-builder drives generation from it.
    - From scratch (default) → you'll draft a minimal OpenAPI 3 doc from the operations below.
 2. **Operations** - for each: HTTP method + path, request body shape, success response shape, and a
    plain-English line on what the operation does (stub it `[CONFIGURE: logic]` if unknown). Capture as
@@ -216,14 +216,14 @@ production. Ask:
 - **Retry limits** - if retry is in scope: how many attempts, what interval. Default: 3 attempts,
   fixed 30s, then DLQ.
 - **Outbound HTTP retry classification** - if the flow calls a downstream HTTP API (an HTTPRequest),
-  flow_builder sees two distinct failure kinds on separate terminals and needs to know how to split
+  ace-flow-builder sees two distinct failure kinds on separate terminals and needs to know how to split
   them: a *connection failure* (no response at all, arrives on the `failure` terminal) vs an *HTTP
   error response* (a 4xx/5xx came back, arrives on the `error` terminal). Default classification:
-  connection failure → retry; HTTP 408/429/5xx → retry; other 4xx → fatal. Record it so flow_builder
+  connection failure → retry; HTTP 408/429/5xx → retry; other 4xx → fatal. Record it so ace-flow-builder
   wires and handles both terminals (it otherwise has to guess, and unwired terminals lose messages).
 - **Timer / delayed-retry parameters** - if retry is delayed (a timer pair) or the flow is timer
   driven: interval, number of fires, and whether retries are single-flight (one at a time) or
-  per-message (concurrent). The timer *identifier value* is flow_builder's job - capture only the
+  per-message (concurrent). The timer *identifier value* is ace-flow-builder's job - capture only the
   strategy. This feeds the *Timer / delayed retry* section of the spec.
 
 Capture as an `Error handling` section: failure → action, plus any retry parameters, the HTTP
@@ -261,7 +261,7 @@ to the pattern; default every one to "standard / not specified":
   `mqsisetdbparms` for v13 server-managed runtimes.
 - **Scheduling** - for timer-driven flows: interval, calendar, missed-fire behaviour.
 - **Integration server name** - which integration server the flow will run on (e.g. `TestServer`,
-  `PROD_IS`). This is one of flow_builder's required Phase B1 answers, so capture it here rather than
+  `PROD_IS`). This is one of ace-flow-builder's required Phase B1 answers, so capture it here rather than
   leaving it as `[CONFIGURE]`. Default `[CONFIGURE: integration server]` only if the user genuinely
   doesn't know yet.
 - **Environments** - which values differ per environment (URLs, queue managers, hostnames) and
@@ -269,7 +269,7 @@ to the pattern; default every one to "standard / not specified":
   promoted on the **main flow** or a **subflow** (matters when shared logic lives in a subflow).
 
 Capture as `Non-functional notes` plus a `Promoted properties / config` list, and carry the
-integration server name into the *flow_builder Phase B1 answers* block.
+integration server name into the *ace-flow-builder Phase B1 answers* block.
 
 ---
 
@@ -277,11 +277,11 @@ integration server name into the *flow_builder Phase B1 answers* block.
 
 ### D8.0 Confirm the flow name and write location
 
-Before writing, confirm two things (these also pre-answer flow_builder's Phase B1):
+Before writing, confirm two things (these also pre-answer ace-flow-builder's Phase B1):
 - **Flow name** - used for the filename and as the spec title. If not already set, ask.
 - **Write location** - where to save the start prompt. Default: the current working directory.
   **Never default to a throwaway path like `D:\tmp\`** - if the user has an ACE workspace or repo in
-  mind, ask for it. (Same rule flow_builder follows for project location.)
+  mind, ask for it. (Same rule ace-flow-builder follows for project location.)
 
 ### D8.1 Maintain the design state file
 
@@ -313,9 +313,9 @@ Read this first when resuming an interview - do not trust conversation memory ac
 
 Fill `START_PROMPT_TEMPLATE.md` from the collected answers. Rules:
 - Every section present; unknowns become explicit `[CONFIGURE: ...]` lines, not silent omissions.
-- The spec must pre-answer flow_builder's Phase B1 inputs: **flow name, project location, flow type,
+- The spec must pre-answer ace-flow-builder's Phase B1 inputs: **flow name, project location, flow type,
   input, output, processing logic, integration server name** - so the build can start without re-asking.
-- Pin down every flow_builder **blocker**: routing-source selection, REST-vs-normal track, project
+- Pin down every ace-flow-builder **blocker**: routing-source selection, REST-vs-normal track, project
   location. These cannot be left to a default - if genuinely unknown, surface them in *Open questions*.
 - For a **REST API**, fill the *REST API* section (spec source, operations table, handler pattern) and
   delete the single Input/Output blocks in *Interfaces* (they don't apply).
@@ -353,20 +353,20 @@ reason, and an opening instruction of this shape:
 > re-asking them, and only ask about the `[CONFIGURE: ...]` open items."
 
 **Claude Code / claude.ai (skills):** invoke the **ace-flow-builder** skill with that same opening
-instruction as the request. Pass the start-prompt file path so flow_builder reads it fresh (don't
+instruction as the request. Pass the start-prompt file path so ace-flow-builder reads it fresh (don't
 paste the whole spec into the prompt - the file is the source of truth).
 
 **In either runtime, the handover instruction must:**
-1. Point flow_builder at the start-prompt **file path** (it reads the file; the spec is authoritative).
+1. Point ace-flow-builder at the start-prompt **file path** (it reads the file; the spec is authoritative).
 2. State the **build mode** to use, taken from the spec's *Build mode hint* (Iterative for a matched
    catalog pattern, Thorough for a novel/multi-flow design).
-3. Tell flow_builder the spec **pre-answers Phase B1** - confirm, don't re-interview.
+3. Tell ace-flow-builder the spec **pre-answers Phase B1** - confirm, don't re-interview.
 4. Flag the **`[CONFIGURE: ...]` open items** as the only genuinely open questions for the build.
 
-Before handing over, do a final consistency check: the spec's *flow_builder Phase B1 answers* section
+Before handing over, do a final consistency check: the spec's *ace-flow-builder Phase B1 answers* section
 is filled (no leftover `<…>` placeholders other than intentional `[CONFIGURE: ...]` lines), and the
 flow name in the handover matches the spec title and the state file. If the project location is still
-`[CONFIGURE: ...]`, ask the user for it as part of the hand-off - flow_builder must not default it to
+`[CONFIGURE: ...]`, ask the user for it as part of the hand-off - ace-flow-builder must not default it to
 a throwaway path.
 
 After the handover, ace-flow-builder owns the session. This skill's job is done once the spec is
@@ -380,10 +380,10 @@ written and the build has been kicked off.
   gave you, confirm it, and only ask about the gaps.
 - **User wants to skip ahead.** If they say "just write the spec", do a single-batch sweep of the
   topics with defaults applied, write the spec with generous `[CONFIGURE:]` markers, and let them
-  refine - mirror flow_builder's Iterative philosophy.
+  refine - mirror ace-flow-builder's Iterative philosophy.
 - **Novel pattern (no catalog match).** Fine. Design from first principles and note in the spec that
-  flow_builder should run in **Thorough** mode (no template to lean on).
-- **REST API requests.** Run **Phase DR** instead of D3/D4. flow_builder has a dedicated REST track
+  ace-flow-builder should run in **Thorough** mode (no template to lean on).
+- **REST API requests.** Run **Phase DR** instead of D3/D4. ace-flow-builder has a dedicated REST track
   with a different file shape; the *REST API* section of the spec (spec source, operations table,
   handler pattern) is what drives it.
 - **Multi-flow apps.** Capture the per-flow table in the *Shape* section and any shared subflow

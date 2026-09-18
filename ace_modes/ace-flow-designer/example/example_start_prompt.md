@@ -21,7 +21,7 @@ Forward every order event from MQ to the orders REST API as JSON, reliably and i
 ## Scope
 - **In scope:** read, transform XML→JSON, POST, handle retry and dead-letter.
 - **Out of scope:** no response is sent back to MQ; no enrichment from other systems.
-- **Build mode hint for flow_builder:** Iterative (catalog pattern matched).
+- **Build mode hint for ace-flow-builder:** Iterative (catalog pattern matched).
 
 ## Shape
 Single flow, one application project.
@@ -91,7 +91,7 @@ Single flow, one application project.
 - **Java / shared-library dependencies:** none.
 - **`ibmint package` must succeed** against the application project.
 
-## flow_builder Phase B1 answers
+## ace-flow-builder Phase B1 answers
 - **Flow name:** `OrderEventForwarder`
 - **Project location:** `[CONFIGURE: ACE workspace path]`
 - **Flow type:** MQ Input-Output (with outbound HTTP)
