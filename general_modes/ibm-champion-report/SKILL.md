@@ -94,7 +94,12 @@ Each submission carries 1 to 3 acts of advocacy. For each act, collect:
 - **Date** - last 12 months; format `yyyy-mm-dd`; first-of-month if unknown.
 - **Can IBM amplify?** - ask, do not assume.
 
-Before drafting anything, check the activity against the log, link first:
+**A share is its own act.** When the material is a social post sharing content already
+reported (a LinkedIn post of a registered blog), ask which act this is; default to the
+social-post type dated on the SHARE date, and never re-register the underlying piece.
+
+Before drafting anything, check the activity against the log, link first (nothing gets
+reported twice):
 
 1. Normalise the new link (lower-case scheme and host, drop a trailing slash and any
    `utm_*`, `trk` or `ref` query parameters) and compare it the same way with every
@@ -104,22 +109,14 @@ Before drafting anything, check the activity against the log, link first:
    talk, repo, video) and raise a likely duplicate the same way. Entries written
    before 2026-09-17 carry no `Link:` line and can only match this way.
 
-The point of the log is that nothing gets reported twice.
-
-If the user has more than 3 activities, tell them to submit the form again for the
-overflow and set "How many MORE" accordingly (Zero / 1 / 2) for this run. **Warning:
-the form DEFAULTS this field to 1** - it must be explicitly set to Zero when
-reporting a single activity, or the form keeps an empty 2nd act open. For two
-activities leave it at 1; for three set it to 2.
+More than 3 activities: a second form submission takes the overflow. **"How many MORE"
+DEFAULTS to 1**: set Zero for one act (or an empty 2nd act stays open), 1 for two, 2 for three.
 
 ### 3. Write the description (<= 250 words each)
 
-For each act, draft the "Description of this Activity":
-
-- Lead with what was contributed and who it helps.
-- Name the product(s) and the concrete artifact.
-- Factual, no marketing fluff, no AI-tool signatures.
-- Enforce the 250-word cap and report the actual word count.
+For each act: lead with what was contributed and who it helps, name the product(s) and
+the concrete artifact, stay factual (no marketing fluff, no AI-tool signatures), and
+enforce the 250-word cap, reporting the actual word count.
 
 ### 4. Confirm the dropdown choices
 
@@ -127,8 +124,8 @@ The option lists in `references/act_options.md` and `references/product_options.
 are verified verbatim from the live form, so they are authoritative. Your job is to pick the right entry: present the exact
 option you chose for each single-select / multi-select field and confirm it is the
 activity/product the user means (e.g. "Blog or Article" vs "Blog on IBM property").
-If the live form ever changes and an option no longer matches, regenerate the option
-file with the re-scrape recipe in its header.
+If the live form ever changes - a prefilled select that lands EMPTY is the first sign;
+suspect list drift before the tool - regenerate the option file with its header recipe.
 
 ### 5. Produce the output
 
@@ -156,13 +153,9 @@ PRIVACY consent: [ ] tick manually before submitting
 
 Repeat the act-specific block for acts 2 and 3 if present.
 
-**B. Prefilled URL (proven)** - built per the prefill section of the field spec. It
-pre-populates 8 fields (Champion Program ID, First/Last name, both emails, 1st Act of
-Advocacy, Product(s), 1st-activity Date). The remaining fields - Description, Link,
-Can IBM Amplify, How-many-more, and PRIVACY consent - cannot be prefilled and stay in
-the copy-paste sheet for manual entry once the form opens. With a 2nd act the URL
-also carries the 2nd-activity date (`prefill_fldsYCztbwXKtlxiT`, 9 fields in total);
-the 2nd act's type, product(s), description, link and amplify stay manual.
+**B. Prefilled URL (proven)** - built per the prefill section of the field spec, which
+lists the 8 fields it carries (9 with a 2nd act). Description, Link, Amplify,
+How-many-more and PRIVACY stay manual, from the sheet.
 
 **C. Activity log entry** - append one entry per act to the file at `ACTIVITY_LOG`.
 Create the file with a `# IBM Champion activity log` title line if it does not exist.
@@ -177,23 +170,19 @@ Link: <url as on the form>
 <description as submitted, <=250 words>
 ```
 
-Two links (slides and a recording) are two `Link:` lines; no link at all is a `Link:`
-line left empty. Keep a blank line between entries. Do not write the products, the
-amplify answer, the identity block, or the prefilled URL - the log exists so the user
-can see what has been reported and so step 2 can match on the link, not to mirror
-the form. If the file cannot
-be written (path unreachable, permission denied), print the entry block and say so,
-so the user can paste it themselves.
+Two links are two `Link:` lines; no link is an empty `Link:` line; a blank line between
+entries. If the file cannot be written, print the entry block and say so.
+
+**Dry run** (testing the skill): dummy act values, the entry goes to a scratch COPY of
+ACTIVITY_LOG and the diff is reported - never the real log; without a browser MCP, open
+the prefilled URL in the default browser and stop.
 
 ### 6. Offer to fill the form in the browser (if a browser MCP is available)
 
-Check the live tool list for a browser-automation MCP. Playwright MCP
-(`browser_navigate`, `browser_snapshot`, `browser_fill_form`, `browser_evaluate`, ...) is
-the primary server; browsermcp is the fallback; Claude's own surfaces map the same
-steps. Installing and wiring: [`dependency.md`](dependency.md). If one is present, offer
-to fill the form directly and follow the **Browser automation** section of
-[`references/form_fields.md`](references/form_fields.md) - the **Normal workflow** by
-default, the **Lean workflow** when lean mode is on:
+Playwright MCP is the primary server, browsermcp the fallback, and Claude's own surfaces
+map the same steps (wiring: [`dependency.md`](dependency.md)). If one is present, offer to
+fill the form and follow the **Browser automation** section of
+[`references/form_fields.md`](references/form_fields.md) - Normal or Lean workflow:
 
 - **Always clear first:** open the bare form URL, click **Clear form**, confirm the
   dialog, then navigate to the PROVEN prefilled URL built in step 5B - identity + Act +
@@ -205,9 +194,6 @@ default, the **Lean workflow** when lean mode is on:
 - Automation only types the manual fields: Description and Link, plus the Amplify
   checkbox if the user explicitly allowed amplification. Handle a product not in the
   list via **Other -> type the name**.
-- **"How many MORE Acts of Advocacy" defaults to 1, not Zero** (options: Zero / 1 / 2).
-  For a single-act submission it MUST be explicitly set to Zero; leave it at 1 for two
-  acts; set 2 for three.
 - **Fill + verify, never submit.** Normal workflow: snapshot after the prefill,
   re-snapshot after each select, read every field back at the end, one screenshot for
   the user, report each field as set / not set / mismatch, retry failures once. Lean
@@ -218,22 +204,18 @@ default, the **Lean workflow** when lean mode is on:
 If **no** browser MCP is available, say so - the sheet + prefilled URL from step 5
 already stand alone.
 
-### 7. Final reminders
+### 7. Final reminder
 
-- The **PRIVACY consent** checkbox and (usually) the **Amplify** checkbox must be
-  ticked by hand - you cannot consent for the user.
-- Remind them only activities from the **last 12 months** are eligible.
-- A link is effectively mandatory.
-- The log entry from step 5C was written before the click. If the user decides not to
-  submit after all, remove that entry so the log stays true.
+The log entry from step 5C was written before the click. If the user decides not to
+submit after all, remove that entry so the log stays true.
 
 ## Lean mode (`lean: on`)
 
 The default comes from `FILL_MODE` in `.env` (`normal` unless set to `lean`); a request
 switches it for one run with `lean: on` / "lean" / "economy" / "save coins" or with
-"normal". It trades checks for spend - fewer reads, fewer
-round trips - and never skips: identity from `.env`, the 250-word cap, the always-clear
-open sequence, the end check, the log append, stop before PRIVACY and Submit.
+"normal". It trades checks for spend and never skips: identity from `.env`, the
+250-word cap, the always-clear open sequence, the end check, the log append, stop
+before PRIVACY and Submit.
 
 | Step | Lean behaviour |
 |---|---|
@@ -243,8 +225,8 @@ open sequence, the end check, the log append, stop before PRIVACY and Submit.
 | 6 | the **Lean workflow** in the field spec: open sequence, one `browser_fill_form`, comboboxes by click + type with submit, one `browser_evaluate` compared to the sheet, one fix pass; no snapshot, no screenshot |
 | 7 | URL plus one status line per field group; the sheet is repeated only if the browser fill was skipped or a mismatch remains |
 
-Lean needs `browser_evaluate` and selector targets (Playwright MCP or a Claude surface).
-On browsermcp say so in one line and run the normal workflow.
+Lean needs `browser_evaluate` and selectors (Playwright or a Claude surface); on
+browsermcp, say so and run the normal workflow.
 
 ---
 
