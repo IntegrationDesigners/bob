@@ -171,9 +171,11 @@ Default every one to "standard / not specified". Keep this phase short for a jun
 
 (Timer / delayed-retry parameters are asked in **D5**, not here - they belong with error handling.)
 
-**Credentials rule to record in the spec:** credentials go in the **ACE vault**
-(`ibmint set credential`), never in the project tree or a properties file, and never via
-`mqsisetdbparms` on a v13 server-managed runtime (legacy IIB path).
+**Credentials rule to record in the spec:** credentials go in the **ACE vault**, never in the
+project tree or a properties file, and never via `mqsisetdbparms` on ACE 13 (legacy IIB path).
+The vault is the mechanism: the integration-server vault (`ibmint set credential`) for
+independent/standalone servers, the node vault (`mqsivault`/`mqsicredentials`) for node-managed
+servers.
 
 *A promoted property* = a setting exposed at the flow/app level so it can be overridden per
 environment at deploy time without editing the flow.

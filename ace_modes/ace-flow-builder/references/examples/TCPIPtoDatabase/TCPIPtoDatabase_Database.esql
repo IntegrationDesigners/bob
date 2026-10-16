@@ -3,6 +3,29 @@
 CREATE COMPUTE MODULE TCPIPtoDatabase_Database
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
+		DECLARE MyRef REFERENCE TO InputRoot.BLOB.BLOB;
+		DECLARE DBSchema CHARACTER 'MYSCHEMA';
+		DECLARE DBTable  CHARACTER 'MYTABLE';
+		SET Environment.Variables.SQL.Failed = FALSE;
+		BEGIN
+			-- Database exceptions carry SQLSTATE 'D' + the database state (IBM Docs, SQLSTATE function)
+			DECLARE CONTINUE HANDLER FOR SQLSTATE LIKE 'D%'
+			BEGIN
+				SET Environment.Variables.SQL.Failed = TRUE;
+				SET Environment.Variables.SQL.Code = SQLCODE;
+				SET Environment.Variables.SQL.State = SQLSTATE;
+				SET Environment.Variables.SQL.NativeError = SQLNATIVEERROR;
+				SET Environment.Variables.SQL.ErrorText = SQLERRORTEXT;
+			END;
+			INSERT INTO Database.{DBSchema}.{DBTable} (BLOBMESSAGE)
+						VALUES( MyRef );
+		END;
+		IF Environment.Variables.SQL.Failed THEN
+			-- forward the untouched input so HandleException can preserve it
+			CALL CopyEntireMessage();
+			PROPAGATE TO TERMINAL 'failure';
+			RETURN FALSE;
+		END IF;
 		CALL CopyMessageHeaders();
 		SET OutputRoot.JSON.Database.SQLCODE = SQLCODE;
 		SET OutputRoot.JSON.Exception.SQLSTATE = SQLSTATE;	

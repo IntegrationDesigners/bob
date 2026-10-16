@@ -232,4 +232,3 @@ Write-Host "  1. Open VS Code in the target project: $TargetProjectPath" -Foregr
 Write-Host "  2. Reload the window (Ctrl+Shift+P -> 'Reload Window')" -ForegroundColor Gray
 Write-Host "  3. The new modes should now be available in Bob's mode selector" -ForegroundColor Gray
 
-# Made with Bob

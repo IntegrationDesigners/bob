@@ -2,9 +2,9 @@
 name: ace-support-case
 description: "Use this skill when the user wants to open an IBM support case for ACE, needs to gather diagnostics for IBM, mentions opening a PMR/case/ticket, references error codes like BIP2111 or BIP2060, or asks what logs or information IBM needs. Also triggers when the user mentions an ACE crash, abend files, or says 'what do I need to collect for support'. If the user wants the failing code fixed rather than a case opened, use ace-review instead."
 metadata:
-  version: 1.1.0
+  version: 1.2.0
   status: stable
-  last_updated: 2026-07-02
+  last_updated: 2026-09-07
 ---
 
 # ACE Support Case Skill
@@ -95,7 +95,7 @@ Collect based on the category. **Functional** problems are about gathering what 
 | Functional - Crash / abend | Event Viewer export (±30 min around the event, not the full log) + abend/dump files |
 | Functional - Message flow | User trace (normal) + event log + project interchange via `mqsipackagebar` |
 | Functional - Deployment / start-up | `mqsicvp` + service trace + JVM property check + event log |
-| Functional - Database / ODBC | DSN inventory first (`mqsireportdbparms -n "*"` + ODBC.INI/ODBCINST.INI export) → then ODBC trace + vendor-specific tools once the vendor is confirmed |
+| Functional - Database / ODBC | DSN inventory first (`mqsireportdbparms -n "*"` + ODBC.INI/ODBCINST.INI export) → then ODBC trace + vendor-specific tools once the vendor is confirmed. Trace procedure follows the driver: Windows + SQL Server means a Microsoft ODBC driver, so use Microsoft's tracing steps, not the IBM `uktrc95.dll` route |
 | Functional - SSL / TLS / GSKit | Library path ordering (MQ GSKit before Db2/Oracle) + user trace |
 | Performance | User trace (debug) + ACELogAnalyser `traceAnalysis` + `mqsireportproperties` (Nagle check) |
 | General / unknown | All of the above |
@@ -135,6 +135,7 @@ Collect based on the category. **Functional** problems are about gathering what 
 - **Always ask for timing** - date and approximate time of the issue is required to scope log extraction
 - **mqsiservice -v first** - version is mandatory context for every IBM case
 - **Check abend files proactively** in `<install_dir>\errors\` (Windows) or `/var/mqsi/errors/` (Linux) - their presence means a crash and changes priority
+- **ODBC trace procedure follows the driver, not ACE:** on Windows the IBM/DataDirect route (copy `uktrc95.dll`, Select DLL) applies to Oracle/PostgreSQL/Sybase/Db2, but SQL Server is reached through a **Microsoft** ODBC driver - use Microsoft's Driver Manager tracing steps and tick **Machine-Wide tracing for all user identities** when the integration server runs under a service account (see `references/diagnostics_guide.md` §3)
 - **Service trace only on IBM direction** or explicit user request - it is heavyweight
 - **Trace wrapping:** if first and last timestamps in the trace are suspiciously close, data was lost; increase trace size and re-collect
 - **GSKit library conflicts** (SQL10013N / BIP2322E): MQ GSKit path must come before Db2 or Oracle library paths in `LD_LIBRARY_PATH` / `LIBPATH`

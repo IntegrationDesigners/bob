@@ -21,6 +21,7 @@ Reference for `ace-review-config` and `ace-review` modes. Covers deployment prop
 | No hardcoded queue manager names | HIGH | Must be environment-specific via overrides |
 | TEST config must not deploy to PROD | CRITICAL | Validate env-specific values differ |
 | All promoted properties must have values in every env | HIGH | Missing value = deployment failure |
+| Overrides-only rule: base `node.conf.yaml` / `server.conf.yaml` unmodified | HIGH | All server/node config changes live in `overrides/*.yaml` (`<work_dir>/overrides/server.conf.yaml`, `<node>/servers/<server>/overrides/server.conf.yaml`, `<node>/overrides/node.conf.yaml`). ACE layers the base file over built-in defaults, so a modified or replaced base file still starts and silently drops the generated settings. An `overrides/*.yaml` that only restates base defaults is a remark, not a finding |
 
 ### 1.2 Promoted Property Naming Convention
 
@@ -244,6 +245,7 @@ Typical configuration finding categories:
 | TLS not configured | SSLCIPH blank on SVRCONN |
 | JSON Schema version | draft-07 keyword in ACE schema |
 | Missing promoted property | Property referenced but not in override file |
+| Base conf.yaml modified | `server.conf.yaml` / `node.conf.yaml` outside `overrides/` differs from the generated file |
 | TEST config in PROD | Queue/URL contains TEST |
 | Policy credential plaintext | Password in policyxml |
 | Missing BOTHRESH | Backout threshold not set |

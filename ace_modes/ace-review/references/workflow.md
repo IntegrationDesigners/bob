@@ -67,6 +67,17 @@ Three determination signals:
 
 **Location mechanic:** look in the **sibling directories of the clone root** - the same parent directory the reviewed repository was cloned into (e.g. if the app is at `C:\work\MyApp`, look for the schema library under `C:\work\`). If a needed schema library cannot be found there, ask the user for its path **or** for permission to skip it with a warning. Record any skipped dependency as a reported item with an explicit coverage caveat (which schemas/fields could not be verified).
 
+### Step 1c: Read the custom rules
+
+**Open `custom-rules/rules.md` and read it in full. This is a mandatory step, not an optional extra** - it holds the organisation's house standards, and skipping it produces findings the customer has already ruled out. Read it here, before any analysis, so the rules are in context while findings are being formed. Do not defer it to Step 5 and do not rely on having read it in an earlier session.
+
+- The file ships **empty** - a template comment block only. If everything in it is inside `<!-- ... -->` or whitespace, or the file is missing, run the default review unchanged.
+- If there is **any content outside the comment block**, those are organisation-specific rules. Apply them throughout the review in addition to the default checks. Where a custom rule conflicts with a default check, **the custom rule wins** - follow it and tell the user you are doing so.
+- A custom rule **never silently deletes a finding.** When a rule allows or downgrades something you would normally flag, still record it under **Remarks / Notes - Accepted deviations (per customer rules)**, naming the rule that permits it. The deviation stays visible; it is just not raised as a rated finding.
+- Typical content: accepted deviations (patterns that are house standard here), a trusted/skip list of central framework libraries (see Step 1b), house severity mappings, and naming / logging / error-handling conventions the review should hold the code to.
+
+**Verification:** the number of rules found here is reported in the Review Metadata block (Step 8). If that field cannot be filled in honestly, this step was not done.
+
 ---
 
 ## Step 2: Determine the ACE Version
@@ -161,6 +172,7 @@ Work through the provided files systematically. For each flow and module:
 - Check for FlowOrder usage where multiple output connections exist
 - Check parse timing and validation on parser-capable nodes (input nodes plus RCD, Compute, HTTPRequest, MQGet, etc.). The "Parse Timing" property serializes as the `validateTiming` attribute (values onDemand/immediate/complete) - there is NO `parseTiming` attribute. "Validate" serializes as `validateMaster` (default none). Parse timing controls when the body is parsed (immediate/complete parse fully at the node, catching malformed input there); schema validation is separate and needs `validateMaster` != none plus a Message model/schema. See `flow_guidelines.md` - Parse Timing, Validate, and Message model.
 - **Absent attribute = default, not missing.** ACE serializes only non-default node-property values into the `.msgflow` (and only overridden values into descriptors). An attribute that is not present means the property is at its DEFAULT, not that it is unset. Never flag a property as "missing/unset" from an absent attribute - state the default (e.g. `validateTiming` absent -> Parse Timing On Demand; `validateMaster` absent -> Validate None).
+- For each RCD node: confirm it actually changes the domain - trace the effective upstream domain (input node's `messageDomainProperty`, prior RCDs, tree-rebuilding Compute nodes). A same-domain RCD validates nothing: with `validateMaster` set and no downstream Validate=`inherit` serializer it is a validation that never runs (🟠 High); with no validation settings it is a no-op node (🟡 Medium). See `flow_guidelines.md` - RCD validation semantics.
 - Check Additional Instances setting - is it appropriate for the expected volume? (see flow_guidelines.md)
 
 **For `.esql` files:**
@@ -191,6 +203,7 @@ Work through the provided files systematically. For each flow and module:
 - Check for hardcoded credentials
 - Compare TEST vs. PROD configurations
 - Check for environment-specific overrides
+- Overrides-only rule: the base `node.conf.yaml` / `server.conf.yaml` must be unmodified - all changes belong in `overrides/*.yaml`. A modified or replaced base file is a 🟠 High finding; an `overrides/*.yaml` that only duplicates base defaults is a remark. See `config_guidelines.md` 1.1.
 - Note any missing or suspicious properties
 - Check JSON schema files (`.json`): verify they use JSON Schema **draft 4** only - ACE does not support draft 6, 7, or 2019-09 keywords (`contains`, `if`, `then`, `else`, `$defs`, `propertyNames`, `$id`, `examples`). See `flow_guidelines.md` - JSON Schema Version Compatibility.
 
@@ -389,6 +402,7 @@ At the end of the report, fill in the Review Metadata block from information alr
 - **ACE Version:** the version detected or confirmed in Step 2
 - **Review Level:** the level chosen in Step 3 (0 / 1 / 2 / 3 - [name])
 - **Review Focus:** the file types reviewed (e.g., ESQL + Flow Design + Java)
+- **Custom Rules:** the outcome of Step 1c - either `applied (N rules from custom-rules/rules.md)` or `none (custom-rules/rules.md empty)`. This field is mandatory and must not be left blank or guessed: it is the check that Step 1c actually happened.
 - **Next Review:** leave blank or suggest a trigger (e.g., "after next major refactor" or "before next production deployment")
 
 ---

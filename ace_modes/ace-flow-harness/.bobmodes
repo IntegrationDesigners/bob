@@ -72,8 +72,11 @@ customModes:
 
       If a testing/ tree already exists, the repo's own docs and scripts are the
       SOURCE OF TRUTH - read them before applying the generalized template:
-      - testing/README.md (and topology READMEs) - the canonical, documented setup:
-        topologies, ports, work dirs, what gets tested, prerequisites, troubleshooting
+      - testing/README.md AND EVERY per-topology README (standalone-server/, docker/,
+        node-managed/) - not just the index plus the first topology you run. Each one
+        carries constraints the index and the scripts do not encode: shared-classes
+        level, port map, cleanup verbs, known issues. Reading one does not transfer
+        to the others. This is lifecycle gate 0a below.
       - the wrapper + harness scripts (e.g. run-test-with-ace-env.bat -> deploy_and_test.bat)
       - any install-<pac> script and Deploymentdescriptors/*.properties
       Reuse their values verbatim rather than inventing new ones; the template only
@@ -102,7 +105,10 @@ customModes:
 
       ## PHASE 3: RUN THE LIFECYCLE (ordered, do not reorder load-bearing steps)
 
-      0. Source the ACE environment. ibmint/IntegrationServer/mqsi* are NOT on PATH
+      0a. Read the repo's own harness docs - ALL of them - before running anything:
+         testing/README.md AND every per-topology README. A gate, not a suggestion;
+         skipping it is the most common way this mode gets it wrong.
+      0b. Source the ACE environment. ibmint/IntegrationServer/mqsi* are NOT on PATH
          until you source the ACE profile:
            Windows: call "<ACE_HOME>\server\bin\mqsiprofile.cmd"
            Linux:   source "<ACE_DIR>/server/bin/mqsiprofile"
@@ -112,7 +118,8 @@ customModes:
          or you will get "'ibmint' is not recognized".
       1. Install dependencies (impl/tool/3rd-party to their targets above).
       2. Provision test env: create work dir + {keys,input,output} or equivalent; copy
-         test data/keys; set config (server.conf.yaml / overrides).
+         test data/keys; set config in <work_dir>/overrides/server.conf.yaml only
+         (Overrides-only rule: never write the base server.conf.yaml).
       3. Place shared-classes: copy the FULL dependency set into the topology-correct dir.
       4. Deploy POLICY PROJECT(S) FIRST, then APPLICATION(S):
            ibmint deploy --input-path <Sources> --output-work-directory <work_dir> --project <name>
@@ -155,6 +162,24 @@ customModes:
       - Clean stale config/.lock before restart.
       - Binary compare for round-trips (fc /B) to avoid masking encoding/newline diffs.
       - Keep passphrases/secrets out of committed scripts; inject via policy/override/env.
+      - NEVER "timeout /t" in a .bat harness - use "ping 127.0.0.1 -n <secs+1> >nul".
+        timeout needs an interactive stdin; once output is redirected (CI, a logged run,
+        an agent) it prints "ERROR: Input redirection is not supported" and returns at
+        once, so every wait silently becomes a no-op and the run still passes.
+      - Pin *.sh to eol=lf in .gitattributes when a script is bind-mounted into a
+        container. With core.autocrlf=true a Windows checkout rewrites the working-tree
+        copy to CRLF, compose mounts THAT file, and bash dies on "$'\r': command not
+        found". Git stores LF so the repo looks fine and it hits every Windows clone.
+        First diagnostic when a container exits in under a second: run "file" on the
+        mounted script before reading its logic.
+      - Check for version-gated startup blocks before blaming the harness. If the server
+        dies between BIP1990I and BIP1991I, read the BIP code and grep the catalog
+        (<ACE>/server/messages/BIPmsgs.properties) - it states the fix. Known: ACE 13.0.8
+        images ship call-home enabled with an unreplaced placeholder in
+        $MQSI_WORKPATH/registry.13.0.conf.yaml, failing with BIP2203E + BIP15366W. For a
+        harness that sends no usage statistics, write "CallHome:\n  enabled: false" -
+        do not invent a company name. "ibmint modify installation
+        --disable-usage-statistics" exits 0 but does NOT clear the gate on its own.
 
 
       ## MODE TRANSITIONS
@@ -176,7 +201,7 @@ customModes:
         (PGP SupportPac: BouncyCastle deps, PGP policies, encrypt/decrypt round-trip)
 
       Companion (different responsibility):
-      - ace-flow-test/references/examples/http_pgp_flow_test_example.md - the test-PLAN
+      - the ace-flow-test skill - its worked HTTP/PGP example is the test-PLAN
         counterpart (scenarios/checklists, no execution)
 
 

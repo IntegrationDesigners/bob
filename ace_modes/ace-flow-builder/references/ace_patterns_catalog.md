@@ -14,7 +14,7 @@ IBM official pattern library for ACE **v13** (all patterns in this catalog targe
 **Download URL format for v13 patterns:**
 `https://github.com/ot4i/ace-patterns/releases/download/v1.0.0/[PatternName].patternzip`
 
-**Template coverage:** All 93 patterns (92 protocol/format + RAG) are ✅ extracted to `references/examples/[PatternName]/`. Each directory contains real IBM ACE v13 `.msgflow`, `.esql`, and supporting files.
+**Template coverage:** All 93 patterns (92 protocol/format + RAG) are ✅ extracted to `references/examples/[PatternName]/`. Each directory contains real IBM ACE v13 `.msgflow`, `.esql`, and supporting files. One more, `AsyncRequestReplyWebhook`, is a hand-built whole application (two flows, descriptor, policy project) deployed and tested end to end on 13.0.8.1.
 
 Use this catalog when a user asks to build a flow - match their description to the closest pattern(s) and name it explicitly.
 
@@ -27,6 +27,7 @@ Simple, self-contained flows with no external dependencies. Use these as the sta
 | Pattern | Description | Example |
 |---------|-------------|---------|
 | HTTP Request-Reply | Receive HTTP request, compute ESQL response, reply directly | `SimpleHTTPResponse` |
+| Async Request-Reply with Webhook | HTTP intake -> 202 + MQ put; queue worker -> enrich -> webhook POST | `AsyncRequestReplyWebhook` |
 
 ### HTTP Request-Reply (REST Endpoint)
 
@@ -51,6 +52,19 @@ The simplest complete ACE flow. Accepts an HTTP request, runs ESQL to build a re
   IntegrationServer --work-dir work_dir --name [ServerName] --admin-rest-api 7600 --http-port-number 7800 --console-log
   ```
 - **Test endpoint:** `http://localhost:7800/[url-path]`
+
+### Async Request-Reply with Webhook Callback (HTTP -> MQ -> HTTP)
+
+Two flows in one application: an HTTP intake flow validates, puts the request on a queue
+and answers 202 with a job id; a queue-driven worker enriches it with an HTTP GET, does the
+work and POSTs the result to the caller's webhook URL. The only example here that is a
+whole application (both flows, descriptor with a shared-library reference, MQEndpoint
+policy project), deployed and tested end to end.
+
+- **Nodes:** `ComIbmWSInput` -> `ComIbmCompute` -> `ComIbmMQOutput` -> `ComIbmCompute` -> `ComIbmWSReply`; `ComIbmMQInput` -> `ComIbmCompute` -> `ComIbmWSRequest` (GET) -> `ComIbmCompute` -> `ComIbmWSRequest` (POST); error queue via `ComIbmMQOutput`
+- **Use when:** "return 202 / a job id now, process asynchronously, call back a webhook"; any HTTP intake with an MQ hand-off and an outbound callback
+- **Reply status:** `OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode` from a `destinationAndMessage` Compute - not an HTTP header
+- **Example files:** `references/examples/AsyncRequestReplyWebhook/` (read its README first: the shapes that broke generated builds)
 
 ---
 
@@ -235,6 +249,7 @@ When a user describes what they want to build, map it to a pattern:
 | "Pick up a file and put it on a queue" | File to IBM MQ | `references/examples/FiletoIBMMQ/` |
 | "Read from queue and write to file" | IBM MQ to File | `references/examples/IBMMQtoFile/` |
 | "HTTP POST to put on a queue" | HTTP to IBM MQ | `references/examples/HTTPtoIBMMQ/` |
+| "Accept a request, return 202 / a job id, process it from a queue, call back a webhook" | Async Request-Reply with Webhook Callback | `references/examples/AsyncRequestReplyWebhook/` |
 | "Convert JSON to XML" | JSON to XML | `references/examples/JSONtoXML/` |
 | "Read from Kafka, put to MQ" | Kafka to IBM MQ | `references/examples/KafkatoIBMMQ/` |
 | "Read from MQ, write to Kafka" | IBM MQ to Kafka | `references/examples/IBMMQtoKafka/` |

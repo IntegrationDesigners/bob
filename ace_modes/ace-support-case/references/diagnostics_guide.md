@@ -122,7 +122,7 @@ mqsichangetrace <NODE> -t -e <IS> -l debug
 mqsichangetrace <NODE> -t -b -l none
 ```
 
-Independent server: set `trace: 'service'` in `server.conf.yaml` (restart required), or start with `--service-trace` flag.
+Independent server: set `trace: 'service'` in `overrides/server.conf.yaml` (restart required; overrides-only rule - never edit the base `server.conf.yaml`), or start with `--service-trace` flag.
 
 **Service trace log locations:**
 
@@ -146,10 +146,30 @@ MQSI_UTILITY_TRACESIZE=<KB>
 
 ### ODBC Trace
 
-**Windows:**
+**How you trace depends on the driver behind the DSN, not on ACE.** Confirm the driver from the DSN
+inventory (`odbc_ini.reg` / `odbcinst.ini`) before choosing a procedure.
+
+**Windows - IBM-supplied DataDirect drivers (Oracle, PostgreSQL, Sybase):**
 1. Copy `uktrc95.dll` and `ukicu.dll` from `<ACE_INSTALL_DIR>\bin` to `C:\Windows\System32` (required for Oracle, PostgreSQL, Sybase only - skip for Db2)
 2. Open **ODBC Data Source Administrator (64-bit)**
 3. Tracing tab → Select DLL → choose `uktrc95.dll` → set Log File Path → Start Tracing Now
+
+**Windows - SQL Server (Microsoft ODBC driver):**
+On Windows, ACE reaches SQL Server through a *Microsoft* ODBC driver, not an IBM/DataDirect one, so the
+`uktrc95.dll` steps above do not apply. Use the Microsoft Driver Manager tracing procedure instead:
+1. Log on with an account in the local Administrators group (needed for machine-wide tracing)
+2. From Administrative Tools, open **ODBC Data Source Administrator** - match the bitness of the ACE process (64-bit)
+3. **Tracing** tab → set the **Log File Path**
+4. Pick the tracing mode with the **Machine-Wide tracing for all user identities** check box. ODBC tracing
+   defaults to **per-user** mode, which captures only the identity you are logged on as. A node-managed
+   integration server normally runs under a service account, Local Service or Network Service, so tick
+   the box to capture it. Clear the box to return to per-user tracing. Click **Apply**
+5. **Start Tracing Now** → reproduce the failure → **Stop Tracing Now**. Tracing stops only when you click
+   Stop; until then the log keeps growing and every ODBC application on the box pays the performance cost
+6. Only ODBC calls from applications started **after** tracing began are logged, so start the trace
+   *before* restarting the integration server or replaying the message
+
+Reference: https://learn.microsoft.com/en-us/sql/odbc/admin/setting-tracing-options?view=sql-server-ver17
 
 **Linux/UNIX:**
 Edit `$ODBCSYSINI/odbcinst.ini`:

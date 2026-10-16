@@ -1,16 +1,24 @@
 
 
 CREATE COMPUTE MODULE EmailtoHTTP_HandleException
+	-- Preserves the original payload; the exception summary travels in Environment.Variables.Error (validated_rules.md s15). Error sink: trace by default - [CONFIGURE: error sink] when the brief names a queue, directory or topic.
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
-				
 		DECLARE messageNumber INTEGER;
 		DECLARE messageText CHAR;
-		CALL getLastExceptionDetail(InputExceptionList, messageNumber, messageText);
-		CALL CopyMessageHeaders();
-		SET OutputRoot.XMLNSC.Message.ProblemMessageNumber = messageNumber;
-		SET OutputRoot.XMLNSC.Message.ProblemMessageText = messageText;	
-		
+		CALL GetLastExceptionDetail(InputExceptionList, messageNumber, messageText);
+		CALL CopyEntireMessage();
+		IF messageNumber IS NULL AND messageText IS NULL THEN
+			IF Environment.Variables.SQL.Failed = TRUE THEN
+				SET messageNumber = Environment.Variables.SQL.Code;
+				SET messageText = 'Database failure: ' || COALESCE(Environment.Variables.SQL.ErrorText, 'see SQLState');
+			ELSE
+				SET messageText = 'No exception detail available';
+			END IF;
+		END IF;
+		SET Environment.Variables.Error.Number = messageNumber;
+		SET Environment.Variables.Error.Text = messageText;
+		SET Environment.Variables.Error.Flow = 'EmailtoHTTP';
 		RETURN TRUE;
 	END;
 

@@ -112,7 +112,7 @@ bob/
 ├── ace_modes/                   # ACE integration modes
 │   ├── README.md               # Detailed ACE modes documentation
 │   ├── Import-BobModes.ps1     # ACE-specific import script
-│   ├── ace-readme/             # Documentation generator (Bob mode only, no SKILL.md)
+│   ├── ace-readme/             # Documentation generator
 │   ├── ace-flow-builder/       # Flow builder
 │   ├── ace-flow-designer/      # Flow designer
 │   ├── ace-flow-harness/       # Deploy-and-test harness (provisions, deploys, runs, verifies)

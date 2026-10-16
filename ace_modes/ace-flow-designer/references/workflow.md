@@ -257,8 +257,10 @@ to the pattern; default every one to "standard / not specified":
 - **Ordering** - must messages be processed in order? (affects additional instances / threading).
 - **Idempotency** - is it safe to process the same message twice? (affects retry/dedup design).
 - **Security & credentials** - TLS, auth scheme, which credentials are needed. Record that
-  credentials go in the **ACE vault** (`ibmint set credential`), never in files - never
-  `mqsisetdbparms` for v13 server-managed runtimes.
+  credentials go in the **ACE vault**, never in files - never `mqsisetdbparms` on ACE 13. The
+  vault is the mechanism: the integration-server vault (`ibmint set credential`) for
+  independent/standalone servers, the node vault (`mqsivault`/`mqsicredentials`) for
+  node-managed servers.
 - **Scheduling** - for timer-driven flows: interval, calendar, missed-fire behaviour.
 - **Integration server name** - which integration server the flow will run on (e.g. `TestServer`,
   `PROD_IS`). This is one of ace-flow-builder's required Phase B1 answers, so capture it here rather than

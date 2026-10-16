@@ -1,10 +1,30 @@
 ---
 template_version: 1.1.0
-last_updated: 2026-07-09
+last_updated: 2026-10-05
 compatible_with: ACE Review v1.0.0+
 status: stable
 ---
 # ACE ESQL Coding Guidelines
+
+## Pre-scan: executable comments (Toolkit-invisible code)
+
+Review ESQL as the RUNTIME lexes it, not as the Toolkit shows it. Before any other
+guideline, grep every `.esql` file for these two forms:
+
+| Form | Syntax | Runtime | Toolkit |
+|---|---|---|---|
+| Block | `/*!{ ... }!*/`, any number of lines | contents executed | block comment |
+| Line | `--!{ ...` to end of line | rest of the line executed | line comment |
+
+`--@!{` / `--@!}` are NOT this: they are the Toolkit's generated-region markers and
+execute nothing. Measured on ACE 13.0.8.1 (2026-09-15, `Ace_test_cases/ExecutableComments`):
+the runtime strips the markers and tokenizes the contents in place, while the Toolkit
+editor, validator and `mqsicreatebar` see a comment. So:
+
+- Treat the contents as code for every other guideline in this file.
+- Report each occurrence as its own finding: **High - executable comment present
+  (Toolkit-invisible code)**, with file, line and the hidden statement. Code that skips
+  every IDE check and code review is a finding even when what it does is harmless.
 
 ## ESQL File Structure - Review Approach
 

@@ -1,0 +1,117 @@
+BROKER SCHEMA com.example.shop
+
+-- Pricing service base URL; declared on the QuoteWorker flow so a BAR override
+-- (com.example.shop.QuoteWorker#PricingServiceUrl=...) changes it per environment.
+DECLARE PricingServiceUrl EXTERNAL CHARACTER 'http://127.0.0.1:5003';
+
+-- QuoteWorker_Load (computeMode destinationAndMessage): keep the request in Environment
+-- (the HTTP calls replace the message body) and point the pricing GET at
+-- /prices/<sku>. A request that fails the rules here passed QuoteIntake's check, so it
+-- is a defect: throw, the catch path parks it.
+CREATE COMPUTE MODULE QuoteWorker_Load
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE req REFERENCE TO InputRoot.JSON.Data;
+
+		SET Environment.Variables.ActivityId = COALESCE(InputRoot.MQRFH2.usr.ActivityId, req.quoteId);
+		SET Environment.Variables.Quote = req;
+		IF NOT IsValidSku(req.sku) OR NOT IsValidQuantity(CAST(req.quantity AS CHARACTER)) THEN
+			THROW USER EXCEPTION MESSAGE 2951 VALUES('QuoteWorker: request fails the quote rules', req.sku);
+		END IF;
+
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = PricingServiceUrl || '/prices/' || req.sku;
+		-- GET carries no body
+		SET OutputRoot.Properties = InputRoot.Properties;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteWorker_Price (computeMode destinationAndMessage): reached from the pricing GET on
+-- out (2xx), error (non-2xx) or failure (no connection). Without a unit price the quote
+-- still goes out, marked 'unpriced', so the caller hears back either way. Builds the
+-- webhook body from Environment and points the POST at the request's callbackUrl.
+CREATE COMPUTE MODULE QuoteWorker_Price
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE q REFERENCE TO Environment.Variables.Quote;
+		DECLARE quantity INTEGER CAST(CAST(q.quantity AS CHARACTER) AS INTEGER);
+		DECLARE unitPrice INTEGER;
+		DECLARE discount INTEGER DiscountPercent(quantity);
+		DECLARE gross INTEGER;
+
+		IF CARDINALITY(InputExceptionList.*[]) = 0 AND InputRoot.JSON.Data.unitPriceCents IS NOT NULL THEN
+			SET unitPrice = CAST(InputRoot.JSON.Data.unitPriceCents AS INTEGER);
+		END IF;
+
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputLocalEnvironment.Destination.HTTP = NULL;
+		SET OutputLocalEnvironment.Destination.HTTP.RequestURL = q.callbackUrl;
+
+		SET OutputRoot.Properties = InputRoot.Properties;
+		CREATE LASTCHILD OF OutputRoot DOMAIN('JSON');
+		CREATE LASTCHILD OF OutputRoot.JSON NAME 'Data';
+		DECLARE outQuote REFERENCE TO OutputRoot.JSON.Data;
+		SET outQuote.quoteId = q.quoteId;
+		SET outQuote.requestId = q.requestId;
+		SET outQuote.customerId = q.customerId;
+		SET outQuote.sku = q.sku;
+		SET outQuote.quantity = quantity;
+		IF unitPrice IS NULL THEN
+			SET outQuote.state = 'unpriced';
+		ELSE
+			SET gross = unitPrice * quantity;
+			SET outQuote.unitPriceCents = unitPrice;
+			SET outQuote.discountPercent = discount;
+			SET outQuote.totalCents = gross - (gross * discount / 100);
+			CREATE LASTCHILD OF outQuote IDENTITY(JSON.Array)lines;
+			CREATE LASTCHILD OF outQuote.lines NAME 'Item' VALUE 'gross ' || CAST(gross AS CHARACTER);
+			CREATE LASTCHILD OF outQuote.lines NAME 'Item' VALUE 'discount ' || CAST(discount AS CHARACTER) || '%';
+			SET outQuote.state = 'priced';
+		END IF;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteWorker_Undeliverable: the webhook POST answered non-2xx or could not connect.
+-- Park the ORIGINAL request (from Environment) on the failed queue with the reason in
+-- MQRFH2.usr, so it can be replayed once the receiver is back.
+CREATE COMPUTE MODULE QuoteWorker_Undeliverable
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE reason CHARACTER 'webhook connection failed';
+		IF CARDINALITY(InputExceptionList.*[]) = 0 THEN
+			SET reason = 'webhook answered HTTP ' ||
+				COALESCE(CAST(InputRoot.HTTPResponseHeader."X-Original-HTTP-Status-Code" AS CHARACTER), 'unknown');
+		END IF;
+		SET OutputRoot.Properties = InputRoot.Properties;
+		SET OutputRoot.MQRFH2.usr.ActivityId = Environment.Variables.ActivityId;
+		SET OutputRoot.MQRFH2.usr.FailReason = reason;
+		SET OutputRoot.JSON.Data = Environment.Variables.Quote;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteWorker_Catch: anything thrown in the flow. The original queue message is kept
+-- whole (CopyEntireMessage) and gets the reason in MQRFH2.usr, then goes to the failed
+-- queue - the payload is never replaced by the exception summary.
+CREATE COMPUTE MODULE QuoteWorker_Catch
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE ex REFERENCE TO InputExceptionList.*[1];
+		DECLARE text CHARACTER '';
+		WHILE LASTMOVE(ex) DO
+			IF ex.Text IS NOT NULL THEN
+				SET text = ex.Text;
+			END IF;
+			MOVE ex LASTCHILD;
+		END WHILE;
+		CALL CopyEntireMessage();
+		SET OutputRoot.MQRFH2.usr.FailReason = text;
+		RETURN TRUE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
+	END;
+END MODULE;

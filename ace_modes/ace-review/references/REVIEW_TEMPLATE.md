@@ -364,4 +364,5 @@ The [Adapter Name] is a [assessment of design quality] ACE application that [sum
 **ACE Version:** [Version]  
 **Review Level:** [0/1/2/3]  
 **Review Focus:** [File types actually reviewed, e.g., ESQL + Flow Design + Java]  
+**Custom Rules:** [applied (N rules from custom-rules/rules.md) | none (custom-rules/rules.md empty)]  
 **Next Review:** [Date or trigger]

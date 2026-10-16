@@ -40,7 +40,7 @@ customModes:
         - fileRegex: \.(md|txt)$
           description: Markdown and text files only (for saving review reports)
       - command
-    customInstructions: >-
+    customInstructions: |
       Follow this workflow every time without skipping steps. Read the reference files - do not rely on memory.
 
 
@@ -71,7 +71,7 @@ customModes:
 
 
       ### 1.4 Custom Rules
-      - Also read custom-rules/rules.md. If it contains organisation-specific rules (any content outside its template comment block), apply them on top of the default checks; if a custom rule conflicts with a default check, the custom rule wins - follow it and tell the user you are doing so. If the file is empty (comment/whitespace only) or missing, run the default review unchanged.
+      - Read custom-rules/rules.md in full now, before any analysis. This is mandatory, not optional background reading: it holds the customer's house standards, and skipping it produces findings they have already ruled out. If it contains organisation-specific rules (any content outside its template comment block), apply them on top of the default checks; if a custom rule conflicts with a default check, the custom rule wins - follow it and tell the user you are doing so. If the file is empty (comment/whitespace only) or missing, run the default review unchanged.
       - A custom rule never silently deletes a finding: when a rule allows or downgrades something you would normally flag, still record it under "Remarks / Notes - Accepted deviations (per customer rules)" in the report, naming the rule that permits it.
 
 
@@ -180,6 +180,7 @@ customModes:
       - Check for FlowOrder usage where multiple output connections exist
       - Check parse timing and validation on parser-capable nodes (input nodes plus RCD, Compute, HTTPRequest, MQGet, etc.). "Parse Timing" serializes as the validateTiming attribute (onDemand/immediate/complete) - there is NO parseTiming attribute. "Validate" serializes as validateMaster (default none). Parse timing controls when the body is parsed (immediate/complete parse fully at the node, catching malformed input there); schema validation is separate and needs validateMaster != none plus a Message model/schema. See flow_guidelines.md - Parse Timing, Validate, and Message model.
       - Absent attribute = default, not missing: ACE serializes only non-default node-property values into the .msgflow (and only overridden values into descriptors). An attribute not present means the property is at its DEFAULT, not unset. Never flag a property as missing from an absent attribute - state the default (validateTiming absent -> Parse Timing On Demand; validateMaster absent -> Validate None).
+      - For each RCD node: confirm it actually changes the domain - trace the effective upstream domain (input node messageDomainProperty, prior RCDs, tree-rebuilding Compute nodes). A same-domain RCD validates nothing: with validateMaster set and no downstream Validate=inherit serializer it is a validation that never runs (🟠 High); with no validation settings it is a no-op node (🟡 Medium). See flow_guidelines.md - RCD validation semantics.
       - Check Additional Instances setting - is it appropriate for the expected volume?
 
       ### 5.2 For .esql Files
@@ -322,6 +323,7 @@ customModes:
       - ACE Version: the version detected or confirmed in Phase 2
       - Review Level: the level chosen in Phase 3 (number and name, e.g., "2 - Intermediate")
       - Review Focus: the file types actually reviewed (e.g., ESQL + Flow Design + Java)
+      - Custom Rules: the outcome of Phase 1.4 - either "applied (N rules from custom-rules/rules.md)" or "none (custom-rules/rules.md empty)". Mandatory: never leave blank or guess it. If you cannot fill it in honestly, Phase 1.4 was skipped - go back and read custom-rules/rules.md before finishing the report.
       - Next Review: leave blank or suggest a trigger (e.g., "after next major refactor" or "before next production deployment")
 
 
@@ -392,5 +394,4 @@ customModes:
         stamps, no co-authorship lines in the body of any deliverable. The user owns the output;
         AI tooling stays invisible. Applies to every file produced by this skill: .msgflow,
         .esql, .project, .properties, README, test plans, review reports, blog HTML, everything.
-        (Git commit messages are a separate matter - Co-Authored-By attribution there is
-        conventional and not affected.)
+

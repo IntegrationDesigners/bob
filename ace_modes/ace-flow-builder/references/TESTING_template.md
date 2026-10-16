@@ -74,10 +74,11 @@ ibmint apply overrides [project]\deploymentDescriptors\[FlowName]_LOCAL.properti
     --input-bar-file [Bundle].bar \
     --output-bar-file [Bundle]_LOCAL.bar
 
-# 6. Stage work_dir with the BAR + a server.conf.yaml that enables HTTPConnector
-#    on the chosen port and points the IS at the PolicyProject for default MQ
+# 6. Stage work_dir with the BAR, then put ALL server customisation (HTTPConnector
+#    port, remoteDefaultQueueManager -> PolicyProject) in work_dir\overrides\server.conf.yaml.
+#    NEVER edit or replace the generated work_dir\server.conf.yaml (validated_rules.md s19).
 xcopy /Y [Bundle]_LOCAL.bar work_dir\run\
-# (server.conf.yaml is generated separately - see Section 4 of validation_runbook.md)
+# (overrides\server.conf.yaml content - see Section 4 of validation_runbook.md)
 
 # 7. Start the standalone Integration Server
 IntegrationServer --work-dir work_dir --name [TestServerName] --console-log
@@ -88,6 +89,8 @@ If the flow doesn't have shared libs / PolicyProject, drop step 3 and stage the 
 If the flow has no external URLs to redirect, drop step 5.
 
 ## Test scenarios
+
+**Driver (Level 3):** `test/preflight.[ps1|sh]` probes the dependencies (run before deploy, and with `-AfterStart` once the server reports `BIP1991I`); `test/run-scenarios.[ps1|sh]` runs S1-S3 below and prints one `[S<n>] PASS|FAIL - <evidence>` line per scenario plus `[RESULT] <passed>/<total> PASS` (exit code = failures). Re-run: `powershell -NoProfile -ExecutionPolicy Bypass -File test\run-scenarios.ps1 [-HttpBase ...] [-Qmgr ...] [-MqContainer ...]` or `bash test/run-scenarios.sh` with `HTTP_BASE` / `QMGR` / `MQ_CONTAINER` in the environment. Last run: `[RESULT] [n]/[total] PASS` on [date]. The scenario prose below is what the scripts encode.
 
 ### S1 - Mock smoke test (no MQ required)
 
@@ -135,7 +138,10 @@ Two scenarios is usually enough. Adapt cases per flow design.
 ## Cleanup
 
 ```bash
-# Stop the IntegrationServer (Ctrl-C in its console)
+# Stop the IntegrationServer: Ctrl-C in its console, or by the PID on THIS run's admin port
+#   netstat -ano | findstr LISTENING | findstr :<adminPort>    -> PID in the last column
+#   taskkill /PID <pid> /F
+# Never `taskkill /IM IntegrationServer.exe /F` - that kills every integration server on the machine.
 
 # (Optional, only if you own the compose file) tear down the qmgr
 docker compose -f [path-to-compose.yaml] down

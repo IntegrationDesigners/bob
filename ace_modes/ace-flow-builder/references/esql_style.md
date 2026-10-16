@@ -7,7 +7,7 @@ status: stable
 
 # ACE ESQL Style & Readability Rules
 
-Thirteen rules captured from real flow-building sessions about how to *write* ESQL - naming, reference naming, single-use extraction, declaration placement, control flow, comments. Apply these while generating any `.esql` file in `ace-flow-builder`. They sit alongside `validated_rules.md` (which covers correctness - `MQRFH2`, `MQFMT_*`, etc.); style rules don't override correctness rules, they complement them.
+Fourteen rules captured from real flow-building sessions about how to *write* ESQL - naming, reference naming, single-use extraction, declaration placement, control flow, comments, file organisation. Apply these while generating any `.esql` file in `ace-flow-builder`. They sit alongside `validated_rules.md` (which covers correctness - `MQRFH2`, `MQFMT_*`, etc.); style rules don't override correctness rules, they complement them.
 
 Each rule has the same shape: rule statement → why it matters → ✅ Good → ❌ Bad → optional Nuance or Exception.
 
@@ -330,6 +330,18 @@ CALL CopyMessageHeaders();
 SET OutputRoot.JSON.Data.length = LENGTH(InputBody.Field);
 ```
 
+**Module header (confirmed by expert review, comparison pair 2, 2026-09-11, M3):** every compute module opens with a short WHY block, between `CREATE COMPUTE MODULE` and `Main()`, stating its contract - what it guarantees and the quirk that forces the shape. A module with no header comment is the shape to avoid.
+
+✅ **Good** - the pair-2 module
+```esql
+CREATE COMPUTE MODULE HttpToMq_Compute
+    -- The MQ payload must be byte-for-byte identical to the received HTTP body,
+    -- so OutputRoot is a straight copy of InputRoot and the BLOB is never
+    -- reparsed. The order id for the reply comes from a throwaway JSON parse
+    -- under Environment - a tree never serialised to any transport.
+    CREATE FUNCTION Main() RETURNS BOOLEAN
+```
+
 ---
 
 ### Rule 12 - No commented-out code
@@ -378,3 +390,28 @@ DECLARE bodyCursor REFERENCE TO InputRoot.JSON.Data;  -- no `ref` prefix
 ```
 
 **Note:** This is the one sanctioned exception to Rule 3 (no type prefixes) - `ref` marks a genuine, behaviourally-distinct category (tree cursor vs value), not a redundant restatement of the declared type.
+
+---
+
+## Files
+
+### Rule 14 - A flow's compute modules share one file
+
+The compute modules that implement one flow's steps (prepare, transform, build the reply) live together in one `.esql` file, in flow order. The standard `<Flow>_HandleException` module keeps its own file, as every template ships it. A module gets its own file only when several flows share it.
+
+**Why:** The reader follows one flow top to bottom in one file instead of hopping between files whose only difference is the module name. Nothing in the `.msgflow` changes: the schema triple (`BROKER SCHEMA`, folder, `esql://routine/<schema>#<Module>.Main`) does not care which file holds a module.
+
+✅ **Good** - one file, two modules (comparison pair 2)
+```
+com/mbl/httptomq/HttpToMq_Compute.esql          -- HttpToMq_Compute + HttpToMq_BuildReply
+com/mbl/httptomq/HttpToMq_HandleException.esql
+```
+
+❌ **Bad** - one module per file (comparison pair 2, classic)
+```
+com/cmp/httptomq/HttpToMq_PrepareOrder.esql
+com/cmp/httptomq/HttpToMq_BuildReply.esql
+com/cmp/httptomq/HttpToMq_HandleException.esql
+```
+
+**Origin:** expert review, comparison pair 2 (2026-09-11, M1).

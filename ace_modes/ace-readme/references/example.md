@@ -1,6 +1,6 @@
 ---
-template_version: 2.0.0
-last_updated: 2026-04-22
+template_version: 2.0.1
+last_updated: 2026-07-02
 compatible_with: ACE README v2.0.0+
 status: stable
 ---
@@ -8,7 +8,7 @@ status: stable
 
 ## Overview
 
-[to be requests from the user]
+The SapOrderAckAdapter receives order acknowledgement messages from SAP and feeds them into the internal integration landscape, supporting the outgoing order confirmation process toward trading partners. Acknowledgement files are picked up from a network share (or arrive via publish/subscribe), evaluated against configurable error, overrule, and priority translation tables, archived as XML and PDF, and announced to the B2B event system.
 
 ## Architecture
 
@@ -21,12 +21,12 @@ The adapter consists of two main message flows:
 
 ### Dependencies
 
-- **MappingUtilsLibrary** - Translation and mapping utilities
+- **MapHelperLib** - Translation and mapping utilities
 - **SapMessageLibrary** - SAP message definitions
-- **AdapterLibrary** - Common adapter patterns (MQInput, MQRetry, MQDrop, HandleQueueInput)
-- **B2BEventLibrary** - B2B event creation
-- **LoggingLibrary** - Centralized logging
-- **ArchivingLibrary** - File archiving
+- **CoreAdapterLib** - Common adapter patterns (MQInput, MQRetry, MQDrop, HandleQueueInput)
+- **EventBridgeLib** - B2B event creation
+- **AuditLogLib** - Centralized logging
+- **ColdStoreLib** - File archiving
 
 ## Flows
 
@@ -37,16 +37,22 @@ Loads acknowledgement files from a network directory and places them on an MQ qu
 
 #### Flow Design
 
-```
-File Input → ToSap (Reset Content) → HandleQueueInput → Load → MQ Header → MQ Output
-     ↓                                            ↓
-FlowFailure → Log                                Log
+```mermaid
+flowchart LR
+    FI[File Input] --> TS["ToSap (Reset Content)"]
+    TS --> HQ[HandleQueueInput]
+    HQ --> LD[Load]
+    LD --> MH[MQ Header]
+    MH --> MO[MQ Output]
+    FI -- failure --> FF[FlowFailure]
+    FF --> LOG1[Log]
+    HQ -- log --> LOG2[Log]
 ```
 
 #### Key Components
 
 1. **File Input** ([`LoadOrderAck.msgflow:22`](SapOrderAckAdapter/LoadOrderAck.msgflow:22))
-   - Monitors: `\\netwerk\dfs\Companies\ENTERPRISE\Applications\{ENV}ESB\Adapter\Load\SAP\Acknowledgement`
+   - Monitors: `\\fileserver\dfs\ExampleCorp\Applications\{ENV}ESB\Adapter\Load\SAP\Acknowledgement`
    - Pattern: `*` (all files)
    - Configurable via deployment properties
 
@@ -67,7 +73,7 @@ FlowFailure → Log                                Log
 
 | Property | TEST | PROD |
 |----------|------|------|
-| inputDirectory | `\\netwerk\dfs\Companies\ENTERPRISE\Applications\TestESB\Adapter\Load\SAP\Acknowledgement` | `\\netwerk\dfs\Companies\ENTERPRISE\Applications\ProdESB\Adapter\Load\SAP\Acknowledgement` |
+| inputDirectory | `\\fileserver\dfs\ExampleCorp\Applications\TestESB\Adapter\Load\SAP\Acknowledgement` | `\\fileserver\dfs\ExampleCorp\Applications\ProdESB\Adapter\Load\SAP\Acknowledgement` |
 | filenamePattern | `*` | `*` |
 | Log_ElasticPrefix | `adpt-sap-orderack-outgoing-load` | `adpt-sap-orderack-outgoing-load` |
 
@@ -79,17 +85,22 @@ Processes acknowledgement messages from the queue, determines error status, arch
 
 #### Flow Design
 
-```
-MQInput → HandleQueueInput → ToSap → Process → (Success)
-              ↓                    ↓
-           Log/Retry/Drop      InvalidInput → Drop/Retry
+```mermaid
+flowchart LR
+    MQI[MQInput] --> HQ[HandleQueueInput]
+    HQ --> TS[ToSap]
+    TS --> PR[Process]
+    PR --> OK([Success])
+    HQ -- error --> LRD[Log / Retry / Drop]
+    TS -- invalid input --> II[InvalidInput]
+    II --> DR[Drop / Retry]
 ```
 
 #### Key Components
 
 1. **MQInput** ([`ProcessOrderAck.msgflow:40`](ProcessOrderAck.msgflow:40))
    - Source queue: `ADPT.SAP.ORDERACK.IN`
-   - Uses AdapterLibrary MQInput subflow
+   - Uses CoreAdapterLib MQInput subflow
 
 2. **HandleQueueInput** ([`ProcessOrderAck.msgflow:43`](ProcessOrderAck.msgflow:43))
    - Standard queue input handling
@@ -131,8 +142,8 @@ Processes acknowledgements based on message type:
 
 Errors can be overruled (treated as successful) via translation tables:
 
-- **Recipient-specific**: `ERR{messagekey}:{recipient}` → `{errorCode}`
-- **Global**: `ERR{messagekey}` → `{errorCode}`
+- **Recipient-specific**: key `ERR{messagekey}:{recipient}` resolves to `{errorCode}`
+- **Global**: key `ERR{messagekey}` resolves to `{errorCode}`
 - Checks both message-specific table and default `ERR_TABLE_DEFAULT` table
 
 **Important behavior**: If ANY error is overruled, the entire acknowledgement is treated as APPLIED, even if other non-overruled errors exist.
@@ -141,8 +152,8 @@ Errors can be overruled (treated as successful) via translation tables:
 
 Certain errors take precedence and stop further processing:
 
-- **Recipient-specific**: `{messagekey}:{recipient}` → `{errorCode}`
-- **Global**: `{messagekey}` → `{errorCode}`
+- **Recipient-specific**: key `{messagekey}:{recipient}` resolves to `{errorCode}`
+- **Global**: key `{messagekey}` resolves to `{errorCode}`
 - Checks both message-specific table and default `PRIO_TABLE_DEFAULT` table
 
 When a prioritized error is found, it's immediately returned without checking remaining messages.
@@ -162,7 +173,7 @@ Archives both XML and PDF files:
 
 **Example:**
 ```
-\\netwerk\dfs\Companies\ENTERPRISE\Applications\TestESB\Inhouse\Archive\OrderAck\PARTNER01\2026\02\19\
+\\fileserver\dfs\ExampleCorp\Applications\TestESB\Inhouse\Archive\OrderAck\PARTNER01\2026\02\19\
   ├── 123e4567e89b12d3a456426614174000.xml
   └── 123e4567e89b12d3a456426614174000.pdf
 ```
@@ -249,7 +260,7 @@ DEFINE SUB('SAP Outgoing OrderAck')
 
 - Enabled by default (`Log_ToElastic = true`)
 - Prefix: `adpt-sap-orderack-outgoing` (process) / `adpt-sap-orderack-outgoing-load` (load)
-- Structured logging via LoggingLibrary
+- Structured logging via AuditLogLib
 
 ---
 
@@ -305,16 +316,16 @@ DEFINE SUB('SAP Outgoing OrderAck')
 - **Logging/Monitoring** - Elastic Search for log aggregation
 
 **Shared libraries:**
-- **MappingUtilsLibrary** - Translation functions
+- **MapHelperLib** - Translation functions
 - **SapMessageLibrary** - Message schemas
-- **AdapterLibrary** - Common patterns
-- **B2BEventLibrary** - Event creation
-- **LoggingLibrary** - Logging
-- **ArchivingLibrary** - File archiving
+- **CoreAdapterLib** - Common patterns
+- **EventBridgeLib** - Event creation
+- **AuditLogLib** - Logging
+- **ColdStoreLib** - File archiving
 
 
 ---
 
 ## Summary
 
-The SapOrderAckAdapter is an ACE v12 application that bridges SAP SAP acknowledgement messages into the internal integration landscape. Files are picked up from a network directory, queued, processed with type-specific error determination (including overrule and prioritisation tables), archived as both XML and PDF, and announced to the B2B event system as a `Received`/`Sent` event pair. Key operational characteristics: persistent MQ messaging, configurable short and long retry paths, Elastic Search log aggregation under the `adpt-sap-orderack-outgoing` prefix, and per-recipient day-partitioned archive directories.
+The SapOrderAckAdapter is an ACE v12 application that bridges SAP acknowledgement messages into the internal integration landscape. Files are picked up from a network directory, queued, processed with type-specific error determination (including overrule and prioritisation tables), archived as both XML and PDF, and announced to the B2B event system as a `Received`/`Sent` event pair. Key operational characteristics: persistent MQ messaging, configurable short and long retry paths, Elastic Search log aggregation under the `adpt-sap-orderack-outgoing` prefix, and per-recipient day-partitioned archive directories.

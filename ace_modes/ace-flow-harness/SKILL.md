@@ -2,10 +2,10 @@
 name: ace-flow-harness
 description: "Use this skill when the user wants to actually STAND UP an IBM ACE test environment and RUN an end-to-end deploy-and-test cycle - not just design test cases. It installs dependency JARs (SupportPac / 3rd-party libraries), provisions the test environment, deploys policy projects and applications in order with ibmint, starts an integration server (waits for BIP1991I), drives the flow over HTTP/file/MQ, and verifies results. Triggers on 'set up a test harness for my flow/SupportPac', 'automate deploy and test', 'install dependencies and run the flow', 'create a deploy_and_test script', 'stand up an integration server and test it', 'add shared-classes and deploy the policy + app'. Produces executable scripts (.bat/.sh) plus a harness README following a canonical template. Use ace-flow-test FIRST to design the test cases (plan only, no execution); use this skill to provision and execute. Use ace-flow-builder to build the flow itself."
 metadata:
-  variant_version: 1.0.1
+  variant_version: 1.1.1
   parent_mode: ace-flow-builder
   sibling_modes: [ace-flow-test, ace-flow-builder]
-  last_updated: 2026-07-02
+  last_updated: 2026-08-28
   status: stable
 ---
 
@@ -88,7 +88,15 @@ box" failures:
 The skill runs these in order and refuses to reorder the load-bearing steps.
 Each step is explained in `references/harness_template.md`.
 
-0. **Source the ACE environment** - `ibmint`/`IntegrationServer`/`mqsi*` are not on
+0a. **Read the repo's own harness docs - ALL of them - before running anything.**
+   If a `testing/` tree exists, enumerate and read `testing/README.md` **and every
+   per-topology README** (`standalone-server/`, `docker/`, `node-managed/`), not just
+   the index plus the first topology you happen to run. Each topology README carries
+   constraints the index and the scripts do not encode - which shared-classes level
+   the jars go to, the port map, the documented cleanup verbs, the known issues.
+   Reading one topology's doc does not transfer to the others. This is a gate, not
+   a suggestion: skipping it is the most common way this skill gets it wrong.
+0b. **Source the ACE environment** - `ibmint`/`IntegrationServer`/`mqsi*` are not on
    PATH until you source the ACE profile (`mqsiprofile.cmd` on Windows,
    `mqsiprofile` on Linux). The standalone pattern is a wrapper script
    (`run-test-with-ace-env.bat`) that sources the profile, then calls the harness.
@@ -96,7 +104,10 @@ Each step is explained in `references/harness_template.md`.
 1. **Install dependencies** - impl jar → `server/jplugin`, tool jar → `tools/plugins`,
    3rd-party libs → shared-classes (location per topology).
 2. **Provision test env** - create work dir + `{keys,input,output}` (or equivalent),
-   copy test data / keys, set config (`server.conf.yaml`, overrides).
+   copy test data / keys, set config in `<work_dir>/overrides/server.conf.yaml` only
+   (Overrides-only rule - never write the base `server.conf.yaml`; ACE layers it over
+   built-in defaults, so a rewritten base file starts fine and silently drops every
+   generated setting).
 3. **Place shared-classes** - copy the full dependency set (e.g. `bcprov` + `bcpg`
    + `bcutil`) into the topology-correct shared-classes dir.
 4. **Deploy - policy project(s) FIRST, then application(s)** - `ibmint deploy
@@ -113,44 +124,67 @@ Each step is explained in `references/harness_template.md`.
    compare original vs result (`fc /B` on Windows, byte compare on *nix); scan logs
    for `BIP*E:` errors.
 9. **Report + teardown** - summarize, point at logs, leave the server running for
-   inspection or stop it (`taskkill /F /FI "WINDOWTITLE eq <server>*"` / `docker stop`).
+   inspection or stop it by matching its `--work-dir` in the process command line
+   (never by window title or process name: other servers on the box are not yours) /
+   `docker stop`.
 
 ## Load-Bearing Gotchas (always check / explain)
 
-These are baked into the template because each one has bitten a real run:
+Each one has bitten a real run. The full checklist, with the why behind every item, is
+section 6 of `references/harness_template.md`, and section 6a holds the traps that only
+bite under CI or an agent. **Before hand-over, walk 6 and 6a item by item and say which
+hold** - this file keeps only the ones that cost the most when missed:
 
-- **Source the ACE env first.** `ibmint`/`IntegrationServer`/`mqsi*` aren't on PATH
-  until `mqsiprofile` is sourced. Skipping it gives `'ibmint' is not recognized` -
-  the #1 "it doesn't work on a clean machine / in CI" cause. Use the wrapper-script
-  pattern (`run-test-with-ace-env.bat` → `deploy_and_test.bat`).
-- **Deploy before start.** Work-dir deploys (`ibmint deploy --output-work-directory`)
-  must complete before `IntegrationServer` starts, or the app/policies aren't picked up.
-- **Policies before app.** The app's policy references resolve only if the policy
-  project is already deployed.
-- **shared-classes location is topology-specific** (see table above).
-- **Ship the *whole* dependency set.** E.g. BouncyCastle needs `bcprov` + `bcpg`
-  **and** `bcutil` (bcutil provides relocated/back-compat classes); missing one
-  fails at runtime, not deploy.
-- **Wait on `BIP1991I`, not on a timer.** Poll the events log; a fixed sleep is flaky.
-- **Clean stale `config/.lock`** from a previous crashed run before restart.
-- **Binary compare for round-trips.** Use `fc /B` (Windows) - a text compare can
-  mask trailing-newline / encoding differences.
-- **Passphrase / secret handling** for crypto flows - keep out of committed scripts;
-  inject via policy/override or env.
+- **Source the ACE env first** (`mqsiprofile` via the wrapper pattern) - `'ibmint' is
+  not recognized` is the #1 "fails on a clean machine / in CI" cause.
+- **Deploy before start, policies before the app** - work-dir deploys are not hot-loaded.
+- **Wait on `BIP1991I`**, never a fixed timer - and never `timeout /t` in a `.bat`
+  (a no-op once output is redirected; use `ping 127.0.0.1 -n <secs+1> >nul`).
+- **`call` every `mqsi*.cmd` tool** - without it control never returns and the run
+  reads as a passing step that stopped early.
+- **The harness runs, it is not handed over unrun.** This skill executes: write the
+  script, then run it and report each scenario's result. A harness handed back as "run
+  this yourself" is an unfinished step. Before the first run, parse-check the script in
+  its own shell (PowerShell: `[System.Management.Automation.Language.Parser]::ParseFile`;
+  bash: `bash -n`). Shell syntax does not travel: bash here-strings (`<<<`, `<<EOF`) do
+  not exist in PowerShell - pipe MQSC in instead (`$mqsc | docker exec -i QM1 runmqsc QM1`).
+  A generated PowerShell harness with `<<<` did not even parse (2026-10-13).
+- **Queue checks measure each scenario's own effect.** Assert the change in depth around
+  a scenario, or drain the queue right before it, never an absolute depth: a poison
+  message from an earlier run reaches the error queue only after its redeliveries, so it
+  can land after the next run's "clear queues" and fail an unrelated scenario (three
+  reruns failed T1 on a leftover T5 message, 2026-10-13).
+- **Drive a worker flow through its real producer.** A message hand-put on the queue
+  (`amqsput`, no MQRFH2) arrives in a different shape than one the intake flow wrote, and
+  a hand probe passed while every real job failed (2026-10-12). Normal scenarios go in at
+  the front door; direct puts only for poison and malformed-shape cases.
+- **External directory vault: `--ext-vault-key`, not `--vault-key`.** When the server's
+  overrides name `Credentials: ExternalDirectoryVault`, start it with
+  `IntegrationServer --work-dir <wd> --ext-vault-key <key>`; `--vault-key` is the work
+  directory's own vault and fails with BIP9964E even with the right key (2026-10-13).
+- **A blocker read from configuration is a hypothesis.** Before stopping as blocked
+  (a missing credential, channel authentication, a queue that "must" exist), make the
+  cheapest real attempt - deploy and start with what exists, or blank the setting that
+  cannot resolve - and stop only on the BIP or MQRC that attempt produced, quoted.
+  Concretely: BIP2688E on an MQ `securityIdentity` is answered by blanking the identity and
+  redeploying, not by asking for a password - a local developer queue manager usually
+  takes the connection without one, and a channel's CHCKCLNT read from MQSC predicts
+  nothing until a connection is tried (a chain stalled on this twice, 2026-10-12).
+- **A container dying between `BIP1990I` and `BIP1991I`** is usually a version-gated
+  startup block (ACE 13.0.8 call-home), not a harness bug - read the BIP id first.
 
 ## Parameters (the "harness manifest")
 
-If the repo already has a `testing/` tree, **its own docs are the source of truth** -
-read `testing/README.md` (and topology READMEs), the wrapper + harness scripts, the
-`install-<pac>` script, and `Deploymentdescriptors/*.properties` first, and reuse
-those values verbatim. The template fills gaps and explains *why*; it does not
-override a working documented setup.
+The repo's own docs are the source of truth - see lifecycle step **0a**, which is a
+hard gate. Reuse the values in those docs verbatim, along with the wrapper + harness
+scripts, the `install-<pac>` script, and `Deploymentdescriptors/*.properties`. The
+template fills gaps and explains *why*; it never overrides a working documented setup.
 
 Gather these before generating; ask only for what you cannot infer from the repo:
 
 | Parameter | Example | Notes |
 |-----------|---------|-------|
-| `ACE_VERSION` / `ACE_HOME` | `13.0.7.0` / `C:\Program Files\IBM\ACE\13.0.7.0` | autodetect newest if unset |
+| `ACE_VERSION` / `ACE_HOME` | `13.0.8.1` / `C:\Program Files\IBM\ACE\13.0.8.1` | make it overridable (`if not defined ACE_VERSION set ...`), do not hardcode |
 | `TOPOLOGY` | `standalone` \| `docker` \| `node-managed` | drives shared-classes location |
 | `SERVER_NAME` / `SERVER_WORK_DIR` | `TEST_SERVER_PGP` / `C:\temp\pgp\TEST_SERVER_PGP` | |
 | `HTTP_PORT` / `ADMIN_PORT` | `7800` / `7600` | verify listener on HTTP_PORT |
@@ -205,15 +239,12 @@ Skill: Confirms the harness manifest (ports, work dir, deps), generates/uses a
 - `references/examples/pgp_supportpac_harness_example.md` - worked reference
   implementation (PGP SupportPac: BouncyCastle deps, PGP policies, encrypt/decrypt
   round-trip) across standalone + Docker topologies.
+- `references/language_semantics_probe.md` - when the question is how the parsers treat a
+  syntax construct (one app per variant, per-parser verdicts from BIP logs, must-fail canary).
 
 Companion (different responsibility):
-- `ace-flow-test/references/examples/http_pgp_flow_test_example.md` - the *test
-  plan* counterpart for the same PGP flow (scenarios/checklists, no execution).
-
-## Version History
-
-- **1.0.0** (2026-06-15) - Initial release. Template + lifecycle distilled from the
-  PGP SupportPac standalone/Docker/node-managed harnesses.
+- the **ace-flow-test** skill - its worked HTTP/PGP example is the *test plan*
+  counterpart for the same flow (scenarios/checklists, no execution).
 
 ## Output Hygiene
 

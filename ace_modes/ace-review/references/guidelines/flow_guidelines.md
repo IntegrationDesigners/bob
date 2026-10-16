@@ -33,7 +33,7 @@ There is no upper or lower limit to the number of nodes that is ideal for a gene
 
 ### Examples of Unnecessary Nodes
 
-1. **RCD and Validate Node Together** - The RCD can validate as well; no need for a separate validate node.
+1. **RCD and Validate Node Together** - redundant ONLY when the RCD genuinely changes the domain AND validates (`validateMaster` set) AND parses fully at the node (`validateTiming` = `complete`/`immediate`) against the same model - only then is the whole message already validated at the RCD. In every other configuration the Validate node is the one doing the real work: an RCD validates only what it causes to be parsed, and the Validate node additionally serialises internally, catching write-side classes (invalid characters) the RCD parse path does not. Work through "RCD validation semantics" below before flagging this pair.
 2. **Multiple Compute Nodes for Routing or Propagation** - Multiple propagations can be handled in a single compute node.
 3. **Redundant Transformation Nodes** - Combine transformations where possible.
 
@@ -235,6 +235,35 @@ Key facts (IBM "Validation properties" and "JSON validation", ACE 13):
 **Absent attribute = default value, not missing.** ACE serializes only *non-default* property values into the `.msgflow` (and only *overridden* values into BAR override / deployment-descriptor files). An attribute that is not present means the node is using that property's **default** - it is not "unset", "missing", or "not configured". So `validateTiming` absent means Parse Timing is at its default **On Demand**; `validateMaster` absent means Validate is at its default **None**. Never flag a property as missing because its attribute is not in the XML - state the default instead. (This is the same principle the promoted-properties cross-check relies on: node default vs descriptor override vs expected value.)
 
 The RCD node type in the `.msgflow` is `ComIbmResetContentDescriptor.msgnode` (from the node's `xmi:type`). For any other node, read the actual `xmi:type` from the `.msgflow` rather than assuming the type string - the same discipline as reading the property attributes.
+
+### RCD validation semantics - validation runs only where a parse happens
+
+Measured on ACE 13.0.8.1 (real deploys, four-revision harness run), not inferred from documentation:
+
+1. **An RCD validates exactly what it causes to be parsed, at the node where that parse happens.** No domain change = it validates nothing; it only stamps validation options that the next serializer inherits (Validate = `inherit`) or discards.
+2. Domain change + Parse Timing `complete`/`immediate` = the whole message is parsed and validated at the RCD itself (BIP5025 raised at `ImbResetContentDescNode::evaluate`).
+3. Domain change + Parse Timing absent (= On Demand, the default) = lazy: each element is validated only when a downstream reference forces its parse, at that node; content nothing ever references is never validated.
+4. **The Validate node serialises internally** - it catches write-side classes (e.g. the 0x1a invalid-character case) at the node itself. It is not interchangeable with RCD validation.
+5. Consequence of 1: a same-domain RCD with validation configured parses nothing, validates nothing, and its stamp dies at the first non-validating serializer. **A validation that never ran looks exactly like a validation that passed.**
+
+BIP fingerprints when run logs are available: parse-side schema violations = BIP5025; write-side = BIP5026; output validation wraps as BIP5010E around BIP5009E/BIP5004E; BIP5004 at a Validate node is its internal serialisation catching invalid characters.
+
+**Reviewer decision procedure** - for each `ComIbmResetContentDescriptor.msgnode` in the flow:
+
+1. **Does it change the domain?** `resetMessageDomain` absent or `"false"` means no domain change regardless of what `messageDomain` says. If `"true"`, compare `messageDomain` against the **effective upstream domain**: the nearest upstream domain-setting point, i.e. the input node's `messageDomainProperty` (absent = that node type's default - state the default), a prior RCD with `resetMessageDomain="true"`, or a Compute/Mapping node that rebuilds the tree (read the ESQL/map to see which domain it builds under `OutputRoot`).
+2. **Trace indeterminate?** (subflow boundary, dynamic domain, ESQL you cannot resolve) -> report "cannot confirm statically - verify", explicitly labeled as unresolved. Never promote an unresolved trace to a defect.
+3. **Classify:**
+   - **🟠 High** - same-domain (or no-reset) RCD with `validateMaster` set and **no** downstream serializing/output node on the path with Validate = `inherit`: validation is configured where it can never run. This is the incident class this section exists for.
+   - **🟢 Low / informational** - same-domain RCD with `validateMaster` set and a downstream `inherit` consumer: functional but obscure (output validation armed via the stamp); recommend making validation explicit at the node that serialises.
+   - **🟡 Medium** - same-domain RCD with no validation settings: a no-op node; fold into the unnecessary-nodes finding. Caveat: an RCD can also reset message set/type/format without a domain change - if other `reset*` attributes are present on the node, do not call it a no-op (see the gate below).
+   - **🟡 Medium** - domain-changing RCD with `validateMaster` set and `validateTiming` absent: On Demand validation is lazy and unreferenced content is never validated. If the intent is boundary validation, recommend explicit `validateTiming="complete"`.
+   - Domain-changing RCD without validation settings: fine - say nothing.
+
+**Attribute verification gate:** key findings only on attributes verified on a real deploy: `messageDomain`, `resetMessageDomain`, `validateMaster`, `validateFailureAction`, `validateTiming`. The set/type/format reset attributes are product-plausible but not yet verified - before conditioning a finding on them, confirm their serialized names from a real `.msgflow` rather than guessing (same discipline as the `validateTiming`/`parseTiming` trap above).
+
+**Validate node (`ComIbmValidate`) with a JSON schema** - the builder's rules (the ace-flow-builder skill's `references/msgflow_format.md`, Validate section, 2026-08-30), seen from the review side; a review on 2026-10-12 contradicted the first one, and a deploy that day confirmed the second:
+- `validateFailureAction` `exception` and `exceptionList` both route a validation failure to the node's `failure` terminal (`exceptionList` adds the detail chain); only `userTrace` / `localError` just log. A 400 path wired from `failure` with either action is correct - not a finding.
+- `checkSet="true"` with `set="<x>.schema.json"` needs the same schema bound on the upstream input node (`messageSetProperty`). Without it EVERY message fails (ERROR_CODE 4162), valid ones included: **🟠 High**, the happy path never runs.
 
 ### JSON Schema Version Compatibility
 

@@ -7,7 +7,7 @@ status: beta
 
 # ACE Flow Validation Runbook
 
-Loaded by Phase B5 (Post-Build Validation) when the user picks level 2 (build + deploy) or level 3 (build + deploy + run). Contains the per-node-type dependency probes, override-file generation, multi-project staging, mock patterns, scenario template, output verification, credential handling, cleanup, and edge cases.
+Loaded by Phase B5 (Post-Build Validation) when the user picks level 2 (build + deploy) or level 3 (build + deploy + run). Contains the per-node-type dependency probes, override-file generation, multi-project staging, mock patterns, scenario template, output verification, credential handling, cleanup, edge cases, and (Section 13) the generated scenario driver and pre-flight probe that Level 3 runs instead of driving scenarios by hand.
 
 Phase B5 in `workflow.md` is the **orchestrator**; this runbook is the **how**.
 
@@ -103,29 +103,21 @@ ibmint package --input-path stage \
 
 Reaching MQ from the IS - especially in CLIENT mode against a Docker QM1 - requires an MQEndpoint policy. Convention: a separate `PolicyProject` deployable that defines the policy.
 
-### Minimal `DefaultMQInsecureLocal` policy
+### Policy shape
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<policies>
-  <policy policyType="MQEndpoint" policyName="DefaultMQInsecureLocal" policyTemplate="MQEndpoint">
-    <connection>CLIENT</connection>
-    <queueManagerHostname>localhost</queueManagerHostname>
-    <listenerPortNumber>1414</listenerPortNumber>
-    <queueManagerName>QM1</queueManagerName>
-    <channelName>INSECURE.APP.SVRCONN</channelName>
-    <securityIdentity></securityIdentity>
-  </policy>
-</policies>
-```
+One skeleton only, kept in `msgflow_format.md` ("MQ client connections: MQEndpoint policy") - the shape Toolkit writes (`policyTemplate=""`, no `version` attribute). Prefer a policy copied from the user's own workspace (Phase B0.5) over the skeleton. Do not maintain a second copy here.
 
-### Wiring in `server.conf.yaml`
+The property name is `destinationQueueManagerName`, NOT `queueManagerName`. An MQEndpoint policy with a missing required property does not fail gracefully: on 13.0.8.1 it crashes the MQQM monitor thread and takes the whole integration server down in a restart loop. Crash signature to watch for: `Invalid configuration message with no value for attribute`.
+
+### Wiring in `overrides/server.conf.yaml` - never in the base file
 
 ```yaml
+# <work_dir>/overrides/server.conf.yaml  (standalone)
+# <node>/servers/<server>/overrides/server.conf.yaml  (node-managed)
 remoteDefaultQueueManager: '{PolicyProject}:DefaultMQInsecureLocal'
 ```
 
-This top-level key tells the IS that any flow not naming its own policy should reach MQ via `DefaultMQInsecureLocal` from the `PolicyProject`.
+This top-level key tells the IS that any flow not naming its own policy should reach MQ via `DefaultMQInsecureLocal` from the `PolicyProject`. It goes in the **overrides** file: the generated `server.conf.yaml` (and `node.conf.yaml`) is never edited or replaced - ALL customisation lives in `overrides/*.yaml`, which the server merges over the base at startup (`validated_rules.md` §19). A validation run that writes the base file has failed Phase B5 even if the server starts.
 
 **Common mistake - do NOT use these keys**, they aren't recognized in v13:
 
@@ -157,11 +149,22 @@ If the channel needs auth, store credentials in the vault keyed to the policy na
 
 ---
 
-## Section 4 - `server.conf.yaml` customisation
+## Section 4 - server customisation goes in `overrides/server.conf.yaml`
 
-A local-validation `server.conf.yaml` typically needs:
+**Step 0 - initialise the work directory.** Before staging anything, run:
+
+```bash
+mqsicreateworkdir <work_dir>
+```
+
+A hand-made folder holding only `server.conf.yaml` and `run/` is rejected: `ibmint` and `IntegrationServer` both fail with `BIP15242E Missing required subdirectory config\common\log`. Staging files into a bare folder is not enough (verified 13.0.8.1).
+
+**Step 1 - leave the generated `server.conf.yaml` alone.** `mqsicreateworkdir` writes a ~1000-line `server.conf.yaml` in which every key is documented and commented out; that file is read-only reference material and is never edited or replaced. ALL customisation is written to `<work_dir>/overrides/server.conf.yaml`, which the server merges over the base at startup. The same rule holds for node-managed servers (`<node>/servers/<server>/overrides/server.conf.yaml`) and for the node (`<node>/overrides/node.conf.yaml`) - `validated_rules.md` §19.
+
+A local-validation `overrides/server.conf.yaml` typically needs:
 
 ```yaml
+# <work_dir>/overrides/server.conf.yaml - the ONLY file this skill writes.
 # Default policy project for MQ - TOP-LEVEL key, NOT under a sub-block.
 # Format: '{PolicyProject}:PolicyName'.
 # Do NOT use defaultPolicyProject / defaultPolicyProjects - see Section 3.
@@ -180,7 +183,9 @@ ResourceManagers:
     jvmSystemProperty: '-Djavax.net.debug=all'
 ```
 
-Generate this file in `work_dir/server.conf.yaml` before starting `IntegrationServer`. Probe for port collisions (Section 9) and offer alternates.
+Write this file to `<work_dir>/overrides/server.conf.yaml` before starting `IntegrationServer` (create the `overrides` folder if `mqsicreateworkdir` did not). Probe for port collisions (Section 9) and offer alternates - the port change goes in the same overrides file.
+
+**Post-deploy check (mandatory in Phase B5):** the base `<work_dir>/server.conf.yaml` is byte-identical to a freshly generated one (compare against a scratch `mqsicreateworkdir` output, or at minimum confirm its line count is still ~1000 and it contains no uncommented `remoteDefaultQueueManager`). Any difference fails the validation.
 
 ### Windows-specific: set codepage 1252 before launching SIS
 
@@ -334,9 +339,31 @@ The ACE vault is the **only** mechanism Phase B5 should suggest. `mqsisetdbparms
 
 ### About the vault
 
-For a single independent integration server, the vault is **created implicitly** the first time you call `ibmint set credential --work-directory <dir>` against that work directory - you don't need a separate "create" step.
+A vault must exist **before** credentials can be inserted - `ibmint set credential`
+against a missing vault fails with `BIP10003E` - and before starting the runtime that
+reads it. Order: create vault, add credentials, start the server with the vault key.
+Two creation options, both explicit:
 
-`ibmint create vault` is for **external directory vaults** that are shared across multiple servers/nodes. The syntax for that is different (positional path + optional key flag); skip it for single-server validation.
+- **Work-dir (independent server) vault** - private to that server; what
+  single-server validation uses. There is no ibmint equivalent for this create, so
+  this is the one place `mqsivault` is still required (verified on ACE 13.0.8.1):
+
+  ```bash
+  mqsivault --work-dir <work_dir> --create --vault-key <key>
+  ```
+
+- **External directory vault** - shared by any number of servers/nodes, lives outside
+  any work directory (positional path argument):
+
+  ```bash
+  ibmint create vault <vault_directory> --external-directory-vault-key <key>
+  ```
+
+Interface preference: use `ibmint` for every vault/credential operation it covers
+(create external vault, set/unset credential, display credentials, import/export
+credentials, update vaultrc); reach for `mqsivault` only where ibmint has no
+equivalent - creating or destroying a work-dir or node vault. (A node vault can also
+be created at node-creation time: `ibmint create node ... --vault-key <key>`.)
 
 ### Add or update a credential
 
@@ -482,6 +509,19 @@ If the message body genuinely needs newlines (e.g. CSV, multi-line text), use `m
 
 This trap surfaces during S2 every time the test data file is JSON-pretty-printed. The fix is the `tr -d '\n'` prefix.
 
+### Putting a test message when the host has no MQ client - decide once, do not re-derive
+
+Both comparison runs spent turns rediscovering this. Pick the first row that applies and say which one you picked:
+
+| Situation | Put the message with |
+|---|---|
+| `amqsput` on PATH (full MQ install or client with samples) | `tr -d '\n' < sample.json \| amqsput <queue> <QMGR>` (local binding) or the same with `MQSERVER='<channel>/TCP/<host>(<port>)'` exported for a client connection |
+| Queue manager in Docker, no host client | `tr -d '\n' < sample.json \| docker exec -i <container> /opt/mqm/samp/bin/amqsput <queue> <QMGR>` - a read/put through the container's own samples, not a change to the container |
+| No client and no container access, MQ web console enabled | MQ REST messaging: `POST https://<host>:9443/ibmmq/rest/v3/messaging/qmgr/<QMGR>/queue/<queue>/message` with `ibm-mq-rest-csrf-token: x` and basic auth (the Docker dev image maps 9443 only if the compose file publishes it) |
+| Payload must keep its newlines | `mqput`/`mqput2` from the MQ samples, or the REST API - never `amqsput` |
+
+Whichever row: the queue depth check afterwards is `DISPLAY QLOCAL(<queue>) CURDEPTH` via `runmqsc` (local or `docker exec`), read-only.
+
 ---
 
 ## Section 9 - Output verification by node type
@@ -509,7 +549,7 @@ ss -tnlp | grep -E ':(7600|7800|7801)\b'
 netstat -ano | findstr "7600 7800 7801"
 ```
 
-If a port is occupied, offer the next free port (`7602`, `7802`, `7803`...) and update `server.conf.yaml` accordingly.
+If a port is occupied, offer the next free port (`7602`, `7802`, `7803`...) and set it in `overrides/server.conf.yaml` (never the base file - Section 4).
 
 ---
 
@@ -543,6 +583,13 @@ Generated flows that follow this skill's patterns log structured status strings 
 
 Per-flow, the skill should know what status strings are expected (from the generated ESQL). Compose the watch-list during B5.
 
+### Log hygiene - how to read the logs, and what never to paste
+
+- Find, do not dump: `grep` / `Select-String` the console and events logs for the BIP code you are waiting for (`BIP1991I` started, `BIP2269I` deployed, `BIP1145I` listener) or for the scenario's status string; tail the last 20-40 lines only when the marker is missing.
+- Never paste a whole log into the reply, into `TESTING.md` or into `flow_state.md`. Quote the matched line plus the two lines around it, and name the log file path so the reader can open it.
+- The evidence block per scenario is the matched lines: HTTP status, `CURDEPTH` before/after, row counts, BIP codes. That is what the main conversation and Phase B4 read; a log dump is what they must not be made to read (measured on two comparison pairs: validation turns re-reading console output are where the cost goes).
+- Capture a harness script's own `[STEP]` / `[OK]` / `[ERROR]` lines rather than the server output they wrap. The same rule is in `ace-flow-harness`.
+
 ---
 
 ## Section 11 - Edge cases
@@ -572,7 +619,7 @@ Detection is automatic from `application.descriptor` `<references>`. If a refere
 ### Idempotent re-run
 
 Re-running B5 against the same `work_dir`:
-- Standalone server: stop it (`Ctrl-C` or `taskkill` on Windows), update the BAR in `work_dir/run/`, restart. The IS reloads on startup.
+- Standalone server: stop it - `Ctrl-C` in its console, or on Windows kill ONLY the PID listening on this run's admin port (`netstat -ano | findstr LISTENING | findstr :<adminPort>` gives the PID, then `taskkill /PID <pid> /F`). Never `taskkill /IM IntegrationServer.exe /F`: that kills every integration server on the box, node-managed ones included. Then update the BAR in `work_dir/run/`, restart. The IS reloads on startup.
 - Node-managed: `ibmint deploy` against an existing app overwrites it. No teardown needed.
 
 ### Cleanup / teardown
@@ -580,8 +627,8 @@ Re-running B5 against the same `work_dir`:
 At the end of validation, ask:
 > "Validation complete. Cleanup options:
 > 1. **leave running** - the standalone server keeps running for further iteration (recommended for Iterative mode)
-> 2. **stop server only** - kill the IntegrationServer; leave Docker MQ running (you may have other flows using it)
-> 3. **stop everything** - kill server, `docker compose down` for the MQ container, remove temp work_dir
+> 2. **stop server only** - kill the IntegrationServer by admin-port PID (see above, never by image name); leave Docker MQ running (you may have other flows using it)
+> 3. **stop everything** - kill the server by admin-port PID, `docker compose down` for the MQ container, remove temp work_dir
 > 4. **leave running and stop the mock** - the mock has shared state that should reset"
 
 For Docker MQ specifically: only run `docker compose down` if the user owns the compose file. If the user spun up MQ via a shared compose, leave it.
@@ -601,3 +648,183 @@ Use the `TESTING_template.md` template. Fill in:
 - **Things this test cannot prove** - explicit limitations list. Always include: real auth flow (vs the canned token), real downstream verbose error bodies, network-partition / retry-policy behaviour (the mock always answers), production proxy + TLS configuration. Adapt per flow.
 
 Write to `<project>/TESTING.md`. Overwrite if it exists (Iterative re-validation produces a fresh document; the historical record lives in `flow_state.md`'s "Validation Results" section).
+
+---
+
+## Section 13 - Generated scenario driver and pre-flight probe (Level 3)
+
+At Level 3 the validation subagent does not drive the scenarios by hand, one command and one log read per turn - measured on two comparison pairs, that loop is ~40 turns of console output re-read every turn. It GENERATES two small scripts into `<project>/test/`, runs them, and reads only their result lines. The scripts ship with the project and re-run by hand; this skill ships only the recipe below (no script files inside the skill - portable recipes, never platform scripts).
+
+### Files and contract
+
+| File | Job |
+|---|---|
+| `<project>/test/preflight.ps1` or `.sh` | Probes every dependency the brief names before anything is deployed: ACE profile (`mqsiservice -v`), the queue manager (local `dspmq` or `docker ps` for the container), the queues (`DISPLAY QLOCAL`), the DSN or the HTTP mock, the admin and HTTP ports free before start and `LISTENING` after. One line per probe: `[PRE] OK - <what>` or `[PRE] FAIL - <what> - <hint>`. Exit code = number of FAIL lines. |
+| `<project>/test/run-scenarios.ps1` or `.sh` | Runs S1 / S2 / S3 from Section 8 against the deployed flow. Prints `[STEP]`, `[OK]`, `[ERROR]` lines while it works, exactly one `[S<n>] PASS - <evidence>` or `[S<n>] FAIL - <evidence>` per scenario, and ends with `[RESULT] <passed>/<total> PASS`. Exit code = number of failed scenarios. |
+
+Platform: Windows gets `.ps1` (Windows PowerShell 5.1 - no `&&` / `||`, no ternary, no `?.`; loop variables prefixed so they never shadow a parameter), Linux/macOS gets `.sh` (bash, `set -u`, written with LF line endings - `core.autocrlf` is on this box, so write the file explicitly with LF). Never both unless the user asks. Parameters (queue manager, container, queues, HTTP base, DSN, timeouts) are script parameters with the run's values as defaults, so a by-hand re-run needs no edits. Evidence is measured as deltas (`CURDEPTH` before and after, row count before and after), never as "the queue is empty", so the script is idempotent against leftovers. A scenario that expects an error reply reads the status from the exception, not from a thrown call.
+
+### The subagent's loop with the driver
+
+1. Generate `preflight` from the brief's dependency list and run it. Fix what it flags (Section 5 for MQ definitions, Section 6 for the mock, Section 7 for credentials); re-run until it prints no FAIL line.
+2. Deploy (B5.3) and start the server; wait on `BIP1991I` per Section 10 - the preflight's "port LISTENING after start" probe is the check.
+3. Generate `run-scenarios` from Section 8's S1/S2/S3 with the project's real values and run it. Read ONLY the lines matching `^\[(S[0-9]+|RESULT|ERROR|PRE)\]` (`Select-String` / `grep -E`); never the whole output, never the server log.
+4. On a `FAIL`: grep the server log for the BIP code or status string that scenario expects (Section 10), diagnose, fix the flow through the generation subagent (B5 rules: never by widening queue manager authority), redeploy, re-run the script. The script is the regression check for the fix.
+5. Document in `TESTING.md`: the two scripts, their parameters, the re-run command, and the `[RESULT]` line of the last run. `flow_state.md` gets the per-scenario PASS/FAIL lines.
+
+### Skeleton - `run-scenarios.ps1` (Windows PowerShell 5.1)
+
+Adapt the scenario bodies to the flow; keep the helpers and the contract lines as they are.
+
+```powershell
+# test/run-scenarios.ps1 - generated by ace-flow-builder Phase B5 (Level 3). Re-run by hand any time.
+# Contract: [STEP]/[OK]/[ERROR] while working, one "[S<n>] PASS|FAIL - <evidence>" per scenario,
+# last line "[RESULT] <passed>/<total> PASS"; exit code = number of failed scenarios.
+param(
+    [string]$HttpBase    = "http://localhost:7800",
+    [string]$Qmgr        = "QM1",
+    [string]$MqContainer = "QM1",        # "" = local queue manager (runmqsc / amqsput on PATH)
+    [string]$OutQueue    = "DEV.QUEUE.2",
+    [int]$TimeoutSec     = 30
+)
+$ErrorActionPreference = "Continue"
+$script:Failed = 0
+$script:Total  = 0
+function Step($msg) { Write-Host "[STEP] $msg" }
+function Report($id, $pass, $evidence) {
+    $script:Total++
+    if ($pass) { Write-Host "[$id] PASS - $evidence" }
+    else { $script:Failed++; Write-Host "[$id] FAIL - $evidence" }
+}
+function Mqsc($cmd) {
+    # Never pipe a PowerShell string into runmqsc: Windows PowerShell 5.1 prepends a UTF-8 BOM to
+    # native stdin and runmqsc answers AMQ8405I "Syntax error". Let the container's shell (or cmd) echo it.
+    if ($MqContainer -ne "") { return (docker exec $MqContainer bash -c "printf '%s\n' '$cmd' | runmqsc $Qmgr") }
+    return (cmd /c "echo $cmd | runmqsc $Qmgr")
+}
+function CurDepth($queue) {
+    $m = [regex]::Match(((Mqsc "DISPLAY QLOCAL($queue) CURDEPTH") -join " "), "CURDEPTH\((\d+)\)")
+    if ($m.Success) { return [int]$m.Groups[1].Value }
+    return -1
+}
+function WaitDepth($queue, $expected) {
+    $deadline = (Get-Date).AddSeconds($TimeoutSec)
+    do {
+        $wdDepth = CurDepth $queue
+        if ($wdDepth -eq $expected) { return $wdDepth }
+        Start-Sleep -Milliseconds 500
+    } while ((Get-Date) -lt $deadline)
+    return $wdDepth
+}
+function PostJson($path, $body) {
+    # Returns the HTTP status for 2xx AND for 4xx/5xx (Invoke-WebRequest throws on the latter).
+    try {
+        $r = Invoke-WebRequest -UseBasicParsing -Method Post -Uri "$HttpBase$path" -ContentType "application/json" -Body $body -TimeoutSec $TimeoutSec
+        return [int]$r.StatusCode
+    } catch {
+        if ($_.Exception.Response) { return [int]$_.Exception.Response.StatusCode }
+        return -1
+    }
+}
+
+Step "S2 full pipeline: POST /events -> one message on $OutQueue"
+$s2Before = CurDepth $OutQueue
+$s2Status = PostJson "/events" '{"id":"42","type":"order.created"}'
+$s2After  = WaitDepth $OutQueue ($s2Before + 1)
+Report "S2" (($s2Status -eq 202) -and ($s2After -eq $s2Before + 1)) "HTTP $s2Status; CURDEPTH $s2Before -> $s2After"
+
+Step "S3 exception path: malformed JSON -> error reply, no message put"
+$s3Before = CurDepth $OutQueue
+$s3Status = PostJson "/events" '{"id":'
+Start-Sleep -Seconds 2
+$s3After  = CurDepth $OutQueue
+Report "S3" (($s3Status -ge 400) -and ($s3After -eq $s3Before)) "HTTP $s3Status; CURDEPTH $s3Before -> $s3After"
+
+Write-Host "[RESULT] $($script:Total - $script:Failed)/$($script:Total) PASS"
+exit $script:Failed
+```
+
+Run it with `powershell -NoProfile -ExecutionPolicy Bypass -File test\run-scenarios.ps1` (add `-HttpBase`, `-Qmgr`, `-MqContainer ""` to override).
+
+### Skeleton - `run-scenarios.sh` (bash)
+
+```bash
+#!/usr/bin/env bash
+# test/run-scenarios.sh - generated by ace-flow-builder Phase B5 (Level 3). Re-run by hand any time.
+# Contract: [STEP]/[OK]/[ERROR] while working, one "[S<n>] PASS|FAIL - <evidence>" per scenario,
+# last line "[RESULT] <passed>/<total> PASS"; exit code = number of failed scenarios.
+set -u
+HTTP_BASE="${HTTP_BASE:-http://localhost:7800}"
+QMGR="${QMGR:-QM1}"
+MQ_CONTAINER="${MQ_CONTAINER:-QM1}"      # "" = local queue manager
+OUT_QUEUE="${OUT_QUEUE:-DEV.QUEUE.2}"
+TIMEOUT_SEC="${TIMEOUT_SEC:-30}"
+failed=0; total=0
+step()   { printf '[STEP] %s\n' "$1"; }
+report() { total=$((total+1)); if [ "$2" = "1" ]; then printf '[%s] PASS - %s\n' "$1" "$3"; else failed=$((failed+1)); printf '[%s] FAIL - %s\n' "$1" "$3"; fi; }
+mqsc()   { if [ -n "$MQ_CONTAINER" ]; then printf '%s\n' "$1" | docker exec -i "$MQ_CONTAINER" runmqsc "$QMGR"; else printf '%s\n' "$1" | runmqsc "$QMGR"; fi; }
+curdepth() { mqsc "DISPLAY QLOCAL($1) CURDEPTH" | grep -oE 'CURDEPTH\([0-9]+\)' | grep -oE '[0-9]+' | head -1; }
+waitdepth() { local wd_end=$(( $(date +%s) + TIMEOUT_SEC )) wd_d; while :; do wd_d=$(curdepth "$1"); [ "$wd_d" = "$2" ] && break; [ "$(date +%s)" -ge "$wd_end" ] && break; sleep 0.5; done; printf '%s' "$wd_d"; }
+post_json() { curl -s -o /dev/null -w '%{http_code}' -X POST "$HTTP_BASE$1" -H 'Content-Type: application/json' --max-time "$TIMEOUT_SEC" -d "$2"; }
+
+step "S2 full pipeline: POST /events -> one message on $OUT_QUEUE"
+s2_before=$(curdepth "$OUT_QUEUE")
+s2_status=$(post_json /events '{"id":"42","type":"order.created"}')
+s2_after=$(waitdepth "$OUT_QUEUE" $((s2_before+1)))
+if [ "$s2_status" = "202" ] && [ "$s2_after" = "$((s2_before+1))" ]; then s2_ok=1; else s2_ok=0; fi
+report S2 "$s2_ok" "HTTP $s2_status; CURDEPTH $s2_before -> $s2_after"
+
+step "S3 exception path: malformed JSON -> error reply, no message put"
+s3_before=$(curdepth "$OUT_QUEUE")
+s3_status=$(post_json /events '{"id":')
+sleep 2
+s3_after=$(curdepth "$OUT_QUEUE")
+if [ "$s3_status" -ge 400 ] && [ "$s3_after" = "$s3_before" ]; then s3_ok=1; else s3_ok=0; fi
+report S3 "$s3_ok" "HTTP $s3_status; CURDEPTH $s3_before -> $s3_after"
+
+printf '[RESULT] %s/%s PASS\n' "$((total-failed))" "$total"
+exit "$failed"
+```
+
+### Skeleton - `preflight.ps1` (the probes; mirror it in bash the same way)
+
+```powershell
+# test/preflight.ps1 - dependency probes before deploy. One "[PRE] OK|FAIL - <what>" per probe; exit = FAIL count.
+param([string]$Qmgr = "QM1", [string]$MqContainer = "QM1", [string[]]$Queues = @("DEV.QUEUE.2"), [int]$HttpPort = 7800, [int]$AdminPort = 7600, [switch]$AfterStart)
+$fails = 0
+function Probe($ok, $what, $hint) { if ($ok) { Write-Host "[PRE] OK - $what" } else { $script:fails++; Write-Host "[PRE] FAIL - $what - $hint" } }
+function PortListening($port) { return [bool](Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue) }
+$mqsi = (Get-Command mqsiservice -ErrorAction SilentlyContinue)
+Probe ($null -ne $mqsi) "ACE profile sourced (mqsiservice on PATH)" "call <ACE>\server\bin\mqsiprofile.cmd first"
+if ($MqContainer -ne "") {
+    $running = (docker ps --format "{{.Names}}" 2>$null) -contains $MqContainer
+    Probe $running "MQ container $MqContainer running" "docker compose up -d, or set -MqContainer '' for a local queue manager"
+} else {
+    Probe ((dspmq 2>$null) -match "QMNAME\($Qmgr\).*Running") "queue manager $Qmgr running" "strmqm $Qmgr"
+}
+foreach ($pqQueue in $Queues) {
+    # echo inside the container / cmd, never a PowerShell pipe into runmqsc (UTF-8 BOM -> AMQ8405I)
+    if ($MqContainer -ne "") { $out = docker exec $MqContainer bash -c "printf '%s\n' 'DISPLAY QLOCAL($pqQueue)' | runmqsc $Qmgr" }
+    else { $out = cmd /c "echo DISPLAY QLOCAL($pqQueue) | runmqsc $Qmgr" }
+    Probe (($out -join " ") -match "QUEUE\($pqQueue\)") "queue $pqQueue exists on $Qmgr" "runmqsc < mqsc\MQDefs.mqsc (Section 5)"
+}
+if ($AfterStart) {
+    Probe (PortListening $HttpPort)  "HTTP listener on $HttpPort" "check overrides\server.conf.yaml ListenerPort and BIP1145I in the log"
+    Probe (PortListening $AdminPort) "admin REST API on $AdminPort" "wait for BIP1991I, or another server owns the port"
+} else {
+    Probe (-not (PortListening $HttpPort))  "port $HttpPort free before start" "another integration server is listening - pick a free port"
+    Probe (-not (PortListening $AdminPort)) "port $AdminPort free before start" "another integration server is listening - pick a free port"
+}
+exit $fails
+```
+
+Run before deploy (`-AfterStart` absent) and again after the server reports `BIP1991I` (`-AfterStart`). A DSN probe (`Get-OdbcDsn -Name <dsn>` on Windows, `isql <dsn> -b < /dev/null` on Linux) and an HTTP mock probe (`Invoke-WebRequest -UseBasicParsing <mock>/health`) follow the same `Probe` shape when the flow needs them.
+
+### Traps met while proving the skeletons (2026-09-12, ACE 13.0.8.1, Docker QM1)
+
+- **A PowerShell pipe into `runmqsc` fails with `AMQ8405I: Syntax error`.** Windows PowerShell 5.1 writes a UTF-8 byte-order mark ahead of the first line it sends to a native command's stdin; runmqsc reads the BOM as part of the command. Both skeletons therefore let the container's `bash -c "printf ... | runmqsc"` or `cmd /c "echo ... | runmqsc"` do the piping. The same trap hits `amqsput` - put messages with `cmd /c "type sample.json | ..."` or from inside the container, never `Get-Content | docker exec -i`.
+- **Do not read the exit code through `cmd /c "... & echo %ERRORLEVEL%"`** - cmd expands the variable when it parses the line, so it always prints the value from before the script ran. Read `$LASTEXITCODE` in PowerShell or `$?` in bash right after the call.
+
+### What the driver cannot replace
+
+The driver reads evidence the flow produces (HTTP status, queue depth, rows, files). Reading the server log for a specific BIP code stays a targeted `grep` by the subagent (Section 10), and the byte-exact comparison of a put message stays an `amqsbcg` / `amqsget` step (Section 9) - add it to S2 when the brief demands byte fidelity.
