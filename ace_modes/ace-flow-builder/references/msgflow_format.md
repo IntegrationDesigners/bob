@@ -9,6 +9,24 @@ status: beta
 Source: Extracted from IBM ACE v13 official pattern zips (September 2024).
 All examples below are verified against `references/examples/` files.
 
+## Section index - read by need, not end to end
+
+This file is 1,100 lines. The generation subagent reads the always-read rows, then only the node rows the matched template (`references/examples/<Pattern>/`) and the user's own artifacts from B0.5a do not already show. Find a section with `Grep "^## <title>"` and read from that line.
+
+| Section | Read when |
+|---|---|
+| Correct XML Structure; Node ID Convention; Connection Wiring; computeExpression Format; nsURI / nsPrefix and node-label uniqueness | always - the structural rules every `.msgflow` must satisfy |
+| Standard Error Handling Pattern | always, unless the spec says no error handling |
+| Node Type Reference; Extended Node Type Reference (the subsection for each node family in scope: Routing, Aggregation, Callable subflows, Mapping, File, MQ, HTTP / REST / SOAP, Database, Messaging (JMS / Kafka), Email & TCP/IP, Scheduling, Enterprise systems, Mainframe) | a node family in the brief is not in the matched template or in a user artifact you were given |
+| Application Connector nodes (App Connect Designer-style) and the 132-connector lookup table | the flow uses an App Connector Request node |
+| HTTPRequest (ComIbmWSRequest) | an HTTPRequest node is in scope |
+| Timer Nodes | a TimeoutControl / TimeoutNotification pair is in scope |
+| Multi-terminal Compute nodes | a Compute routes on more than out / failure |
+| Validate node (ComIbmValidate) | validation is in scope (`validated_rules.md` §18) |
+| Trace (ComIbmTrace) | always when a Trace node is generated (the error handler adds one by default) |
+| Promoted properties - two flavours | the brief asks for deploy-time overridable node properties or a subflow |
+| Complete Minimal Example; Key Differences from Incorrect Format; Examples Available | no template matched (fallback mode only) |
+
 ---
 
 ## Correct XML Structure
@@ -83,7 +101,7 @@ Standalone callable subflows (separate `.subflow` files invoked via a Callable F
 | MQ Output | `xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode"` | `ComIbmMQOutput.msgnode:FCMComposite_1` | `queueName="QUEUE.NAME"` |
 | File Input | `xmlns:ComIbmFileInput.msgnode="ComIbmFileInput.msgnode"` | `ComIbmFileInput.msgnode:FCMComposite_1` | `inputDirectory="C:\path"` |
 | File Output | `xmlns:ComIbmFileOutput.msgnode="ComIbmFileOutput.msgnode"` | `ComIbmFileOutput.msgnode:FCMComposite_1` | `outputDirectory="C:\path"`, `outputFilename="file.txt"` |
-| Trace | `xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode"` | `ComIbmTrace.msgnode:FCMComposite_1` | `destination="file"`, `filePath="C:\temp\trace.txt"`, `pattern="${Root}"` - see **Trace `pattern` syntax** below |
+| Trace | `xmlns:ComIbmTrace.msgnode="ComIbmTrace.msgnode"` | `ComIbmTrace.msgnode:FCMComposite_1` | `destination="localError"`, `pattern="${Environment}"` - never a hardcoded `filePath`; see **Trace (ComIbmTrace)** rules and `pattern` syntax below |
 
 ---
 
@@ -122,6 +140,44 @@ When uncertain about an attribute, check `MessageFlow.xsd` (see top of this file
 | Group Gather | `ComIbmGroupGather.msgnode` |
 | Group Complete | `ComIbmGroupComplete.msgnode` |
 
+### Subflow nodes from a shared library (inline, not callable)
+
+A subflow that lives in a shared library is dropped into a flow as an ordinary node.
+Without this shape a generated flow references the library in `.project` but never
+uses it (seen 2026-10-11 and 2026-10-12: compute modules commented "the LogEntry
+subflow node is wired after this compute", no such node in the XML). Toolkit-written
+example: `D:\GIT\Ace_test_cases\ContextLogNode\AppWithLogging\FlowWithLogging.msgflow`.
+
+1. Namespace on `ecore:EPackage`: the prefix is the subflow's path inside the library
+   project with `/` turned into `_`; the value is that path.
+   `xmlns:LoggingLibrary_LogEntry.subflow="LoggingLibrary/LogEntry.subflow"`
+   (library project `LoggingLibrary`, schema folder `LoggingLibrary`, file `LogEntry.subflow`).
+2. The node: `xmi:type="<prefix>:FCMComposite_1"`; the subflow's promoted properties are
+   plain attributes on the node:
+   `<nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_2" location="209,92" Message="Message Received" Uuid="$InputRoot.JSON.Data.uuid">`
+   followed by `<translation xmi:type="utility:ConstantString" string="LogEntry"/>` and `</nodes>`.
+3. Terminals are the subflow's own Input / Output nodes, not its internal nodes:
+   `targetTerminalName="InTerminal.Input"`, `sourceTerminalName="OutTerminal.Output"`.
+   Read the `.subflow` to confirm the names before wiring (`grep InTerminal\. / OutTerminal\.`
+   lists internal terminals too; the boundary ones are the names of its Input/Output nodes).
+4. The library is in the application's `.project` `<projects>` AND in its
+   `application.descriptor` - without the descriptor entry every such node fails at deploy
+   with BIP1360E "requires subflow 'LoggingLibrary/LogEntry.subflow' which is not
+   deployed", although the library itself deploys fine (2026-10-12):
+   `<ns2:appDescriptor xmlns="http://com.ibm.etools.mft.descriptor.base" xmlns:ns2="http://com.ibm.etools.mft.descriptor.app"><references><sharedLibraryReference><libraryName>LoggingLibrary</libraryName></sharedLibraryReference></references></ns2:appDescriptor>`
+   `ibmint package` with the library in the input path adds it to the BAR as a `.shlibzip`.
+   Worked application: `references/examples/AsyncRequestReplyWebhook/`.
+5. `ibmint package` does NOT resolve subflow references: a node pointing at a subflow
+   that does not exist packages with BIP8071I all the same (canary, 2026-10-12). A wrong
+   path or prefix fails only at deploy. Check the shape statically: every namespace
+   value names an existing `.subflow` under a referenced library, and the node count per
+   library subflow is what the design says.
+
+| Library subflow | Namespace value | In / Out | Promoted properties |
+|---|---|---|---|
+| `LoggingLibrary` `LogEntry` | `LoggingLibrary/LogEntry.subflow` | `Input` / `Output` | `Status`, `Message`, `Uuid` |
+| `ActivityLogLib` `ActivityLog` | `ActivityLogLib/ActivityLog.subflow` | `Input` / `Output` | none (reads `Environment.Variables.Log.Line`) |
+
 ### Callable subflows (separate `.subflow` files)
 
 For inline subflow boundaries (`eflow:FCMSource` / `eflow:FCMSink`) see the top of this file.
@@ -144,6 +200,20 @@ For inline subflow boundaries (`eflow:FCMSource` / `eflow:FCMSink`) see the top 
 | Reset Content Descriptor | `ComIbmResetContentDescriptor.msgnode` |
 | .NET Compute | `ComIbmDotNetCompute.msgnode` |
 
+#### ResetContentDescriptor attributes (verified on a real deploy, ACE 13.0.8.1)
+
+| Attribute | Values |
+|---|---|
+| `messageDomain` | target domain, e.g. `XMLNSC`, `DFDL`, `BLOB` |
+| `resetMessageDomain` | `true` \| `false` - must be `true` for `messageDomain` to take effect |
+| `validateMaster` | validation profile, e.g. `none`, `contentAndValue` |
+| `validateFailureAction` | `exception`, `exceptionList`, `userTrace`, `localError` |
+| `validateTiming` | `complete` \| `immediate` - **absent means On Demand**, a third value, not a synonym for either listed one |
+
+The `validateTiming` default is the trap: leaving the attribute off does not give you `complete`, it gives On Demand, which parses lazily and can stop before the element that would have failed. A validation that never ran looks exactly like a validation that passed.
+
+Choosing between an RCD and a Validate node is a requirements decision - `validated_rules.md` §18. A same-domain RCD validates nothing (it only stamps options for a downstream serializer); validation-only requirements take the Validate node (see its section below).
+
 ### File operations (extended)
 
 | Node | xmi:type suffix |
@@ -164,6 +234,48 @@ For inline subflow boundaries (`eflow:FCMSource` / `eflow:FCMSink`) see the top 
 | MQ Reply | `ComIbmMQReply.msgnode` |
 | MQ Header | `ComIbmMQHeader.msgnode` |
 | Publication | `ComIbmPublication.msgnode` |
+
+#### MQ client connections: MQEndpoint policy, applied through server overrides (validated_rules.md §22)
+
+The policy-vs-node-level choice is a house convention: `customer_profile.md` decides it when present (validated_rules.md §22). Generic default: an MQ node that connects as a client (`connection="CLIENT"`, queue manager not local to the server) gets its connection from an **MQEndpoint policy project**, applied server-wide - the flow itself carries only `queueName` and stays environment-free. Node-level connection properties (`queueManagerHostname`, `listenerPortNumber`, `channelName`, `securityIdentity` on the node) are used only when the profile says so or the user explicitly asks for a self-contained flow.
+
+How it is applied - and where the key may live:
+
+- `<work_dir>/overrides/server.conf.yaml` (standalone) or `<node>/servers/<server>/overrides/server.conf.yaml` (node-managed):
+  ```yaml
+  remoteDefaultQueueManager: '{<PolicyProject>}:<PolicyName>'
+  ```
+  **Never in the base `server.conf.yaml` or `node.conf.yaml`** - the generated base files are never edited; every customisation goes in `overrides/*.yaml` (validated_rules.md §19). The policy must be `connection=CLIENT`; the policy project is staged as a folder under `<work_dir>/run/`, not packaged in the BAR (`BIP1388E` otherwise) - see `validation_runbook.md` Section 3.
+- Per node: the node's **Policy** property in `{<PolicyProject>}:<PolicyName>` form (IBM doc "MQEndpoint policy", v13). For Kafka producer nodes the `.msgflow` attribute is `policyUrl="{<Project>}:<Policy>"` - verified against the ACE install's `MessageFlow.xsd` and two independently generated flows (2026-08-30). For MQ nodes, verify the attribute the same way (the XSD at `<ACE>/common/schemas/MessageFlow/MessageFlow.xsd` is the authority) before writing it; do not invent attribute names.
+
+Skeleton - the shape Toolkit writes (verified from a Toolkit-authored `PolicyProject/DefaultMQ.policyxml`, ACE 13): note `policyTemplate=""` and no `version` attribute. Required properties first; the rest may stay empty.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<policies>
+  <policy policyType="MQEndpoint" policyName="<PolicyName>" policyTemplate="">
+    <connection>CLIENT</connection>
+    <destinationQueueManagerName>QM1</destinationQueueManagerName>
+    <queueManagerHostname>localhost</queueManagerHostname>
+    <listenerPortNumber>1414</listenerPortNumber>
+    <channelName>DEV.APP.SVRCONN</channelName>
+    <CCDTUrl></CCDTUrl>
+    <securityIdentity>QM1AppId</securityIdentity>
+    <useSSL>false</useSSL>
+    <SSLPeerName></SSLPeerName>
+    <SSLCipherSpec></SSLCipherSpec>
+    <SSLCertificateLabel></SSLCertificateLabel>
+    <MQApplName></MQApplName>
+    <reconnectOption>default</reconnectOption>
+  </policy>
+</policies>
+```
+
+- `destinationQueueManagerName` is required on 13.0.8.1: a policy without it does not fail gracefully - it crashes the MQ monitor thread and shuts the server down.
+- Prefer a policy copied from the user's own workspace (Phase B0.5 ground truth, e.g. `PolicyProject/DefaultMQ.policyxml`) over this skeleton; the property set is the same, the values are already right for their estate.
+- `securityIdentity` names a vault credential (`ibmint set credential --credential-type mq --credential-name <id>`), never a user/password in the policy.
+- A copied policy carries the credential name of the server it came from. Keep a `securityIdentity` only when that credential exists for the TARGET server (the user named it, or the target's vault lists it); otherwise leave it empty and let the deploy check prove whether the queue manager accepts the connection without one (a local developer queue manager usually does). An identity the target cannot resolve fails with BIP2688E and stops every MQ flow.
+- **`messageContext` on MQOutput / MQReply is always written explicitly, `"default"` unless told otherwise** (validated_rules.md §23). The Toolkit default `passAll` needs `passall` authority on the queue; an application identity with `put` only fails `MQOPEN` with MQRC 2035 (`AMQ8077W ... unauthorized: passall` in the qmgr error log). Fix the flow, never the authority.
 
 ### HTTP / REST / SOAP
 
@@ -204,8 +316,10 @@ For inline subflow boundaries (`eflow:FCMSource` / `eflow:FCMSink`) see the top 
 | JMS Reply | `ComIbmJMSClientReply.msgnode` |
 | JMS Receive | `ComIbmJMSClientReceive.msgnode` |
 | JMS Header | `ComIbmJMSHeader.msgnode` |
-| Kafka Consumer | `ComIbmKafkaMsgConsumer.msgnode` |
-| Kafka Producer | `ComIbmKafkaMsgProducer.msgnode` |
+| Kafka Consumer | `com/ibm/connector/kafka/ComIbmEventInput.msgnode` (xmlns prefix `com_ibm_connector_kafka_ComIbmEventInput.msgnode`, `connectorName="Kafka"`) - the default; all 8 `Kafkato*` templates - rule 25 |
+| Kafka Consumer (transactional only) | `ComIbmKafkaMsgConsumer.msgnode` - only when the brief asks for transactional consuming (`transactionalId`) - rule 25 |
+| Kafka Producer | `com/ibm/connector/kafka/ComIbmOutput.msgnode` (xmlns prefix `com_ibm_connector_kafka_ComIbmOutput.msgnode`, `connectorName="Kafka"`) - the default; all 8 `*toKafka` templates and the 13.0.8.1 Toolkit palette - rule 25 |
+| Kafka Producer (transactional only) | `ComIbmKafkaMsgProducer.msgnode` - only when the brief asks for transactional publishing; adds `transactionMode` / `transactionalId` / `transactionTimeout`, otherwise the same properties - rule 25 |
 | Kafka Read | `ComIbmKafkaMsgRead.msgnode` |
 
 ### Email & TCP/IP
@@ -497,26 +611,38 @@ Connections use `sourceTerminalName` and `targetTerminalName`. Common terminal n
 
 ## Standard Error Handling Pattern
 
-All IBM ACE v13 patterns include error handling on the catch terminal. Always add this:
+Every generated flow has an error path, and on MQ-input flows that path must not lose the message (`validated_rules.md` §15). Always add this:
 
-1. Connect `OutTerminal.catch` (and optionally `OutTerminal.failure`) of the input node → `HandleException` Compute node
-2. Connect `HandleException` Compute → terminal output (HTTP Reply, Trace node, or dead-letter queue)
+1. Connect BOTH `OutTerminal.catch` AND `OutTerminal.failure` of the input node → the `HandleException` Compute node. `Failure` and `Catch` carry different problem classes (Failure: the input node itself could not process the message - parse, backout, transactional; Catch: an exception thrown downstream and rolled back to the input node). Leaving Failure dangling on an MQInput node silently drops what Catch never sees, or loops the message forever on the queue. If a flow deliberately leaves Failure unwired, the justification is written in `flow_state.md` / README - never silently.
+2. `HandleException` preserves the ORIGINAL payload (`CopyEntireMessage()`), and carries the exception summary out-of-band: `OutputRoot.MQRFH2.usr.Error.*` (for MQ destinations) mirrored into `Environment.Variables.Error.*` (for the Trace). It never replaces the body with the summary.
+3. Connect `HandleException` → an error sink that persists the payload BEFORE the transaction commits: on MQ-input flows an `MQOutput` node on an error queue (`<FlowName>.ERROR`, marked `[CONFIGURE: error queue]` in Iterative mode; the queue manager's backout queue via `BOQNAME`/`BOTHRESH` is the alternative when the customer standard says so) → then the Trace node. On HTTP request-reply flows the sink is the HTTP Reply (error response) plus a Trace.
+4. Database errors are NOT handled here: a Compute node that touches a database catches them itself with an ESQL `DECLARE CONTINUE HANDLER FOR SQLSTATE ...` (see `validated_rules.md` §20 and the Database pattern in the generation reference) and propagates to its own `failure` terminal, which is wired to `HandleException`. The catch path is the last resort for transport/parse errors, not the DB error path.
 
 ```xml
-<!-- Error path: catch terminal → HandleException → Reply -->
+<!-- Error path: catch AND failure -> HandleException -> ErrorQueue -> Trace -->
 <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_err1"
   targetNode="FCMComposite_1_N"   <!-- HandleException node ID -->
   sourceNode="FCMComposite_1_1"   <!-- input node ID -->
   sourceTerminalName="OutTerminal.catch"
   targetTerminalName="InTerminal.in"/>
 <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_err2"
-  targetNode="FCMComposite_1_3"   <!-- reply/output node ID -->
+  targetNode="FCMComposite_1_N"   <!-- HandleException node ID -->
+  sourceNode="FCMComposite_1_1"   <!-- input node ID -->
+  sourceTerminalName="OutTerminal.failure"
+  targetTerminalName="InTerminal.in"/>
+<connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_err3"
+  targetNode="FCMComposite_1_E"   <!-- ErrorQueue MQOutput node ID (queueName="<FlowName>.ERROR") -->
   sourceNode="FCMComposite_1_N"   <!-- HandleException node ID -->
+  sourceTerminalName="OutTerminal.out"
+  targetTerminalName="InTerminal.in"/>
+<connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_err4"
+  targetNode="FCMComposite_1_T"   <!-- Trace node ID (destination="localError") -->
+  sourceNode="FCMComposite_1_E"   <!-- ErrorQueue MQOutput node ID -->
   sourceTerminalName="OutTerminal.out"
   targetTerminalName="InTerminal.in"/>
 ```
 
-The `HandleException` ESQL module is always the same (see `XMLtoJSON_HandleException.esql` in `references/examples/XMLtoJSON/`).
+The `HandleException` ESQL module is the same in every pattern - use the payload-preserving version in any `references/examples/IBMMQto*/` folder (`<Pattern>_HandleException.esql`), not an older copy that overwrites `OutputRoot.XMLNSC.Message`.
 
 ---
 
@@ -826,7 +952,7 @@ Notes:
 Use `ComIbmValidate` when the requirement is *"validate the incoming message against a schema / message model"* - e.g. "receives JSON, validates it, replies ok/nok". The node checks the message and routes it on two terminals, so it **is** the conditional-routing mechanism for valid/invalid - you do not need a separate Filter or a hand-written ESQL field-check Compute.
 
 **When to use which:**
-- **`ComIbmValidate`** - the decision is "does this message conform to a schema/model?" (JSON Schema, DFDL, XMLNSC, MRM, SOAP). Don't reinvent schema validation as ESQL `IS NULL` / `EXISTS` checks - the parser does standards-compliant validation for free.
+- **`ComIbmValidate`** - the decision is "does this message conform to a schema/model?" (JSON Schema, DFDL, XMLNSC, MRM, SOAP). Don't reinvent schema validation as ESQL `IS NULL` / `EXISTS` checks - the parser does standards-compliant validation for free. And never substitute a same-domain RCD for this node - an RCD only validates what it causes to be re-parsed, so without a domain change it validates nothing (`validated_rules.md` §18).
 - **`ComIbmFilter`** - a boolean business decision expressed in ESQL (e.g. `amount > 1000`), two paths.
 - **Multi-terminal `ComIbmCompute`** - routing needs computation/enrichment alongside the decision, or 3+ paths.
 
@@ -933,8 +1059,14 @@ Diagnostic node that writes a templated line to one of three sinks. Common uses:
 
 `destination` values are case-sensitive - `"file"`, `"localError"`, `"userTrace"`. Capitalised variants (`"File"`, `"LocalError"`) are accepted by the runtime in some versions but XSD-strict tooling will reject them.
 
+### Rules for generated flows (validated_rules.md §21)
+
+- Default `destination="localError"` for build/validate debugging; `"userTrace"` for diagnostics that stay in the flow (silent until `mqsichangetrace -u`).
+- **Never a hardcoded absolute `filePath`.** `destination="file"` only when the user asks for a file sink, and then the path is a `[CONFIGURE: trace file path]` marker or a promoted property overridden at deploy - a `C:\temp\...` literal breaks on Linux/containers and is invisible to operations.
+- Success-path traces log context, not payloads: `${Environment}` or selected fields, never `${Root}`/`${Body}` to `localError` (that puts every message, PII included, in the system log). Error-path traces may include `${ExceptionList}`.
+
 ```xml
-<!-- Debug to BIP log (no filePath needed) -->
+<!-- Debug to BIP log (no filePath needed) - the default -->
 <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7"
   location="260,340"
   destination="localError"
@@ -942,11 +1074,11 @@ Diagnostic node that writes a templated line to one of three sinks. Common uses:
   <translation xmi:type="utility:ConstantString" string="Log Trace"/>
 </nodes>
 
-<!-- File destination -->
+<!-- File destination - only on request, path never hardcoded -->
 <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8"
   location="200,300"
   destination="file"
-  filePath="C:\\temp\\retry.log"
+  filePath="[CONFIGURE: trace file path - promote or override at deploy]"
   pattern="${Environment}">
   <translation xmi:type="utility:ConstantString" string="Trace retry context"/>
 </nodes>

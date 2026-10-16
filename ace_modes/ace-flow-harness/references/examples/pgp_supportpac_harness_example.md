@@ -6,8 +6,8 @@
 **Topologies shown:** standalone (Windows) and Docker (Linux)
 
 This is the reference instantiation of the enforced template in
-`../harness_template.md`. It is the *executable* counterpart to the test-PLAN
-example in `ace-flow-test/references/examples/http_pgp_flow_test_example.md`.
+`../harness_template.md`. It is the *executable* counterpart to the worked HTTP/PGP
+test-PLAN example carried by the **ace-flow-test** skill.
 
 ---
 
@@ -15,7 +15,7 @@ example in `ace-flow-test/references/examples/http_pgp_flow_test_example.md`.
 
 | Parameter | Value |
 |-----------|-------|
-| `ACE_VERSION` / `ACE_HOME` | `13.0.7.0` / `C:\Program Files\IBM\ACE\13.0.7.0` |
+| `ACE_VERSION` / `ACE_HOME` | `13.0.8.1` / `C:\Program Files\IBM\ACE\13.0.8.1` (overridable) |
 | `TOPOLOGY` | standalone (also: docker) |
 | `SERVER_NAME` / `SERVER_WORK_DIR` | `TEST_SERVER_PGP` / `C:\temp\pgp\TEST_SERVER_PGP` |
 | `HTTP_PORT` / `ADMIN_PORT` | `7800` / `7600` |
@@ -60,8 +60,9 @@ The harness is *invoked* through a thin wrapper that sources the ACE environment
 first; `deploy_and_test.bat` then assumes `ibmint`/`IntegrationServer` are on PATH:
 ```bat
 @echo off
-echo Sourcing ACE environment...
-call "C:\Program Files\IBM\ACE\13.0.7.0\server\bin\mqsiprofile.cmd"
+if not defined ACE_VERSION set ACE_VERSION=13.0.8.1
+echo Sourcing ACE environment (%ACE_VERSION%)...
+call "C:\Program Files\IBM\ACE\%ACE_VERSION%\server\bin\mqsiprofile.cmd"
 if errorlevel 1 ( echo [ERROR] Failed to source ACE environment & exit /b 1 )
 echo Running deploy_and_test.bat...
 call "%~dp0deploy_and_test.bat"
@@ -75,7 +76,7 @@ exit /b %ERRORLEVEL%
 
 Config block:
 ```bat
-set ACE_VERSION=13.0.7.0
+if not defined ACE_VERSION set ACE_VERSION=13.0.8.1
 set ACE_HOME=C:\Program Files\IBM\ACE\%ACE_VERSION%
 set SERVER_NAME=TEST_SERVER_PGP
 set SERVER_WORK_DIR=C:\temp\pgp\%SERVER_NAME%

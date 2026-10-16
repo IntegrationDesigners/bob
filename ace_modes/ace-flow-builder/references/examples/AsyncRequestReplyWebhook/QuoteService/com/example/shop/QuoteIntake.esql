@@ -1,0 +1,74 @@
+BROKER SCHEMA com.example.shop
+
+-- QuoteIntake_Start: one correlation id per request, carried through every log line and
+-- onto the queue. Message passed through unchanged.
+CREATE COMPUTE MODULE QuoteIntake_Start
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET Environment.Variables.ActivityId = UUIDASCHAR;
+		SET OutputRoot = InputRoot;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteIntake_Check (computeMode destinationAndMessage):
+--   valid   -> out:  Properties + MQRFH2.usr.ActivityId + the request plus quoteId, for
+--                    the MQ Output node (no MQMD: the node creates the default one;
+--                    HTTPInputHeader is not copied, so it never reaches the queue)
+--   invalid -> out1: 400 body and ReplyStatusCode, for the HTTP Reply node
+CREATE COMPUTE MODULE QuoteIntake_Check
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		DECLARE req REFERENCE TO InputRoot.JSON.Data;
+		DECLARE quoteId CHARACTER;
+
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputRoot.Properties = InputRoot.Properties;
+
+		IF NOT IsValidSku(req.sku)
+		   OR NOT IsValidQuantity(CAST(req.quantity AS CHARACTER))
+		   OR COALESCE(req.callbackUrl, '') = '' THEN
+			SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = 400;
+			SET OutputRoot.JSON.Data.error = 'invalid-request';
+			SET OutputRoot.JSON.Data.detail = 'sku must look like ABC-1234, quantity 1-999, callbackUrl required';
+			PROPAGATE TO TERMINAL 'out1';
+			RETURN FALSE;
+		END IF;
+
+		SET quoteId = UUIDASCHAR;
+		SET Environment.Variables.QuoteId = quoteId;
+		SET OutputRoot.MQRFH2.usr.ActivityId = Environment.Variables.ActivityId;
+		SET OutputRoot.JSON.Data = req;
+		SET OutputRoot.JSON.Data.sku = UPPER(TRIM(req.sku));
+		SET OutputRoot.JSON.Data.quoteId = quoteId;
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteIntake_Accept (computeMode destinationAndMessage): 202 with the quoteId after the
+-- MQ put succeeded. A fresh body: the queue message (MQRFH2, full request) is not echoed.
+CREATE COMPUTE MODULE QuoteIntake_Accept
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = 202;
+		SET OutputRoot.Properties = InputRoot.Properties;
+		SET OutputRoot.JSON.Data.quoteId = Environment.Variables.QuoteId;
+		SET OutputRoot.JSON.Data.state = 'queued';
+		RETURN TRUE;
+	END;
+END MODULE;
+
+-- QuoteIntake_Fail (computeMode destinationAndMessage): opaque 500 that names the
+-- correlation id to look up in the logs; never the exception text.
+CREATE COMPUTE MODULE QuoteIntake_Fail
+	CREATE FUNCTION Main() RETURNS BOOLEAN
+	BEGIN
+		SET OutputLocalEnvironment = InputLocalEnvironment;
+		SET OutputLocalEnvironment.Destination.HTTP.ReplyStatusCode = 500;
+		SET OutputRoot.Properties = InputRoot.Properties;
+		SET OutputRoot.JSON.Data.error = 'internal-error';
+		SET OutputRoot.JSON.Data.detail = 'reference ' || COALESCE(Environment.Variables.ActivityId, 'unknown');
+		RETURN TRUE;
+	END;
+END MODULE;

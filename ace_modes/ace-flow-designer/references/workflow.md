@@ -49,7 +49,7 @@ deliverable is handed to ace-flow-builder.
 Open the interview. Ask, in plain language and in one short batch (these three are tightly linked):
 
 1. **Goal** - "In one sentence, what should this integration achieve?"
-2. **Trigger** - "What kicks it off? (a message arriving, a file landing, an HTTP call, a timer…)"
+2. **Trigger** - "What kicks it off? (a message arriving, a file landing, an HTTP call, a timerâ¦)"
 3. **Definition of done** - "What does one successful run look like - what has happened when it worked?"
 
 Also capture, lightly, **who/what is on each end** (the source system and the target system) - this
@@ -73,7 +73,7 @@ terms, giving the user the vocabulary:
 
 Common signals (full catalog in the referenced file):
 
-| User describes… | Pattern to name |
+| User describesâ¦ | Pattern to name |
 |---|---|
 | Read from a queue, call an API | IBM MQ to HTTP (Protocol Transformation) |
 | Pick up a file, put to a queue | File to IBM MQ (Protocol Transformation) |
@@ -110,14 +110,14 @@ Establish the *structure* of what will be built. One topic, asked as a short bat
 4. **Explicitly out of scope.** "What should this flow *not* do?" - capture non-goals so ace-flow-builder
    doesn't over-build. Default: nothing extra.
 
-Where there are several flows, capture them as a table (flow file → input → output) - this becomes
+Where there are several flows, capture them as a table (flow file â input â output) - this becomes
 the *Shape* section of the spec and mirrors the worked example.
 
 **Subflow terminal wiring (ask only when a shared subflow is chosen).** A subflow usually has a
 separate happy path and error path. ace-flow-builder needs to know how the parent flow's terminals route
 in - which is a blocker, like routing-source - so capture: the subflow's input terminals (e.g. a
 happy input and an error input) and which parent output goes to each. Default and common shape: the
-parent input node's `out` terminal → the subflow's happy input; its `catch` and `failure` terminals →
+parent input node's `out` terminal â the subflow's happy input; its `catch` and `failure` terminals â
 the subflow's error input. Record this in the *Shape* section, exactly as the MQEventReader gold spec
 does. Skip this entirely for a single-flow design with no subflow.
 
@@ -149,7 +149,7 @@ If the flow has more than one input or output endpoint, capture each as its own 
 routing/filter decision value could exist in more than one place on the message tree (an MQRFH2
 folder, an HTTP header, `Environment.Variables`, `LocalEnvironment`), ask which single source is
 authoritative and record it. ace-flow-builder stops and asks this if the spec doesn't pin it down. (See
-ace-flow-builder `validated_rules.md` §1.)
+ace-flow-builder `validated_rules.md` Â§1.)
 
 ---
 
@@ -187,8 +187,8 @@ exactly what that track needs, mirroring ace-flow-builder's **two-question gate*
 `interview_guide.md` for framings and defaults.
 
 1. **Spec source** - "Do you have an OpenAPI/Swagger file already, or are we starting from scratch?"
-   - Existing → record the file path; ace-flow-builder drives generation from it.
-   - From scratch (default) → you'll draft a minimal OpenAPI 3 doc from the operations below.
+   - Existing â record the file path; ace-flow-builder drives generation from it.
+   - From scratch (default) â you'll draft a minimal OpenAPI 3 doc from the operations below.
 2. **Operations** - for each: HTTP method + path, request body shape, success response shape, and a
    plain-English line on what the operation does (stub it `[CONFIGURE: logic]` if unknown). Capture as
    the operations table in the spec's *REST API* section.
@@ -219,14 +219,14 @@ production. Ask:
   ace-flow-builder sees two distinct failure kinds on separate terminals and needs to know how to split
   them: a *connection failure* (no response at all, arrives on the `failure` terminal) vs an *HTTP
   error response* (a 4xx/5xx came back, arrives on the `error` terminal). Default classification:
-  connection failure → retry; HTTP 408/429/5xx → retry; other 4xx → fatal. Record it so ace-flow-builder
+  connection failure â retry; HTTP 408/429/5xx â retry; other 4xx â fatal. Record it so ace-flow-builder
   wires and handles both terminals (it otherwise has to guess, and unwired terminals lose messages).
 - **Timer / delayed-retry parameters** - if retry is delayed (a timer pair) or the flow is timer
   driven: interval, number of fires, and whether retries are single-flight (one at a time) or
   per-message (concurrent). The timer *identifier value* is ace-flow-builder's job - capture only the
   strategy. This feeds the *Timer / delayed retry* section of the spec.
 
-Capture as an `Error handling` section: failure → action, plus any retry parameters, the HTTP
+Capture as an `Error handling` section: failure â action, plus any retry parameters, the HTTP
 classification, and (where relevant) the timer parameters.
 
 ---
@@ -364,7 +364,7 @@ paste the whole spec into the prompt - the file is the source of truth).
 4. Flag the **`[CONFIGURE: ...]` open items** as the only genuinely open questions for the build.
 
 Before handing over, do a final consistency check: the spec's *ace-flow-builder Phase B1 answers* section
-is filled (no leftover `<…>` placeholders other than intentional `[CONFIGURE: ...]` lines), and the
+is filled (no leftover `<â¦>` placeholders other than intentional `[CONFIGURE: ...]` lines), and the
 flow name in the handover matches the spec title and the state file. If the project location is still
 `[CONFIGURE: ...]`, ask the user for it as part of the hand-off - ace-flow-builder must not default it to
 a throwaway path.

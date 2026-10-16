@@ -12,7 +12,7 @@
       <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="362,24" dataSource="EXAMPLE" computeExpression="esql://routine/#MQTTtoDatabase_Database.Main">
         <translation xmi:type="utility:ConstantString" string="Database"/>
       </nodes>
-      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="699,24" destination="file" filePath="C:\temp\TraceMQTTtoDatabase.txt" pattern="====================&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;====================&#xD;&#xA;${ExceptionList}">
+      <nodes xmi:type="ComIbmTrace.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="699,24" destination="localError" pattern="====================&#xD;&#xA;${LocalEnvironment}&#xD;&#xA;====================&#xD;&#xA;${ExceptionList}&#xD;&#xA;====================&#xD;&#xA;${Environment}">
         <translation xmi:type="utility:ConstantString" string="Trace"/>
       </nodes>
       <nodes xmi:type="com_ibm_connector_mqtt_ComIbmEventInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="131,70" connectorName="MQTT" topicName="MQTTtoDatabase" clientId="MQTTtoDatabase" hostName="localhost" port="1883" qos="0" useSSL="false" validateTiming="deferred" parserXmlnscBuildTreeUsingXMLSchema="no" parserXmlnscUseForXmlnsDomain="no" parserXmlnscMixedContentRetainMode="none" parserXmlnscCommentsRetainMode="none" parserXmlnscProcessingInstructionsRetainMode="none" validateMaster="none"
@@ -22,7 +22,9 @@
       <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
       <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
       <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
       <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_1" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
     </composition>
     <propertyOrganizer/>
     <stickyBoard/>

@@ -6,25 +6,40 @@ Reference for `ace-flow-refactor` mode. Covers what to look for, how to fix it, 
 
 ## 1. Compute Mode Matrix
 
-The compute mode controls what ACE puts in `OutputRoot` before your ESQL runs. Getting this wrong causes silent data corruption or unnecessary overhead.
+The compute mode controls which trees the node **propagates** - it never copies
+anything into `OutputRoot`, which always starts empty (copying is done in ESQL - see
+`validated_rules.md` rules 16-17). A tree the mode does not include propagates its
+**input** version, and writes to its `Output*` correlation are silently discarded.
 
-| Mode | What ACE initialises in OutputRoot | Use when |
-|------|------------------------------------|----------|
-| `none` | Nothing - OutputRoot is empty | You build the entire output yourself (most common for transformations) |
-| `copyMessageHeaders` | All headers (MQMD, HTTPReplyHeader, etc.) copied, no body | You want headers preserved but will build the body; avoids manual `CopyMessageHeaders()` |
-| `local` | Copy of the whole message tree (input + headers + body) | Use only for simple field overrides; wastes memory on large messages |
-| `clone` | Deep clone of entire input tree | Rarely correct - effectively same as `local` but explicit; avoid unless you need to modify a copy without affecting input |
+| `computeMode` literal | Toolkit label | Output trees propagated |
+|------|------|------|
+| `message` (default - omit the attribute) | Message | `OutputRoot` |
+| `destination` | LocalEnvironment | `OutputLocalEnvironment` |
+| `destinationAndMessage` | LocalEnvironment and Message | `OutputRoot` + `OutputLocalEnvironment` |
+| `exception` | Exception | `OutputExceptionList` |
+| `exceptionAndMessage` | Exception and Message | `OutputRoot` + `OutputExceptionList` |
+| `exceptionAndDestination` | Exception and LocalEnvironment | `OutputLocalEnvironment` + `OutputExceptionList` |
+| `all` | All | all three |
 
-**Default in IBM patterns:** `none` - you control all output explicitly.
+`destination` is the serialized name for LocalEnvironment (its historic name). There
+is no `none`, `copyMessageHeaders`, `local`, `clone`, or `localEnvironment*` literal,
+and no `Environment` mode - the `Environment` tree sits outside the mode system
+entirely (one flow-wide tree, addressed as `Environment` in every node - see
+`validated_rules.md` rule 16).
 
-**Common mistake:** Using `local` when you only need to transform the body. This copies the entire input tree unnecessarily. Switch to `none` + explicit `SET OutputRoot.Properties = InputRoot.Properties`.
+**Default in generated flows:** `message` (omit the attribute) for body-only
+transforms; `destinationAndMessage` or `all` as soon as the ESQL writes
+`OutputLocalEnvironment` (destination lists, `TimeoutRequest`, `ReplyStatusCode`).
+
+**Common mistake:** writing `SET OutputLocalEnvironment...` under `message` mode - the
+write is silently discarded and the input LocalEnvironment propagates instead.
 
 **In .msgflow XML**, compute mode appears as `computeMode` attribute on the Compute node:
 ```xml
 <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1"
   xmi:id="FCMComposite_1_2"
   computeExpression="esql://routine/#MyFlow_Compute.Main"
-  computeMode="none"/>   <!-- omit attribute entirely for "none" (it's the default) -->
+  computeMode="destinationAndMessage"/>   <!-- omit attribute entirely for "message" (the default) -->
 ```
 
 ---
@@ -53,35 +68,25 @@ HTTP Input → ValidateCompute → TransformCompute → HTTP Reply
 HTTP Input → ValidateAndTransformCompute → HTTP Reply
 ```
 
-### 2.2 CopyMessageHeaders Anti-Pattern
+### 2.2 Whole-Message Copy Idioms
 
-**Bad pattern:** Manually coding `CopyMessageHeaders()` inside every compute module.
+There is no compute-mode setting that copies trees for you - copying is always done in
+ESQL. The Toolkit template ships two helpers; pick ONE idiom per compute module:
+
+- **Pass-through / annotate in place:** `SET OutputRoot = InputRoot;` - the complete
+  copy (this is the entire body of the template's `CopyEntireMessage()`; inline it per
+  `esql_style.md` Rule 8), then modify individual output fields.
+- **New body, headers preserved:** `CALL CopyMessageHeaders();` then build
+  `OutputRoot.<body>` from scratch (body last - `validated_rules.md` rule 13).
+
+**Bad pattern:** combining them, or wildcard "copies":
 ```esql
--- Repeated in every compute module
-CREATE PROCEDURE CopyMessageHeaders() BEGIN
-    DECLARE I INTEGER 1;
-    DECLARE J INTEGER;
-    SET J = CARDINALITY(InputRoot.*[]);
-    WHILE I < J DO
-        SET OutputRoot.*[I] = InputRoot.*[I];
-        SET I = I + 1;
-    END WHILE;
-END;
+CALL CopyMessageHeaders();
+SET OutputRoot.* = InputRoot.*;   -- `*` addresses ONE child, not the whole tree
 ```
-
-**Better:** Use `computeMode="copyMessageHeaders"` on the Compute node - ACE copies headers automatically before your ESQL runs. You then only need to set the body:
-```esql
-CREATE COMPUTE MODULE MyFlow_Compute
-    CREATE FUNCTION Main() RETURNS BOOLEAN
-    BEGIN
-        -- Headers already copied by computeMode=copyMessageHeaders
-        SET OutputRoot.XMLNSC.Response.Field = InputRoot.XMLNSC.Request.Field;
-        RETURN TRUE;
-    END;
-END MODULE;
-```
-
-Exception: keep the `CopyMessageHeaders()` procedure in `HandleException` modules - the error handler still needs it there since error paths don't go through normal compute.
+A full-tree assignment supersedes the preceding header copy, and the wildcard `SET` is
+not a whole-tree copy at all (`validated_rules.md` rule 17). Refactor the pair to a
+single `SET OutputRoot = InputRoot;`.
 
 ---
 
@@ -259,7 +264,7 @@ Rule of thumb: with ≥ 3 contributors, refactor to Label + PROPAGATE. With 2, t
 ### Before (common issues)
 
 ```
-[HTTP Input] → [ValidateCompute (computeMode=local)] → [TransformCompute (computeMode=local)] → [HTTP Reply]
+[HTTP Input] → [ValidateCompute (computeMode=all)] → [TransformCompute (computeMode=all)] → [HTTP Reply]
 (catch terminal unwired, no error handling, two adjacent compute nodes)
 ```
 
@@ -298,8 +303,8 @@ END MODULE;
 ### After (refactored)
 
 ```
-[HTTP Input] → [ValidateAndTransformCompute (computeMode=none)] → [HTTP Reply]
-               [HandleException (computeMode=none)] ↗ (from catch)
+[HTTP Input] → [ValidateAndTransformCompute (computeMode omitted = message)] → [HTTP Reply]
+               [HandleException (computeMode omitted = message)] ↗ (from catch)
 ```
 
 **ValidateAndTransformCompute.esql:**
@@ -325,7 +330,9 @@ END MODULE;
 
 **Changes made:**
 - Merged two adjacent compute nodes into one (eliminated redundant node)
-- Removed `computeMode=local` - both used full tree copy unnecessarily
+- Dropped `computeMode=all` back to the default `message` - neither module writes
+  `OutputLocalEnvironment` or `OutputExceptionList` (the mode gates propagation, it
+  copies nothing)
 - Eliminated duplicated `CopyMessageHeaders()` procedure
 - Added `BROKER SCHEMA` declaration
 - Added error handling (HandleException node + wired catch terminal)

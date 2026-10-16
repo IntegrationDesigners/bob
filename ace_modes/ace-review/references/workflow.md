@@ -115,14 +115,14 @@ If the user does not respond or explicitly says "default" / "up to you", use Lev
 
 | Guideline file | L0 | L1 | L2 | L3 |
 |---|---|---|---|---|
-| `esql_guidelines.md` | ⚠️ (if chosen) | ✅ | ✅ | ✅ |
-| `flow_guidelines.md` | ⚠️ (if chosen) | ✅ | ✅ | ✅ |
-| `java_guidelines.md` | ⚠️ (if chosen) | ✅ | ✅ | ✅ |
-| `ten_ace_message_flow_mistakes.md` | ❌ | ✅ | ✅ | ✅ |
-| `config_guidelines.md` | ❌ | ⚠️ (if config files provided) | ⚠️ (if config files provided) | ⚠️ (if config files provided) |
-| `error_handling_guidelines.md` | ❌ | ❌ | ✅ | ✅ |
-| `security_guidelines.md` | ❌ | ❌ | ❌ | ✅ |
-| `performance_monitoring_guidelines.md` | ❌ | ❌ | ❌ | ✅ |
+| `esql_guidelines.md` | â ï¸ (if chosen) | â | â | â |
+| `flow_guidelines.md` | â ï¸ (if chosen) | â | â | â |
+| `java_guidelines.md` | â ï¸ (if chosen) | â | â | â |
+| `ten_ace_message_flow_mistakes.md` | â | â | â | â |
+| `config_guidelines.md` | â | â ï¸ (if config files provided) | â ï¸ (if config files provided) | â ï¸ (if config files provided) |
+| `error_handling_guidelines.md` | â | â | â | â |
+| `security_guidelines.md` | â | â | â | â |
+| `performance_monitoring_guidelines.md` | â | â | â | â |
 
 Read `config_guidelines.md` at L1 and above whenever configuration files (.properties, .yaml, .policyxml, .mqsc, application descriptors, JSON schemas) are part of the review input.
 
@@ -146,7 +146,7 @@ Do not rely on memory for the guidelines content - always read the files.
 Work through the provided files systematically. For each flow and module:
 
 **For `.msgflow` files:**
-- Map out the full flow structure (input → processing → output → error paths)
+- Map out the full flow structure (input â processing â output â error paths)
 - Identify all node types and their configurations
 - Check compute modes on Compute nodes. Apply this decision logic:
   - **Do NOT flag** `SET OutputRoot = InputRoot` under Message mode as wrong - this is how input is preserved before modification (Message mode discards InputRoot, so the copy is required)
@@ -155,12 +155,13 @@ Work through the provided files systematically. For each flow and module:
   - **Flag inefficient full copies:** `SET OutputRoot = InputRoot` or `CopyEntireMessage()` when only a few headers are needed - suggest targeted copies instead
   - **For All mode:** `CopyEntireMessage()` alone is not enough - LocalEnvironment and ExceptionList must also be copied explicitly
   - **Account for shared library/helper calls:** if a helper module sets LocalEnvironment, the calling flow's compute mode must include LocalEnvironment or those changes are lost
-- Check for unconnected Failure, Catch, and Timeout terminals - when unconnected, exceptions propagate upstream with potential transaction rollback. Flag as 🟠 High if a Timeout terminal on an external call (HTTP, SOAP, DB) is unconnected; flag as 🟡 Medium if a processing node has an unconnected Failure terminal with no upstream TryCatch. Do NOT flag if a TryCatch covers the full path. See `flow_guidelines.md` - Unconnected Node Terminals for the full decision rules.
+- Check for unconnected Failure, Catch, and Timeout terminals - when unconnected, exceptions propagate upstream with potential transaction rollback. Flag as ð  High if a Timeout terminal on an external call (HTTP, SOAP, DB) is unconnected; flag as ð¡ Medium if a processing node has an unconnected Failure terminal with no upstream TryCatch. Do NOT flag if a TryCatch covers the full path. See `flow_guidelines.md` - Unconnected Node Terminals for the full decision rules.
 - Check for adjacent compute nodes
 - Check for flow loops
 - Check for FlowOrder usage where multiple output connections exist
 - Check parse timing and validation on parser-capable nodes (input nodes plus RCD, Compute, HTTPRequest, MQGet, etc.). The "Parse Timing" property serializes as the `validateTiming` attribute (values onDemand/immediate/complete) - there is NO `parseTiming` attribute. "Validate" serializes as `validateMaster` (default none). Parse timing controls when the body is parsed (immediate/complete parse fully at the node, catching malformed input there); schema validation is separate and needs `validateMaster` != none plus a Message model/schema. See `flow_guidelines.md` - Parse Timing, Validate, and Message model.
 - **Absent attribute = default, not missing.** ACE serializes only non-default node-property values into the `.msgflow` (and only overridden values into descriptors). An attribute that is not present means the property is at its DEFAULT, not that it is unset. Never flag a property as "missing/unset" from an absent attribute - state the default (e.g. `validateTiming` absent -> Parse Timing On Demand; `validateMaster` absent -> Validate None).
+- For each RCD node: confirm it actually changes the domain - trace the effective upstream domain (input node's `messageDomainProperty`, prior RCDs, tree-rebuilding Compute nodes). A same-domain RCD validates nothing: with `validateMaster` set and no downstream Validate=`inherit` serializer it is a validation that never runs (ð  High); with no validation settings it is a no-op node (ð¡ Medium). See `flow_guidelines.md` - RCD validation semantics.
 - Check Additional Instances setting - is it appropriate for the expected volume? (see flow_guidelines.md)
 
 **For `.esql` files:**
@@ -191,6 +192,7 @@ Work through the provided files systematically. For each flow and module:
 - Check for hardcoded credentials
 - Compare TEST vs. PROD configurations
 - Check for environment-specific overrides
+- Overrides-only rule: the base `node.conf.yaml` / `server.conf.yaml` must be unmodified - all changes belong in `overrides/*.yaml`. A modified or replaced base file is a ð  High finding; an `overrides/*.yaml` that only duplicates base defaults is a remark. See `config_guidelines.md` 1.1.
 - Note any missing or suspicious properties
 - Check JSON schema files (`.json`): verify they use JSON Schema **draft 4** only - ACE does not support draft 6, 7, or 2019-09 keywords (`contains`, `if`, `then`, `else`, `$defs`, `propertyNames`, `$id`, `examples`). See `flow_guidelines.md` - JSON Schema Version Compatibility.
 
@@ -217,9 +219,9 @@ Always produce a five-column table (Node / Property / Hardcoded default / Promot
 Expected value) when reporting these findings. Apply this severity logic:
 
 **Severity Assessment:**
-- If promoted value **matches** expected → **Runtime is CORRECT**. Do **not** raise this as a finding (not even 🟢 Low). The override descriptor already applies the right value, so there is no runtime issue to fix. Record it in the **Remarks / Notes (non-findings)** section as an observation: the node default is stale but harmless while descriptors are applied; a descriptor-less deployment (e.g. direct BAR deploy in test) would use the stale node default. Optionally suggest aligning the node default for tidiness, but keep it a remark, not a rated issue.
-- If promoted value **also mismatches** expected → flag as 🟠 High or 🔴 Critical - this is a **runtime misconfiguration** that affects production
-- If **no properties file** was provided → Cannot assess runtime behavior. Note this gap explicitly: "Unable to verify runtime configuration without deployment descriptors. Recommend including .properties/.yaml files in future reviews."
+- If promoted value **matches** expected â **Runtime is CORRECT**. Do **not** raise this as a finding (not even ð¢ Low). The override descriptor already applies the right value, so there is no runtime issue to fix. Record it in the **Remarks / Notes (non-findings)** section as an observation: the node default is stale but harmless while descriptors are applied; a descriptor-less deployment (e.g. direct BAR deploy in test) would use the stale node default. Optionally suggest aligning the node default for tidiness, but keep it a remark, not a rated issue.
+- If promoted value **also mismatches** expected â flag as ð  High or ð´ Critical - this is a **runtime misconfiguration** that affects production
+- If **no properties file** was provided â Cannot assess runtime behavior. Note this gap explicitly: "Unable to verify runtime configuration without deployment descriptors. Recommend including .properties/.yaml files in future reviews."
 
 **Example Remark Format (when promoted value is correct):**
 
@@ -232,8 +234,8 @@ The hardcoded node-level defaults in the msgflow do not match the deployment des
 
 | Node | Property | Hardcoded Default | Promoted Value | Expected | Status |
 |------|----------|-------------------|----------------|----------|--------|
-| MQRetry | FailureArchiveDirectory | `\ARCHIVE\Upload` | `\ARCHIVE\UploadSOL` | `\ARCHIVE\UploadSOL` | ✅ Runtime correct |
-| MQDrop | DropArchiveDirectory | `\ARCHIVE\Upload` | `\ARCHIVE\UploadSOL` | `\ARCHIVE\UploadSOL` | ✅ Runtime correct |
+| MQRetry | FailureArchiveDirectory | `\ARCHIVE\Upload` | `\ARCHIVE\UploadSOL` | `\ARCHIVE\UploadSOL` | â Runtime correct |
+| MQDrop | DropArchiveDirectory | `\ARCHIVE\Upload` | `\ARCHIVE\UploadSOL` | `\ARCHIVE\UploadSOL` | â Runtime correct |
 
 **Optional tidy-up:** Align the node defaults in the msgflow with the descriptor values (`\ARCHIVE\UploadSOL`) so descriptor-less test deployments behave the same. Not required - runtime behaviour is already correct.
 ```
@@ -260,8 +262,8 @@ Use `references/REVIEW_TEMPLATE.md` as the structure. Fill it in fully - do not 
 4. **Configuration** - Deployment properties table (TEST vs PROD)
 5. **Logging strategy** - Log points, log aggregation integration (if any)
 6. **Strengths** - What is done well (be specific, reference the code)
-7. **Areas for improvement** - Prioritized issues with code snippets and recommendations, followed by a **Findings Summary** table (one row per finding: ID / Title / Severity / Location), ordered Critical → Low
-8. **ACE best practices compliance** - What's followed ✅, what needs improvement ⚠️
+7. **Areas for improvement** - Prioritized issues with code snippets and recommendations, followed by a **Findings Summary** table (one row per finding: ID / Title / Severity / Location), ordered Critical â Low
+8. **ACE best practices compliance** - What's followed â, what needs improvement â ï¸
 9. **Testing recommendations** - Unit, integration, performance
 10. **Operational considerations** - Monitoring, maintenance, troubleshooting
 11. **Conclusion** - Summary assessment, priority improvements, overall rating
@@ -312,8 +314,8 @@ Every finding must include:
 **Example:**
 - Review file saved at: `MyApp/MyApp_technical_review.md`
 - Source file at: `MyApp/MyApp/MyFlow.esql`
-- ✅ Correct link: `[MyFlow.esql:42](MyApp/MyFlow.esql)`
-- ❌ Wrong link: `[MyFlow.esql:42](MyApp/MyApp/MyFlow.esql)`
+- â Correct link: `[MyFlow.esql:42](MyApp/MyFlow.esql)`
+- â Wrong link: `[MyFlow.esql:42](MyApp/MyApp/MyFlow.esql)`
   (resolves to `MyApp/MyApp/MyApp/MyFlow.esql` - double folder)
 
 **Implementation:** After determining the review file's save location in Step 6, strip the leading project folder segment from all file paths before writing any links. If the review file is saved at `ProjectName/review.md` and source is at `ProjectName/src/file.esql`, the link should be `[file.esql:42](src/file.esql)`.
@@ -322,10 +324,10 @@ Every finding must include:
 
 | Severity | Label | Meaning |
 |---|---|---|
-| 🔴 | **Critical** | Data loss, security vulnerability, production crash risk |
-| 🟠 | **High** | Significant performance impact, reliability risk, error handling gap |
-| 🟡 | **Medium** | Best practice violation, maintainability concern, minor performance issue |
-| 🟢 | **Low** | Nice-to-have improvement, style, future-proofing |
+| ð´ | **Critical** | Data loss, security vulnerability, production crash risk |
+| ð  | **High** | Significant performance impact, reliability risk, error handling gap |
+| ð¡ | **Medium** | Best practice violation, maintainability concern, minor performance issue |
+| ð¢ | **Low** | Nice-to-have improvement, style, future-proofing |
 
 ### Grouping findings
 
@@ -342,19 +344,19 @@ Group findings by topic, not by file. Use these topic groups in this order:
 | 7 | Observability / Logging | O-NN |
 | 8 | Maintainability | M-NN |
 
-Within each topic, order findings by severity (Critical → Low). The counter resets to 01 for each new topic group.
+Within each topic, order findings by severity (Critical â Low). The counter resets to 01 for each new topic group.
 
 This is the global topic order for the entire ace-review family: the scoped variants (ace-review-code, ace-review-flow, ace-review-config) keep this exact order and simply skip topics that are out of their scope.
 
 ### Findings Summary table
 
-After all individual findings (before the ACE Best Practices Compliance section), write a `## Findings Summary` table that aggregates every finding in one view. One row per finding, ordered Critical → High → Medium → Low:
+After all individual findings (before the ACE Best Practices Compliance section), write a `## Findings Summary` table that aggregates every finding in one view. One row per finding, ordered Critical â High â Medium â Low:
 
 ```markdown
 | ID | Title | Severity | Location |
 |----|-------|----------|----------|
-| R-01 | Commented-Out RETURN TRUE | 🔴 Critical | [`postRecord_Compute.esql:36`](path/to/postRecord_Compute.esql) |
-| SEC-01 | Raw Bearer Token Logged | 🟠 High | [`postRecord.subflow:96`](path/to/postRecord.subflow) |
+| R-01 | Commented-Out RETURN TRUE | ð´ Critical | [`postRecord_Compute.esql:36`](path/to/postRecord_Compute.esql) |
+| SEC-01 | Raw Bearer Token Logged | ð  High | [`postRecord.subflow:96`](path/to/postRecord.subflow) |
 ```
 
 This table is always required - it gives developers and architects an at-a-glance summary before reading the full finding detail.
@@ -362,9 +364,9 @@ This table is always required - it gives developers and architects an at-a-glanc
 ### Overall assessment rating
 
 End the report with one of:
-- ✅ **Production-Ready** - Minor improvements recommended
-- ⚠️ **Needs Work** - Significant improvements required before production
-- ❌ **Not Ready** - Critical issues must be resolved
+- â **Production-Ready** - Minor improvements recommended
+- â ï¸ **Needs Work** - Significant improvements required before production
+- â **Not Ready** - Critical issues must be resolved
 
 ---
 

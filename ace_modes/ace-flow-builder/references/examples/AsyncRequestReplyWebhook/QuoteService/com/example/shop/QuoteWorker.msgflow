@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmMQInput.msgnode="ComIbmMQInput.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ComIbmWSRequest.msgnode="ComIbmWSRequest.msgnode" xmlns:LoggingLibrary_LogEntry.subflow="LoggingLibrary/LogEntry.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="com/example/shop/QuoteWorker.msgflow" nsPrefix="com_example_shop_QuoteWorker.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <eStructuralFeatures xmi:type="ecore:EAttribute" xmi:id="Property.PricingServiceUrl" name="PricingServiceUrl" lowerBound="1" defaultValueLiteral="http://127.0.0.1:5003">
+      <eType xmi:type="ecore:EDataType" href="http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    </eStructuralFeatures>
+    <translation xmi:type="utility:TranslatableString" key="QuoteWorker" bundleName="com/example/shop/QuoteWorker" pluginId="QuoteService"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/QuoteService/icons/full/obj16/QuoteWorker.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/QuoteService/icons/full/obj30/QuoteWorker.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmMQInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="20,120" queueName="SHOP.QUOTE.REQUEST" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="SHOP.QUOTE.REQUEST"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_2" location="170,120" Status="input" Message="quote request taken from the queue" Uuid="$InputRoot.MQRFH2.usr.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log request"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_3" location="310,120" computeExpression="esql://routine/com.example.shop#QuoteWorker_Load.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Load"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="450,120" URLSpecifier="http://127.0.0.1:5003/prices/unknown" httpMethod="GET" httpVersion="1.1" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="GET price"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="600,120" computeExpression="esql://routine/com.example.shop#QuoteWorker_Price.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Price"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSRequest.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="750,120" URLSpecifier="http://127.0.0.1:5002/webhook/quote" httpMethod="POST" httpVersion="1.1" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="POST result to webhook"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_7" location="900,80" Status="callback-sent" Message="quote delivered to the webhook" Uuid="$Environment.Variables.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log delivered"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_8" location="900,180" computeExpression="esql://routine/com.example.shop#QuoteWorker_Undeliverable.Main">
+        <translation xmi:type="utility:ConstantString" string="Undeliverable"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_9" location="1040,180" Status="error-callback" Message="webhook not reachable, quote parked" Uuid="$Environment.Variables.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log callback failed"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_10" location="170,280" computeExpression="esql://routine/com.example.shop#QuoteWorker_Catch.Main">
+        <translation xmi:type="utility:ConstantString" string="Catch"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_11" location="310,280" Status="error-exception" Message="quote worker failed, request parked" Uuid="$InputRoot.MQRFH2.usr.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log error"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="1180,280" queueName="SHOP.QUOTE.FAILED" messageContext="default">
+        <translation xmi:type="utility:ConstantString" string="SHOP.QUOTE.FAILED"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.error" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.error" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_9" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_13" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_14" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_15" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_16" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer>
+      <propertyDescriptor groupName="Group.Endpoints" configurable="true" userDefined="true" describedAttribute="Property.PricingServiceUrl">
+        <propertyName xmi:type="utility:TranslatableString" key="Property.PricingServiceUrl" bundleName="com/example/shop/QuoteWorker" pluginId="QuoteService"/>
+      </propertyDescriptor>
+    </propertyOrganizer>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

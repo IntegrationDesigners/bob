@@ -25,7 +25,7 @@ mqsichangeflowstats <integration_node> -s -e <integration_server> -f <flow_name>
 mqsireportflowstats <integration_node> -e <integration_server> -f <flow_name>
 ```
 
-For independent (standalone) integration servers, enable statistics in `server.conf.yaml` (`Statistics` section) or via the web UI / admin REST API.
+For independent (standalone) integration servers, enable statistics in `overrides/server.conf.yaml` (`Statistics` section - overrides-only rule: never edit the base `server.conf.yaml`, ACE layers it over built-in defaults) or via the web UI / admin REST API.
 
 ---
 
@@ -103,7 +103,7 @@ Additional instances (threads per flow) are a **deployment property**, not a sta
 ibmint apply overrides overrides/prod.properties --bar-file App.bar
 ```
 
-- Alternatively set the Additional instances property on the flow in the Toolkit / BAR editor before packaging, or configure defaults in `server.conf.yaml` for an independent integration server
+- Alternatively set the Additional instances property on the flow in the Toolkit / BAR editor before packaging, or configure defaults in `overrides/server.conf.yaml` for an independent integration server (never the base `server.conf.yaml`)
 - Don't over-provision - more threads does not equal better performance
 - Monitor thread utilization - adjust based on actual usage
 - Consider workload type - I/O-bound vs. CPU-bound
@@ -205,7 +205,7 @@ mqsichangeproperties <integration_node> -e <integration_server> \
     -o ComIbmJVMManager -n jvmMaxHeapSize -v 1073741824
 ```
 
-For independent integration servers, set `jvmMaxHeapSize` under the `ResourceManagers.JVM` section of `server.conf.yaml` (also in bytes).
+For independent integration servers, set `jvmMaxHeapSize` under the `ResourceManagers.JVM` section of `overrides/server.conf.yaml` (also in bytes; never the base `server.conf.yaml`).
 
 ---
 

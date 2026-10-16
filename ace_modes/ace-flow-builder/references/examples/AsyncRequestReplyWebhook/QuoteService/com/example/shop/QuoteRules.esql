@@ -1,0 +1,36 @@
+BROKER SCHEMA com.example.shop
+
+-- Shared by QuoteIntake (validation) and QuoteWorker (pricing): the request rules.
+-- ESQL has no regular expressions, so formats are checked positionally.
+
+-- SKU format: three letters, a dash, four digits (ABC-1234), case-insensitive.
+CREATE FUNCTION IsValidSku(IN sku CHARACTER) RETURNS BOOLEAN
+BEGIN
+	DECLARE s CHARACTER UPPER(TRIM(COALESCE(sku, '')));
+	IF LENGTH(s) <> 8 OR SUBSTRING(s FROM 4 FOR 1) <> '-' THEN
+		RETURN FALSE;
+	END IF;
+	RETURN LENGTH(TRANSLATE(SUBSTRING(s FROM 1 FOR 3), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '')) = 0
+	   AND LENGTH(TRANSLATE(SUBSTRING(s FROM 5 FOR 4), '0123456789', '')) = 0;
+END;
+
+-- Quantity: a whole number 1-999, sent as a JSON number or a numeric string.
+CREATE FUNCTION IsValidQuantity(IN qty CHARACTER) RETURNS BOOLEAN
+BEGIN
+	DECLARE q CHARACTER TRIM(COALESCE(qty, ''));
+	IF LENGTH(q) = 0 OR LENGTH(q) > 3 OR LENGTH(TRANSLATE(q, '0123456789', '')) <> 0 THEN
+		RETURN FALSE;
+	END IF;
+	RETURN CAST(q AS INTEGER) BETWEEN 1 AND 999;
+END;
+
+-- Volume discount in percent: 10 from 10 units, 20 from 100 units.
+CREATE FUNCTION DiscountPercent(IN quantity INTEGER) RETURNS INTEGER
+BEGIN
+	IF quantity >= 100 THEN
+		RETURN 20;
+	ELSEIF quantity >= 10 THEN
+		RETURN 10;
+	END IF;
+	RETURN 0;
+END;

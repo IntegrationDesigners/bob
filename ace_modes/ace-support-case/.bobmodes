@@ -1,6 +1,6 @@
 customModes:
   - slug: ace-support-case
-    name: 🆘 ACE Support Case
+    name: ð ACE Support Case
     description: >-
       Use this skill when the user wants to open an IBM support case for ACE, needs to gather
       diagnostics for IBM, mentions opening a PMR/case/ticket, references error codes like
@@ -103,7 +103,9 @@ customModes:
       - Functional - Message flow: user trace (normal) + event log + project interchange via mqsipackagebar.
       - Functional - Deployment / start-up: mqsicvp + service trace + JVM property check + event log.
       - Functional - Database / ODBC: DSN inventory first (mqsireportdbparms -n "*" + ODBC.INI/ODBCINST.INI export),
-        then ODBC trace + vendor-specific tools once the vendor is confirmed.
+        then ODBC trace + vendor-specific tools once the vendor is confirmed. The ODBC trace procedure
+        follows the driver: on Windows, SQL Server is reached through a Microsoft ODBC driver, so use
+        Microsoft's Driver Manager tracing steps (no uktrc95.dll) - see references/diagnostics_guide.md Â§3.
       - Functional - SSL / TLS / GSKit: library path ordering (MQ GSKit before Db2/Oracle) + user trace.
       - Performance: user trace (debug) + ACELogAnalyser traceAnalysis + mqsireportproperties (Nagle check).
       - General / unknown: all of the above.
@@ -130,6 +132,10 @@ customModes:
       - mqsiservice -v first - version is mandatory context for every IBM case.
       - Check abend files proactively in <install_dir>\errors\ (Windows) or /var/mqsi/errors/ (Linux) -
         their presence means a crash and changes priority.
+      - ODBC trace procedure follows the driver, not ACE: the IBM/DataDirect route on Windows (copy
+        uktrc95.dll, Select DLL) covers Oracle/PostgreSQL/Sybase/Db2, but SQL Server uses a Microsoft ODBC
+        driver - follow Microsoft's tracing steps and enable "Machine-Wide tracing for all user identities"
+        when the integration server runs under a service account.
       - Service trace only on IBM direction or explicit user request - it is heavyweight.
       - Trace wrapping: if first and last timestamps are suspiciously close, data was lost; increase
         trace size and re-collect.

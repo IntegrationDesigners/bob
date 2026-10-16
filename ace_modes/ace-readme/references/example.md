@@ -38,9 +38,9 @@ Loads acknowledgement files from a network directory and places them on an MQ qu
 #### Flow Design
 
 ```
-File Input → ToSap (Reset Content) → HandleQueueInput → Load → MQ Header → MQ Output
-     ↓                                            ↓
-FlowFailure → Log                                Log
+File Input â ToSap (Reset Content) â HandleQueueInput â Load â MQ Header â MQ Output
+     â                                            â
+FlowFailure â Log                                Log
 ```
 
 #### Key Components
@@ -80,9 +80,9 @@ Processes acknowledgement messages from the queue, determines error status, arch
 #### Flow Design
 
 ```
-MQInput → HandleQueueInput → ToSap → Process → (Success)
-              ↓                    ↓
-           Log/Retry/Drop      InvalidInput → Drop/Retry
+MQInput â HandleQueueInput â ToSap â Process â (Success)
+              â                    â
+           Log/Retry/Drop      InvalidInput â Drop/Retry
 ```
 
 #### Key Components
@@ -131,8 +131,8 @@ Processes acknowledgements based on message type:
 
 Errors can be overruled (treated as successful) via translation tables:
 
-- **Recipient-specific**: `ERR{messagekey}:{recipient}` → `{errorCode}`
-- **Global**: `ERR{messagekey}` → `{errorCode}`
+- **Recipient-specific**: `ERR{messagekey}:{recipient}` â `{errorCode}`
+- **Global**: `ERR{messagekey}` â `{errorCode}`
 - Checks both message-specific table and default `ERR_TABLE_DEFAULT` table
 
 **Important behavior**: If ANY error is overruled, the entire acknowledgement is treated as APPLIED, even if other non-overruled errors exist.
@@ -141,8 +141,8 @@ Errors can be overruled (treated as successful) via translation tables:
 
 Certain errors take precedence and stop further processing:
 
-- **Recipient-specific**: `{messagekey}:{recipient}` → `{errorCode}`
-- **Global**: `{messagekey}` → `{errorCode}`
+- **Recipient-specific**: `{messagekey}:{recipient}` â `{errorCode}`
+- **Global**: `{messagekey}` â `{errorCode}`
 - Checks both message-specific table and default `PRIO_TABLE_DEFAULT` table
 
 When a prioritized error is found, it's immediately returned without checking remaining messages.
@@ -163,8 +163,8 @@ Archives both XML and PDF files:
 **Example:**
 ```
 \\netwerk\dfs\Companies\ENTERPRISE\Applications\TestESB\Inhouse\Archive\OrderAck\PARTNER01\2026\02\19\
-  ├── 123e4567e89b12d3a456426614174000.xml
-  └── 123e4567e89b12d3a456426614174000.pdf
+  âââ 123e4567e89b12d3a456426614174000.xml
+  âââ 123e4567e89b12d3a456426614174000.pdf
 ```
 
 ### B2B Event Creation ([`ProcessOrderAck.esql:222-256`](ProcessOrderAck.esql:222-256))

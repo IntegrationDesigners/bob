@@ -22,6 +22,7 @@ Read this in **Phase B0.5** (deploy planning) and **Phase B5** (validate) instea
 cmd /c "\"C:\Program Files\IBM\ACE\13.0.7.0\server\bin\mqsiprofile.cmd\" >nul && mqsilist"
 ```
 
+- **Verified under the PowerShell tool**, with the whole command in a single-quoted string. From the Bash tool the same backslash-escaped form silently NO-OPS on this box: the call prints the cmd banner and nothing else, and `mqsicreateworkdir` never ran (2026-08-28, twice). A command whose only output is the shell banner did not run - check for output beyond the banner before trusting the step, or use the PowerShell tool.
 - Pick the profile matching the target version: `...\ACE\12.0.12.17\...` vs `...\ACE\13.0.7.0\...`.
 - `>nul` suppresses the profile banner so command output is clean.
 - Each `cmd /c` is its own environment - chain everything you need inside one invocation with `&&`.
@@ -54,7 +55,7 @@ mqsireportproperties <node> -e <server> -o HTTPConnector -n ListenerPort
 
 **The ACE 13 credential mechanism is the vault.** Lead with it in every credential conversation:
 
-- **Independent/standalone servers (work-dir):** per-work-directory vault via `ibmint set credential` (singular). The vault is created **implicitly** on the first `set credential --work-directory` call - `ibmint create vault` is only for *external directory* vaults shared across servers.
+- **Independent/standalone servers (work-dir):** per-work-directory vault via `ibmint set credential` (singular). The vault must be created **explicitly first** with `mqsivault --work-dir <dir> --create --vault-key <key>` - `set credential` does NOT bootstrap it and fails with `BIP10003E` (verified 13.0.8.1). `ibmint create vault` is only for *external directory* vaults shared across servers.
 
   ```bat
   REM Add/update a credential (singular 'credential')

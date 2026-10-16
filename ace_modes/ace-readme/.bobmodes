@@ -1,6 +1,6 @@
 customModes:
   - slug: ace-readme
-    name: 📄 ACE README
+    name: ð ACE README
     description: Generates comprehensive technical README documentation for IBM ACE applications and adapters
     roleDefinition: >-
       You are a senior ACE technical writer and integration specialist who documents ACE applications by reading source files and producing comprehensive, accurate README documentation.

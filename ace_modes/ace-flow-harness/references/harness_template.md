@@ -71,7 +71,9 @@ Drop one and it fails at runtime, not at deploy. The manifest must list the full
 ## 3. The Ordered Lifecycle (do not reorder load-bearing steps)
 
 ```
-0. Source the ACE env        call mqsiprofile (.cmd/.sh) - puts ibmint/IntegrationServer
+0a. Read the repo's docs     testing/README.md AND every per-topology README - a gate,
+                             not a suggestion. Reuse their values verbatim.
+0b. Source the ACE env       call mqsiprofile (.cmd/.sh) - puts ibmint/IntegrationServer
                              /mqsi* on PATH. NOTHING below works without this.
 1. Install dependencies      impl->jplugin, tool->tools/plugins, 3rd-party->shared-classes
 2. Provision test env        work dir + {keys,input,output}; copy test data/keys; config
@@ -89,7 +91,18 @@ Drop one and it fails at runtime, not at deploy. The manifest must list the full
 
 ### Step-by-step rationale
 
-**0. Source the ACE environment.** `ibmint`, `IntegrationServer`, and every `mqsi*`
+**0a. Read the repo's own harness docs - all of them.** Before executing anything,
+enumerate and read `testing/README.md` **and every per-topology README**
+(`standalone-server/`, `docker/`, `node-managed/`). Each one carries constraints the
+index README and the scripts do not encode: which shared-classes *level* the jars go
+to, the port map, the documented cleanup verbs, the known issues for that topology.
+Reading the index plus the first topology you run does **not** transfer to the others.
+
+> Symptom when skipped: you drive topology 2 and 3 straight from their scripts, miss a
+> documented constraint, and the user has to stop you mid-run to ask whether you read
+> their README. Cheap to do, expensive to skip.
+
+**0b. Source the ACE environment.** `ibmint`, `IntegrationServer`, and every `mqsi*`
 command are NOT on PATH in a fresh shell. They become available only after sourcing
 the ACE profile:
 - Windows: `call "<ACE_HOME>\server\bin\mqsiprofile.cmd"`
@@ -100,7 +113,8 @@ profile and then calls the real harness, so the harness body can assume the env 
 ready (this is exactly what `run-test-with-ace-env.bat` does):
 ```bat
 @echo off
-call "C:\Program Files\IBM\ACE\13.0.7.0\server\bin\mqsiprofile.cmd"
+if not defined ACE_VERSION set ACE_VERSION=13.0.8.1
+call "C:\Program Files\IBM\ACE\%ACE_VERSION%\server\bin\mqsiprofile.cmd"
 if errorlevel 1 ( echo [ERROR] Failed to source ACE environment & exit /b 1 )
 call "%~dp0deploy_and_test.bat"
 exit /b %ERRORLEVEL%
@@ -116,8 +130,9 @@ so this step usually calls the repo's `install-<pac>.bat` (idempotent, `/force`)
 
 **2. Provision test env.** Create the server work dir and the data dirs
 (`keys/`, `input/`, `output/` - or your flow's equivalents). Copy keys/fixtures.
-Write any `server.conf.yaml` / overrides. Make this **idempotent**: clean an old
-work dir first so reruns are deterministic.
+Write server config to `<work_dir>/overrides/server.conf.yaml` only - never the base
+`server.conf.yaml` (Overrides-only rule, section 6). Make this **idempotent**: clean an
+old work dir first so reruns are deterministic.
 
 **3. Place shared-classes.** Create `<shared-classes>` and copy the full 3rd-party
 set. This is separate from step 1 precisely because the destination differs by topology.
@@ -161,7 +176,10 @@ log tail, don't blast curl into the void.
 
 **9. Report + teardown.** Print original/result, a clear PASS/FAIL, and the log path.
 Either leave the server up for inspection (handy locally) or stop it cleanly:
-- Windows: `taskkill /F /FI "WINDOWTITLE eq <SERVER_NAME>*"`
+- Windows: stop the process whose command line holds this run's `--work-dir`
+  (PowerShell: `Get-CimInstance Win32_Process -Filter "Name='IntegrationServer.exe'" |
+  Where-Object CommandLine -match [regex]::Escape('<work_dir>')`, then `Stop-Process` on
+  those ids). Never by window title (a detached server has none, see 6a) or by image name.
 - Docker: `docker stop <container>`
 
 ---
@@ -172,7 +190,7 @@ Gather these once; infer from the repo where possible, ask only for the rest.
 
 | Parameter | Example | Notes |
 |-----------|---------|-------|
-| `ACE_VERSION` / `ACE_HOME` | `13.0.7.0` / `C:\Program Files\IBM\ACE\13.0.7.0` | autodetect newest if unset |
+| `ACE_VERSION` / `ACE_HOME` | `13.0.8.1` / `C:\Program Files\IBM\ACE\13.0.8.1` | make it overridable (`if not defined ACE_VERSION set ...`), do not hardcode |
 | `TOPOLOGY` | `standalone` \| `docker` \| `node-managed` | drives shared-classes dir |
 | `SERVER_NAME` / `SERVER_WORK_DIR` | `TEST_SERVER_PGP` / `C:\temp\pgp\TEST_SERVER_PGP` | |
 | `HTTP_PORT` / `ADMIN_PORT` | `7800` / `7600` | verify listener on HTTP_PORT |
@@ -194,32 +212,153 @@ Gather these once; infer from the repo where possible, ask only for the rest.
 | Start command | `IntegrationServer --work-dir .. --name ..` | same, inside container | server under a node |
 | Script | `deploy_and_test.bat` | `run-tests.sh` + compose | `setup-and-test-node.bat` |
 | Best for | local Windows + Toolkit debug | CI, isolation, no local ACE | multi-server, prod-like |
-| Teardown | `taskkill /F /FI "WINDOWTITLE eq <name>*"` | `docker stop` | stop server + delete node |
+| Teardown | stop the PID whose command line holds the work dir | `docker stop` | stop server + delete node |
 
 ---
 
 ## 6. Load-Bearing Gotchas (the checklist)
 
+- [ ] **Read every topology README first** - the index plus one topology is not enough.
 - [ ] **Source the ACE env first** - `mqsiprofile` (.cmd/.sh) before any `ibmint`/
       `IntegrationServer`/`mqsi*`. Use the wrapper-script pattern for standalone.
 - [ ] **Deploy before start** - work-dir deploys aren't hot-loaded by a running server.
 - [ ] **Policies before app** - policy references resolve only if policies are deployed.
 - [ ] **shared-classes in the topology-correct dir** - wrong dir → runtime ClassNotFound.
+- [ ] **Overrides-only rule** - config changes go to `overrides/server.conf.yaml`
+      (standalone: `<work_dir>/overrides/`; node-managed: `<node>/servers/<server>/overrides/`;
+      node: `<node>/overrides/node.conf.yaml`), never the base file. ACE layers the base
+      file over built-in defaults, so a script that rewrites it "works" while dropping
+      every generated setting.
 - [ ] **Full dependency set shipped** - e.g. BouncyCastle = bcprov + bcpg + bcutil.
 - [ ] **Wait on `BIP1991I`**, never a fixed timer.
+- [ ] **Log hygiene** - `grep` the events/console log for the BIP marker and quote the
+      matched line; tail 20-40 lines only when the marker is missing. Never paste a whole
+      log into the reply, the README or `TESTING.md`.
 - [ ] **Clean stale `config/.lock`** before restart.
 - [ ] **Binary compare** round-trips (`fc /B`) - not text compare.
 - [ ] **Secrets out of committed scripts** - passphrases via policy/override/env.
 - [ ] **Idempotent reruns** - clean the work dir / input/output so a 2nd run is clean.
 - [ ] **Fail fast, non-zero exit** - so the script drops straight into CI.
+- [ ] **No `timeout /t` in `.bat`** - use `ping 127.0.0.1 -n <secs+1> >nul`.
+- [ ] **`.gitattributes` pins `*.sh` to `eol=lf`** when scripts are bind-mounted.
+- [ ] **Version-gated startup blocks checked** - e.g. call-home on ACE 13.0.8 images.
+- [ ] **Agent-written `.bat` converted to CRLF** before its first run (see 6a).
+- [ ] **`call` every `mqsi*.cmd` vendor tool** - without it control never returns.
+- [ ] **Stop the server by command-line match**, not window title (see 6a).
+- [ ] **A left-running server's output redirected to a file** (see 6a).
+
+---
+
+## 6a. Non-Interactive and Cross-Platform Traps
+
+These bite only when the harness is run by CI or an agent - never when a human runs it
+interactively - so they survive a lot of "it works for me" testing.
+
+### `timeout /t` is a no-op under redirected stdin
+
+Windows `timeout` requires an interactive console. Redirect the script's output
+(`deploy_and_test.bat > run.log 2>&1`, any CI job, any agent-driven run) and every
+call prints `ERROR: Input redirection is not supported, exiting the process
+immediately` and returns at once. The waits vanish, the run usually still passes, and
+the race they guarded resurfaces on a slower machine.
+
+```bat
+REM WRONG - silently skipped when stdout is redirected
+timeout /t 10 /nobreak >nul
+
+REM RIGHT - works redirected or not (n = seconds + 1)
+ping 127.0.0.1 -n 11 >nul
+```
+
+### CRLF breaks bind-mounted shell scripts
+
+A `.sh` mounted from a Windows working tree into a Linux container is line-ending
+sensitive. With `core.autocrlf=true`, git stores LF but *checks out* CRLF; compose
+mounts the working-tree copy, and bash fails immediately:
+
+```
+/tmp/run-tests.sh: line 3: $'\r': command not found
+/tmp/run-tests.sh: line 17: syntax error near unexpected token `$'{\r''
+```
+
+The commit is clean, so the repo looks correct and this reproduces for every Windows
+clone. Ship a `.gitattributes`:
+
+```gitattributes
+*.sh  text eol=lf      # executed inside Linux containers
+*.bat text eol=crlf
+*.cmd text eol=crlf
+```
+
+First diagnostic when a container exits within a second: `file <script>` - check for
+`with CRLF line terminators` before you start reading the script's logic.
+
+### Version-gated startup blocks
+
+When a server dies between `BIP1990I` (starting initialization) and `BIP1991I`
+(finished initialization), read the BIP code before suspecting the harness, then grep
+the catalog - it names the fix:
+
+```bash
+grep -A4 '<id>' <ACE_DIR>/server/messages/BIPmsgs.properties
+```
+
+**Known: ACE 13.0.8 container images.** They ship call-home (anonymous usage
+statistics) enabled with an unreplaced placeholder in
+`$MQSI_WORKPATH/registry.13.0.conf.yaml`:
+
+```yaml
+---
+CallHome:
+  companyName: 'REPLACE_ME_COMPANY_NAME'
+  enabled: true
+```
+
+The server refuses to start with `BIP2203E` + `BIP15366W: ... requires a company name
+supplied to start`. The company name exists only for that anonymous feedback, so a
+test harness that sends none should turn call-home off rather than invent a name:
+
+```bash
+printf 'CallHome:\n  enabled: false\n' > "${MQSI_WORKPATH:-/var/mqsi}/registry.13.0.conf.yaml"
+```
+
+This matches what a configured Windows install carries in
+`C:\ProgramData\IBM\MQSI\registry.13.0.conf.yaml`, which is why standalone and
+node-managed topologies never hit it. Note that
+`ibmint modify installation --disable-usage-statistics` returns 0 but does **not**
+clear the gate on its own (verified on 13.0.8.1-r1). Images 13.0.6/13.0.7 have no
+such check, so the step is harmless on older tags.
+
+### An agent-written `.bat` is LF until proven otherwise
+
+It never passes through git, so `.gitattributes` does not save it. Convert to CRLF
+before the first run: `cmd` label search (`call`/`goto`) on an LF-only batch file
+misjumps into the middle of a later line, nondeterministically, and the failure MOVES as
+the file grows (three clean runs, then added lines shifted the offsets and one test was
+silently skipped). Verify with a per-file count of CRLF versus lone-LF endings, never a
+boolean `grep` for `\r` - that reported CRLF present on a pure-LF file.
+
+### Process control: `call`, stop by command line, redirect output
+
+- `mqsicreateworkdir` and the other `mqsi*` tools are `.cmd` files: invoked without
+  `call`, control never returns to the harness. The run prints its success line and then
+  truncates - it reads as a passing step that stopped early. A `%ERRORLEVEL%` read inside
+  a `for` body expands once at parse time; use `!ERRORLEVEL!` or assert on the BIP message.
+- `taskkill /FI "WINDOWTITLE eq ..."` cannot reach a detached `IntegrationServer.exe`.
+  Match on the work directory instead:
+  `Get-CimInstance Win32_Process | ? CommandLine -match <work_dir>`.
+- A server left running inherits the harness console's stdout handle, so any
+  output-capturing caller blocks forever on a pipe the server will never close. Redirect
+  its output to a file.
 
 ---
 
 ## 7. Script Skeleton (topology-agnostic shape)
 
 ```
-0a. Source ACE env   (wrapper: call mqsiprofile.cmd, then call deploy_and_test)
-0b. Config block     (ACE_HOME, SERVER_NAME, work dir, ports, Sources path)
+0. Source ACE env    (wrapper: call mqsiprofile.cmd, then call deploy_and_test)
+   Config block      (ACE_HOME, SERVER_NAME, work dir, ports, Sources path)
+   (the 0a discovery gate is an agent action, not a step in the generated script)
 1. Install deps      (call install-<pac> script; /force /skipbackup)
 2. Setup test dirs   (mkdir keys/input/output; copy test data)
 3. Clean + recreate  (rm old work dir; mkdir work dir + shared-classes)

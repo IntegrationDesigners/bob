@@ -2,9 +2,15 @@
 name: ace-flow-designer
 description: "Use this skill when a developer - especially a junior one - knows WHAT they want an IBM ACE (App Connect Enterprise) integration to achieve but does NOT yet have a precise, node-level specification to hand to a builder. This skill runs a guided, one-topic-at-a-time design interview (goal, use case, pattern, scope, interfaces, processing logic, error handling, logging, non-functionals) and produces a complete 'flow-builder start prompt' - the structured design document that ace-flow-builder consumes. Triggers: 'help me design a flow', 'I have a vague requirement', 'interview me about my integration', 'scope this integration', 'I'm not sure how to spec my ACE flow', 'build me a prompt for the flow builder', 'what should my flow do', 'turn this requirement into a flow spec', 'I'm a junior dev and need to design an ACE flow'. Do NOT use this when the user already has a clear, node-level spec and just wants files generated - that is ace-flow-builder."
 metadata:
+<<<<<<< mirror
   version: 0.2.0
   status: beta
   last_updated: 2026-06-10
+=======
+  version: 0.3.0
+  status: beta
+  last_updated: 2026-10-10
+>>>>>>> dev
 ---
 
 # ACE Flow Designer
@@ -24,7 +30,7 @@ Run these in order. One topic per turn. Each maps to a section of the output spe
 | # | Phase | Topic | Maps to start-prompt section |
 |---|-------|-------|------------------------------|
 | D0 | Goal & use case | What problem, what triggers it, what "done" looks like | Goal, Use case |
-| D1 | Pattern | Name the IBM ACE integration pattern (REST API → branch to DR) | Pattern |
+| D1 | Pattern | Name the IBM ACE integration pattern (REST API â branch to DR) | Pattern |
 | D2 | Scope & shape | One flow or many, subflows, one app, what's out of scope | Scope, Shape |
 | D3 | Interfaces | Input/output source+format, **output contract/target shape**, filename, routing-source | Interfaces |
 | D4 | Processing | Mapping, enrichment, routing, calculations, **ESQL vs Java** (plain English) | Processing logic |
@@ -40,6 +46,10 @@ Run these in order. One topic per turn. Each maps to a section of the output spe
 
 Follow this sequence every time. Full detail for each phase is in [`references/workflow.md`](references/workflow.md) - read it before starting.
 
+### Before D0. Load the team's conventions profile
+If [`../ace-flow-builder/references/customer_profile.md`](../ace-flow-builder/references/customer_profile.md) exists, read it in full before the first question (it is the house style `ace-conventions-profiler` produced; skill-resident, present only on a customer deployment). Everything it settles - application and flow naming, queue and queue-manager naming, logging prefix and levels, error handling and retry, credentials, server and deployment conventions - is **decided, not asked**: apply it directly in the start prompt and say in one line that the team profile is applied. Ask only what the requirement and the profile leave open (business payload fields, external systems, the system name the profile's patterns take). If the profile is absent, interview as below.
+A convention is not an environment fact: the profile says HOW credentials are held (an external vault, by name), not WHICH credentials exist or whether a connection needs one. Never invent a credential name, a password requirement or any other environment fact. When the user named no credential for a connection, the start prompt says "credential: none given - leave the identity empty, the build's deploy check proves the connection" (an invented `dices_mq` stalled a whole chain at test on 2026-10-12).
+
 ### D0. Frame the goal and use case
 Open with one or two plain-language questions: what business outcome, what kicks it off, what a successful run looks like. Echo your understanding back before moving on. Detail in workflow.md.
 
@@ -47,11 +57,11 @@ Open with one or two plain-language questions: what business outcome, what kicks
 Read [`../ace-flow-builder/references/ace_patterns_catalog.md`](../ace-flow-builder/references/ace_patterns_catalog.md) and name the pattern the user is describing in plain terms ("this is the *MQ to HTTP* protocol-transformation pattern"). Confirm before continuing. **If it's a REST API** (the user wants to expose HTTP operations, or has an OpenAPI/Swagger file), run **Phase DR** instead of D3+D4 - ace-flow-builder builds REST on a separate track.
 
 ### D2-D7. Interview the remaining topics
-Walk D2 → D7 one topic per turn (for a REST API, **DR replaces D3+D4**). For every question, offer a sensible default and accept "default" / "tbd" / "you pick". Define any jargon. Record answers as you go in `<FlowName>.design_state.md` (see workflow.md) so the interview survives across turns. The per-topic question bank and the defaults to suggest live in [`references/interview_guide.md`](references/interview_guide.md). A few topics map to ace-flow-builder **blockers** - routing-source selection and the REST-vs-normal track must be answered, never defaulted.
+Walk D2 â D7 one topic per turn (for a REST API, **DR replaces D3+D4**). For every question, offer a sensible default and accept "default" / "tbd" / "you pick". Define any jargon. Record answers as you go in `<FlowName>.design_state.md` (see workflow.md) so the interview survives across turns. The per-topic question bank and the defaults to suggest live in [`references/interview_guide.md`](references/interview_guide.md). A few topics map to ace-flow-builder **blockers** - routing-source selection and the REST-vs-normal track must be answered, never defaulted.
 
 ### D8. Synthesize the start prompt and offer the hand-off
 Fill [`references/START_PROMPT_TEMPLATE.md`](references/START_PROMPT_TEMPLATE.md) from the collected answers. Anything still unknown becomes an explicit `[CONFIGURE: ...]` line so ace-flow-builder knows it is open. Write the file (see Reference Files) and show it in chat too. Then **ask the user** what to do next - never hand over automatically:
-> "Start prompt written to `<path>`. What next? **1. build it** (hand to ace-flow-builder now) · **2. refine** · **3. done"**
+> "Start prompt written to `<path>`. What next? **1. build it** (hand to ace-flow-builder now) Â· **2. refine** Â· **3. done"**
 
 Only if the user picks **build it** do you hand over to ace-flow-builder: point it at the start-prompt file, tell it the build mode and that the spec pre-answers its Phase B1 (confirm, don't re-ask). Full handover mechanics - `switch_mode` in Bob, Skill invocation in Claude - are in workflow.md D8.3.
 
@@ -65,6 +75,7 @@ Only if the user picks **build it** do you hand over to ace-flow-builder: point 
 - **Echo before advancing.** Summarise the answer in one line so the user can catch a misunderstanding cheaply.
 - **You design, you don't build.** No `.msgflow` / `.esql` / project files. Pre-answer ace-flow-builder's Phase B1 questions in the spec instead.
 - **Never invent specifics you can confirm.** If a node attribute or queue name matters and you don't know it, mark it `[CONFIGURE: ...]` - don't fabricate.
+- **Never ask what the customer profile answers.** A naming, queue, logging, retry or deployment question the profile already settles costs the user a turn and invites an answer that contradicts the house style. Names in the start prompt follow the profile's patterns (for example its queue pattern filled with the system name), and the builder takes the start prompt as authoritative, so a non-profile name here survives into the build.
 - Never use em dashes or en dashes (Unicode U+2014 and U+2013) in any generated output. Use ASCII hyphens, commas, parentheses, or separate sentences instead.
 - Never add AI-tool signatures, watermarks, or attribution comments to the generated start prompt or any file. No "Made with Bob" footer, no "Generated by Claude" line, no "Created with X" stamp, no co-authorship line in the body of any deliverable. The user owns the output; AI tooling stays invisible. (Git commit messages are separate - Co-Authored-By there is conventional and not affected.)
 
@@ -76,9 +87,10 @@ Read these as needed - always fresh, never from memory:
 
 | File | When to read |
 |---|---|
+| [`../ace-flow-builder/references/customer_profile.md`](../ace-flow-builder/references/customer_profile.md) | **Before D0, when present** - the team's conventions; decided, never asked |
 | [`references/workflow.md`](references/workflow.md) | **Read first** - authoritative phase-by-phase detail, state-file format, output rules |
 | [`references/interview_guide.md`](references/interview_guide.md) | During D2-D7 - per-topic question bank and the default to suggest for each |
 | [`references/START_PROMPT_TEMPLATE.md`](references/START_PROMPT_TEMPLATE.md) | At D8 - the exact output structure to fill |
 | [`../ace-flow-builder/references/ace_patterns_catalog.md`](../ace-flow-builder/references/ace_patterns_catalog.md) | At D1 - IBM's pattern catalog (reused, not duplicated) |
-| [`example/example_start_prompt.md`](example/example_start_prompt.md) | Anytime - a worked output for a normal (MQ→HTTP) flow |
+| [`example/example_start_prompt.md`](example/example_start_prompt.md) | Anytime - a worked output for a normal (MQâHTTP) flow |
 | [`example/example_rest_start_prompt.md`](example/example_rest_start_prompt.md) | At DR - a worked output for a REST API |

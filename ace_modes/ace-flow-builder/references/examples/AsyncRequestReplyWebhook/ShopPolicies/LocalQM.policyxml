@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<policies>
+  <policy policyType="MQEndpoint" policyName="LocalQM" policyTemplate="">
+    <connection>CLIENT</connection>
+    <destinationQueueManagerName>QM1</destinationQueueManagerName>
+    <queueManagerHostname>localhost</queueManagerHostname>
+    <listenerPortNumber>1414</listenerPortNumber>
+    <channelName>DEV.APP.SVRCONN</channelName>
+    <securityIdentity></securityIdentity>
+  </policy>
+</policies>

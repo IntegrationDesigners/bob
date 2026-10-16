@@ -296,7 +296,13 @@ mqsicvp <NODE>                       # includes an ODBC connectivity check
 mqsireportdbparms <NODE> -e <IS> -n <DATASOURCE_NAME>   # drill into the specific DSN
 
 # === Step 3: ODBC trace during error reproduction ===
-# Windows: ODBC Administrator → Tracing tab → Start Tracing Now
+# Windows, IBM/DataDirect drivers (Oracle, PostgreSQL, Sybase, Db2):
+#   ODBC Administrator → Tracing tab → Select DLL (uktrc95.dll) → Start Tracing Now
+# Windows + SQL Server: the driver is a MICROSOFT ODBC driver, so the trace procedure is different -
+#   no uktrc95.dll, and per-user vs "Machine-Wide tracing for all user identities" matters because the
+#   integration server usually runs under a service account. Follow Microsoft's steps:
+#   see diagnostics_guide.md §3 "ODBC Trace" and
+#   https://learn.microsoft.com/en-us/sql/odbc/admin/setting-tracing-options?view=sql-server-ver17
 # Linux: set Trace=yes in $ODBCSYSINI/odbcinst.ini
 
 # === Step 4: user trace (normal) during reproduction ===
@@ -309,7 +315,8 @@ mqsichangetrace <NODE> -u -e <IS> -l none
 ```bash
 # Db2:    db2level ; db2 get db cfg for <DATABASE> | grep -i maxappls ; collect db2dialog.log ; Db2 XA config
 # Oracle: check libclntsh / libgcc availability and GSKit ordering (see §4g)
-# SQL Server: confirm the driver named in odbc_ini.reg; collect the driver version
+# SQL Server: confirm the driver named in odbc_ini.reg; collect the driver version;
+#             ODBC trace follows the Microsoft procedure (Step 3), not the IBM trace DLL
 # Informix: $INFORMIXDIR / $INFORMIXSERVER env
 ```
 

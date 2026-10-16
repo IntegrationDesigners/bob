@@ -60,6 +60,13 @@ An application declares the libraries it references in **two** places. Read both
 | Subflow | `*.subflow` | file name (= node type when referenced), source/sink terminals, internal nodes |
 | ESQL module | `*.esql` | `BROKER SCHEMA <x>`, each `CREATE COMPUTE/PROCEDURE/FUNCTION MODULE <name>`, each `CREATE PROCEDURE`/`CREATE FUNCTION` |
 | Java | `*.java` in the sibling `<App>Java` project | public classes + methods called from JavaCompute nodes |
+
+Read ESQL as the runtime lexes it: the contents of `/*!{ ... }!*/` and of `--!{` to end of
+line are executed although the Toolkit shows them as comments (`--@!{` is only a Toolkit
+generated-region marker). Index modules and procedures defined inside them like any other,
+and record the estate-level fact "executable comments used in N files" in the profile -
+the profiler describes, it does not grade. Evidence and syntax table:
+`~/.claude/skills/ace-review/references/guidelines/esql_guidelines.md`, first section.
 | Map | `*.map` | `mappingDeclaration name`, input/output message assemblies |
 | Message model | `*.mxsd` / `*.xsd` / `*.json` | root element/type names, location (which project/folder) |
 

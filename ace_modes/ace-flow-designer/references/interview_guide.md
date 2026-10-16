@@ -39,7 +39,7 @@ description is genuinely ambiguous between two patterns ("are you *reading from*
 |---|---|---|
 | One flow or many | "Is this one flow, or several near-identical ones (e.g. one per queue)?" | Single flow |
 | Shared subflow | "If several, do they share logic worth putting in one place?" | Extract a subflow only when 2+ flows reuse it |
-| Subflow terminals | **(ask ONLY if a shared subflow is chosen)** "Does the subflow have a separate happy path and error path - and where do the parent flow's normal output and its error outputs go?" | Separate happy/error inputs: parent's `out` → subflow happy input; parent's `catch`/`failure` → subflow error input |
+| Subflow terminals | **(ask ONLY if a shared subflow is chosen)** "Does the subflow have a separate happy path and error path - and where do the parent flow's normal output and its error outputs go?" | Separate happy/error inputs: parent's `out` â subflow happy input; parent's `catch`/`failure` â subflow error input |
 | One app project | "Should everything live in one ACE application?" | Yes, one application project |
 | Out of scope | "Anything this flow should explicitly *not* do?" | Nothing extra |
 
@@ -48,7 +48,7 @@ A *subflow* = a reusable mini-flow you wire into several parent flows so the sha
 When a subflow is chosen, the terminal wiring is a ace-flow-builder blocker (it otherwise guesses how the
 parent's success and error paths enter the subflow). Capture it in the *Shape* section: the subflow's
 input terminals (e.g. happy + error) and which parent-flow output goes to each - exactly as the
-MQEventReader gold-standard spec does ("`out` → happy input; `failure`/`catch` → error input").
+MQEventReader gold-standard spec does ("`out` â happy input; `failure`/`catch` â error input").
 
 ---
 
@@ -111,10 +111,10 @@ help decide during the build.
 | Ask | Framing | Default |
 |---|---|---|
 | Failure modes | "What could go wrong - downstream down, bad input, timeout, auth?" | Downstream unreachable + malformed input |
-| Action per failure | (offer the menu below) | Catch → HandleException + log; poison → backout/DLQ where one exists |
+| Action per failure | (offer the menu below) | Catch â HandleException + log; poison â backout/DLQ where one exists |
 | Retry | "Retry transient failures? How many times, how far apart?" | Retry only a named transient dependency; else no retry |
 | Retry params | (if retry) "Attempts and interval?" | 3 attempts, fixed 30s, then DLQ |
-| HTTP retry classification | **(ask ONLY if the flow calls an HTTP API)** "When the API call fails, should the flow retry on timeouts and connection problems, or stop right away?" | Timeouts / connection loss / HTTP 408, 429, 5xx → retry; other 4xx → stop |
+| HTTP retry classification | **(ask ONLY if the flow calls an HTTP API)** "When the API call fails, should the flow retry on timeouts and connection problems, or stop right away?" | Timeouts / connection loss / HTTP 408, 429, 5xx â retry; other 4xx â stop |
 | Timer / delayed-retry | **(ask ONLY if retry is delayed, or the flow is timer-driven)** "How long between tries, how many tries, and one retry at a time or several at once?" | Single-flight; interval + count as stated. Identifier *value* is ace-flow-builder's job - strategy only. |
 
 The HTTP and timer rows are **conditional** - skip them entirely for a flow with no outbound HTTP
@@ -158,14 +158,14 @@ Default every one to "standard / not specified". Keep this phase short for a jun
 | Ask | Framing | Default |
 |---|---|---|
 | Integration server name | "Which integration server will this run on? (a name like `TestServer` / `PROD_IS`)" | `[CONFIGURE: integration server]` |
-| Per-environment values | "Which values differ between DEV/TEST/PROD?" | URLs, queue managers, hostnames → promoted properties (note whether promoted on the main flow or a subflow) |
+| Per-environment values | "Which values differ between DEV/TEST/PROD?" | URLs, queue managers, hostnames â promoted properties (note whether promoted on the main flow or a subflow) |
 
 **Ask only if relevant:**
 
 | Ask | When | Framing | Default |
 |---|---|---|---|
 | Security & credentials | any external call (HTTP / DB / Kafka) | "TLS? Auth scheme? Which credentials are needed?" | TLS on external calls; credentials in the ACE vault |
-| Idempotency | any retry in scope | "Safe to process the same message twice?" | Assume not safe → note dedup/retry caution |
+| Idempotency | any retry in scope | "Safe to process the same message twice?" | Assume not safe â note dedup/retry caution |
 | Scheduling | timer-driven flows | "Interval, calendar, what if a fire is missed?" | As stated in the trigger |
 | Throughput / ordering | high-volume or order-sensitive flows | "How many messages? Must they stay in order?" | Not specified / no strict ordering |
 

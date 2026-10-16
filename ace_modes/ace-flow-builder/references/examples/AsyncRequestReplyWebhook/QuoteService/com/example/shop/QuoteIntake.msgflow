@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ComIbmCompute.msgnode="ComIbmCompute.msgnode" xmlns:ComIbmMQOutput.msgnode="ComIbmMQOutput.msgnode" xmlns:ComIbmWSInput.msgnode="ComIbmWSInput.msgnode" xmlns:ComIbmWSReply.msgnode="ComIbmWSReply.msgnode" xmlns:LoggingLibrary_LogEntry.subflow="LoggingLibrary/LogEntry.subflow" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" xmlns:eflow="http://www.ibm.com/wbi/2005/eflow" xmlns:utility="http://www.ibm.com/wbi/2005/eflow_utility" nsURI="com/example/shop/QuoteIntake.msgflow" nsPrefix="com_example_shop_QuoteIntake.msgflow">
+  <eClassifiers xmi:type="eflow:FCMComposite" name="FCMComposite_1">
+    <eSuperTypes href="http://www.ibm.com/wbi/2005/eflow#//FCMBlock"/>
+    <translation xmi:type="utility:TranslatableString" key="QuoteIntake" bundleName="com/example/shop/QuoteIntake" pluginId="QuoteService"/>
+    <colorGraphic16 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/QuoteService/icons/full/obj16/QuoteIntake.gif"/>
+    <colorGraphic32 xmi:type="utility:GIFFileGraphic" resourceName="platform:/plugin/QuoteService/icons/full/obj30/QuoteIntake.gif"/>
+    <composition>
+      <nodes xmi:type="ComIbmWSInput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_1" location="20,120" URLSpecifier="/quotes" messageDomainProperty="JSON">
+        <translation xmi:type="utility:ConstantString" string="POST /quotes"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_2" location="160,120" computeExpression="esql://routine/com.example.shop#QuoteIntake_Start.Main">
+        <translation xmi:type="utility:ConstantString" string="Start"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_3" location="290,120" Status="input" Message="quote request received" Uuid="$Environment.Variables.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log request"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_4" location="430,120" computeExpression="esql://routine/com.example.shop#QuoteIntake_Check.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Check"/>
+      </nodes>
+      <nodes xmi:type="ComIbmMQOutput.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_5" location="580,60" queueName="SHOP.QUOTE.REQUEST" messageContext="default">
+        <translation xmi:type="utility:ConstantString" string="SHOP.QUOTE.REQUEST"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_6" location="760,60" computeExpression="esql://routine/com.example.shop#QuoteIntake_Accept.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Accept"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_7" location="900,60">
+        <translation xmi:type="utility:ConstantString" string="Reply 202"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_8" location="580,180" Status="error-validation" Message="quote request rejected" Uuid="$Environment.Variables.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log rejected"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_9" location="760,180">
+        <translation xmi:type="utility:ConstantString" string="Reply 400"/>
+      </nodes>
+      <nodes xmi:type="LoggingLibrary_LogEntry.subflow:FCMComposite_1" xmi:id="FCMComposite_1_10" location="160,280" Status="error-request" Message="quote intake failed" Uuid="$Environment.Variables.ActivityId">
+        <translation xmi:type="utility:ConstantString" string="Log error"/>
+      </nodes>
+      <nodes xmi:type="ComIbmCompute.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_11" location="300,280" computeExpression="esql://routine/com.example.shop#QuoteIntake_Fail.Main" computeMode="destinationAndMessage">
+        <translation xmi:type="utility:ConstantString" string="Fail"/>
+      </nodes>
+      <nodes xmi:type="ComIbmWSReply.msgnode:FCMComposite_1" xmi:id="FCMComposite_1_12" location="460,280">
+        <translation xmi:type="utility:ConstantString" string="Reply 500"/>
+      </nodes>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_1" targetNode="FCMComposite_1_2" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_2" targetNode="FCMComposite_1_3" sourceNode="FCMComposite_1_2" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_3" targetNode="FCMComposite_1_4" sourceNode="FCMComposite_1_3" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_4" targetNode="FCMComposite_1_5" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_5" targetNode="FCMComposite_1_6" sourceNode="FCMComposite_1_5" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_6" targetNode="FCMComposite_1_7" sourceNode="FCMComposite_1_6" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_7" targetNode="FCMComposite_1_8" sourceNode="FCMComposite_1_4" sourceTerminalName="OutTerminal.out1" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_8" targetNode="FCMComposite_1_9" sourceNode="FCMComposite_1_8" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_9" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.catch" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_10" targetNode="FCMComposite_1_10" sourceNode="FCMComposite_1_1" sourceTerminalName="OutTerminal.failure" targetTerminalName="InTerminal.Input"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_11" targetNode="FCMComposite_1_11" sourceNode="FCMComposite_1_10" sourceTerminalName="OutTerminal.Output" targetTerminalName="InTerminal.in"/>
+      <connections xmi:type="eflow:FCMConnection" xmi:id="FCMConnection_12" targetNode="FCMComposite_1_12" sourceNode="FCMComposite_1_11" sourceTerminalName="OutTerminal.out" targetTerminalName="InTerminal.in"/>
+    </composition>
+    <propertyOrganizer/>
+    <stickyBoard/>
+  </eClassifiers>
+</ecore:EPackage>

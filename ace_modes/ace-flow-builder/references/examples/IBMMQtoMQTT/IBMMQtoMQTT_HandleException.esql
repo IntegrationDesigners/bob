@@ -1,3 +1,4 @@
+-- Preserves the original payload for the error queue; the exception summary travels in MQRFH2.usr.Error and Environment.Variables.Error (validated_rules.md s15).
 
 
 CREATE COMPUTE MODULE IBMMQtoMQTT_HandleException
@@ -6,10 +7,33 @@ CREATE COMPUTE MODULE IBMMQtoMQTT_HandleException
 		DECLARE messageNumber INTEGER;
 		DECLARE messageText CHAR;
 		CALL GetLastExceptionDetail(InputExceptionList, messageNumber, messageText);
-		CALL CopyMessageHeaders();
-		SET OutputRoot.JSON.Exception.MessageNumber = messageNumber;
-		SET OutputRoot.JSON.Exception.MessageText = messageText;	
-		
+		CALL CopyEntireMessage();
+		IF NOT EXISTS(OutputRoot.MQRFH2[]) THEN
+			CREATE NEXTSIBLING OF OutputRoot.MQMD DOMAIN 'MQRFH2';
+			SET OutputRoot.MQRFH2.(MQRFH2.Field)Version = 2;
+			SET OutputRoot.MQRFH2.(MQRFH2.Field)Format = InputRoot.MQMD.Format;
+			SET OutputRoot.MQRFH2.(MQRFH2.Field)NameValueCCSID = 1208;
+			SET OutputRoot.MQMD.Format = MQFMT_RF_HEADER_2;
+		END IF;
+		CREATE FIELD OutputRoot.MQRFH2.usr.Error;
+		DECLARE errRef REFERENCE TO OutputRoot.MQRFH2.usr.Error;
+		IF messageNumber IS NULL AND Environment.Variables.SQL.Failed THEN
+			-- the compute that hit the SQL error handled it itself, so the exception list carries no detail: surface the failure explicitly
+			SET errRef.MessageNumber = CAST(Environment.Variables.SQL.Code AS INTEGER);
+			SET errRef.MessageText = 'Database failure: ' || COALESCE(Environment.Variables.SQL.ErrorText, 'see SQLState');
+		ELSEIF messageNumber IS NULL AND messageText IS NULL THEN
+			SET errRef.MessageText = 'No exception detail available';
+		ELSE
+			SET errRef.MessageNumber = messageNumber;
+			SET errRef.MessageText = messageText;
+		END IF;
+		IF Environment.Variables.SQL.Failed THEN
+			SET errRef.SQLCode = Environment.Variables.SQL.Code;
+			SET errRef.SQLState = Environment.Variables.SQL.State;
+			SET errRef.SQLNativeError = Environment.Variables.SQL.NativeError;
+			SET errRef.SQLErrorText = Environment.Variables.SQL.ErrorText;
+		END IF;
+		SET Environment.Variables.Error = errRef;
 		RETURN TRUE;
 	END;
 
@@ -21,6 +45,10 @@ CREATE COMPUTE MODULE IBMMQtoMQTT_HandleException
 			SET OutputRoot.*[I] = InputRoot.*[I];
 			SET I = I + 1;
 		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
 	END;
 	
 	CREATE PROCEDURE GetLastExceptionDetail(IN InputTree REFERENCE, OUT messageNumber INTEGER, OUT messageText CHARACTER)	

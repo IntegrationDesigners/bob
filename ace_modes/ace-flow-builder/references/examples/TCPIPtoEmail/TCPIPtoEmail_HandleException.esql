@@ -1,15 +1,24 @@
 
 
 CREATE COMPUTE MODULE TCPIPtoEmail_HandleException
+	-- Preserves the original payload; the exception summary travels in Environment.Variables.Error (validated_rules.md s15). Error sink: trace by default - [CONFIGURE: error sink] when the brief names a queue, directory or topic.
 	CREATE FUNCTION Main() RETURNS BOOLEAN
 	BEGIN
 		DECLARE messageNumber INTEGER;
 		DECLARE messageText CHAR;
 		CALL GetLastExceptionDetail(InputExceptionList, messageNumber, messageText);
-		CALL CopyMessageHeaders();
-		SET OutputRoot.JSON.Exception.MessageNumber = messageNumber;
-		SET OutputRoot.JSON.Exception.MessageText = messageText;	
-		
+		CALL CopyEntireMessage();
+		IF messageNumber IS NULL AND messageText IS NULL THEN
+			IF Environment.Variables.SQL.Failed = TRUE THEN
+				SET messageNumber = Environment.Variables.SQL.Code;
+				SET messageText = 'Database failure: ' || COALESCE(Environment.Variables.SQL.ErrorText, 'see SQLState');
+			ELSE
+				SET messageText = 'No exception detail available';
+			END IF;
+		END IF;
+		SET Environment.Variables.Error.Number = messageNumber;
+		SET Environment.Variables.Error.Text = messageText;
+		SET Environment.Variables.Error.Flow = 'TCPIPtoEmail';
 		RETURN TRUE;
 	END;
 
@@ -21,6 +30,10 @@ CREATE COMPUTE MODULE TCPIPtoEmail_HandleException
 			SET OutputRoot.*[I] = InputRoot.*[I];
 			SET I = I + 1;
 		END WHILE;
+	END;
+
+	CREATE PROCEDURE CopyEntireMessage() BEGIN
+		SET OutputRoot = InputRoot;
 	END;
 	
 	CREATE PROCEDURE GetLastExceptionDetail(IN InputTree REFERENCE, OUT messageNumber INTEGER, OUT messageText CHARACTER)	
