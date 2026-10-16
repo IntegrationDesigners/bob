@@ -79,8 +79,6 @@ The profile is confidential (it carries real names). Read it; do not copy its co
 
 Before asking the user for details, identify which IBM ACE pattern the user is describing. Name it explicitly when you recognize it - this gives the user vocabulary and confirms you understand what they're building.
 
-**KB-first matching:** if the `doc-kb` server is available, run ONE `kb_search(collection="ace-flow-kb", query="<the user's flow description>", top_k=5)` instead of reading the catalog. Each hit is a whole pattern record: title, a `Direction: input from X, output to Y` line, node types, and the example folder under `source`. A-to-B and B-to-A patterns rank as near-ties (identical vocabulary) - **pick the direction from the `Direction:` line, never from rank order**. If no hit clearly matches, or the collection is absent, fall back to reading `references/ace_patterns_catalog.md`.
-
 Common recognition signals:
 
 | User describes... | Pattern to name |
@@ -124,12 +122,12 @@ Operation subflows hold the per-operation business logic; if none is specified f
 
 #### B0.5a - Local ground truth first, in rank order
 
-When ACE is installed on this machine, its own introspection and its GUI-generated artifacts outrank vendor docs, notes and KB search for any config-surface question (type names, enum values, element names): they cannot be stale relative to the installed version, and the KB can be down, unindexed, or timing out. Work down this list and stop at the first one that answers:
+When ACE is installed on this machine, its own introspection and its GUI-generated artifacts outrank vendor docs and notes for any config-surface question (type names, enum values, element names): they cannot be stale relative to the installed version. Work down this list and stop at the first one that answers:
 
 1. **Runtime introspection.** `ibmint display credential-types --show-auth-types`, `ibmint display credential-types`, `ibmint help <command>`.
-2. **Toolkit-generated artifacts in the user's workspace.** A `.policyxml` for verified `policyType` and element names, a `.msgflow` for node attribute names and defaults. The Toolkit wrote them, so they are valid for this version by definition. **Find them through the `my-flows` collection first** (lookup lane `kb`, collection present in `kb_collections`): one `kb_search(collection="my-flows", top_k=5)` per need - "MQEndpoint policy for queue manager <QM>", "flow with <node type> node" - returns whole-artifact summaries with the artifact's path; take the path into the brief, the subagent reads the file. Prefer a hit whose summary does not say "Generated comparison output" (Toolkit-written artifacts outrank flows this skill generated earlier - a generated policy carries `policyTemplate="MQEndpoint"` where the Toolkit writes `policyTemplate=""`). No hit, collection absent, or lane `local`/`web`: `Glob`/`Grep` the resolved roots below.
+2. **Toolkit-generated artifacts in the user's workspace.** A `.policyxml` for verified `policyType` and element names, a `.msgflow` for node attribute names and defaults. The Toolkit wrote them, so they are valid for this version by definition. Find them by running `Glob`/`Grep` over the resolved roots below. Prefer Toolkit-written artifacts over flows this skill generated earlier - a generated policy carries `policyTemplate="MQEndpoint"` where the Toolkit writes `policyTemplate=""`.
 3. **The install tree.** Schemas and samples under the ACE installation.
-4. Only then: shipped examples, vendor docs, the notes vault, doc-kb.
+4. Only then: shipped examples and vendor docs.
 
 | Question | Ask |
 |---|---|
@@ -140,7 +138,7 @@ When ACE is installed on this machine, its own introspection and its GUI-generat
 
 **Probe and record the installed ACE version once**, before anything else in B0.5a: source the profile and run `mqsiservice -v` (the `BIP8996I: Version: <n.n.n.n>` line; verified on 13.0.8.1), or read it from the install path when the profile is not on this machine. Put the version in the generation brief and in `flow_state.md`, so every answer carries its own stamp. Read each `validated_rules.md` stamp's scope against it: a rule scoped `v13` holds on any 13.0.x install; a rule scoped `13.0.N+` names a mod-pack feature and does not apply as written below that fix pack - use the older path and record which one you took; a rule scoped to another major version is a hypothesis until re-checked here. The exact install named after the mechanism ("runtime run on 13.0.8.1") is provenance, not a requirement. When the install rejects a stamped mechanism, record it in `flow_state.md` with the version and file it as a rule amendment; never work around it silently.
 
-Then check whether the user already has real `.msgflow` files using the node types you need - the `my-flows` search above answers this in one call when the collection exists; the filesystem walk below is the fallback.
+Then check whether the user already has real `.msgflow` files using the node types you need - the filesystem walk below answers this.
 
 **Determine the search roots dynamically - never hardcode machine-specific paths like `D:\GIT\`.** Derive them at runtime, in this order:
 1. The current working directory and any additional working directories the harness exposes for this session (these are the repos actually in play).

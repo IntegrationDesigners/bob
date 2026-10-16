@@ -174,7 +174,7 @@ DEFINE QLOCAL([QUEUE_NAME])
 
 ## Areas for Improvement
 
-Findings are grouped by topic (Security â Reliability â Performance â Flow Design â Coding â Configuration â Observability â Maintainability) and ordered by severity within each group.
+Findings are grouped by topic (Security → Reliability → Performance → Flow Design → Coding → Configuration → Observability → Maintainability) and ordered by severity within each group.
 
 Each finding uses a topic code + 2-digit counter as its ID:
 
@@ -191,7 +191,7 @@ Each finding uses a topic code + 2-digit counter as its ID:
 
 ---
 
-### [TOPIC-NN] [Issue Title] [ð´/ð /ð¡/ð¢]
+### [TOPIC-NN] [Issue Title] [🔴/🟠/🟡/🟢]
 
 **Issue:** [Description of the issue or limitation]
 
@@ -208,7 +208,7 @@ Each finding uses a topic code + 2-digit counter as its ID:
 
 ---
 
-### [TOPIC-NN] [Next Issue] [ð´/ð /ð¡/ð¢]
+### [TOPIC-NN] [Next Issue] [🔴/🟠/🟡/🟢]
 
 [Repeat structure for each finding]
 
@@ -218,12 +218,12 @@ Each finding uses a topic code + 2-digit counter as its ID:
 
 | ID | Title | Severity | Location |
 |----|-------|----------|----------|
-| [TOPIC-NN] | [Issue Title] | ð´ Critical | [`file.esql:42`](path/to/file.esql) |
-| [TOPIC-NN] | [Issue Title] | ð  High | [`file.esql:55`](path/to/file.esql) |
-| [TOPIC-NN] | [Issue Title] | ð¡ Medium | [`file.msgflow:12`](path/to/file.msgflow) |
-| [TOPIC-NN] | [Issue Title] | ð¢ Low | [`file.esql:1`](path/to/file.esql) |
+| [TOPIC-NN] | [Issue Title] | 🔴 Critical | [`file.esql:42`](path/to/file.esql) |
+| [TOPIC-NN] | [Issue Title] | 🟠 High | [`file.esql:55`](path/to/file.esql) |
+| [TOPIC-NN] | [Issue Title] | 🟡 Medium | [`file.msgflow:12`](path/to/file.msgflow) |
+| [TOPIC-NN] | [Issue Title] | 🟢 Low | [`file.esql:1`](path/to/file.esql) |
 
-*One row per finding. Order: Critical â High â Medium â Low.*
+*One row per finding. Order: Critical → High → Medium → Low.*
 
 ---
 
@@ -242,14 +242,14 @@ Observations that are **not** rated findings - things that are correct at runtim
 
 ### Alignment with IBM ACE Guidelines
 
-#### â Followed Best Practices
+#### ✅ Followed Best Practices
 
 1. **[Practice Category]**
    - [Specific practice followed]
    - [Why this is good]
    - [ACE principle it aligns with]
 
-#### â ï¸ Areas for Enhancement
+#### ⚠️ Areas for Enhancement
 
 1. **[Enhancement Area]**
    - Currently: [Current approach]
@@ -351,7 +351,7 @@ The [Adapter Name] is a [assessment of design quality] ACE application that [sum
    - [Improvement 1]
    - [Improvement 2]
 
-**Overall Assessment:** [â/â ï¸/â] [Production-Ready/Needs Work/Not Ready] with [Recommended/Required] Enhancements
+**Overall Assessment:** [✅/⚠️/❌] [Production-Ready/Needs Work/Not Ready] with [Recommended/Required] Enhancements
 
 **Use Case Fit:** [Assessment of how well the solution fits its intended purpose]
 
@@ -364,4 +364,5 @@ The [Adapter Name] is a [assessment of design quality] ACE application that [sum
 **ACE Version:** [Version]  
 **Review Level:** [0/1/2/3]  
 **Review Focus:** [File types actually reviewed, e.g., ESQL + Flow Design + Java]  
+**Custom Rules:** [applied (N rules from custom-rules/rules.md) | none (custom-rules/rules.md empty)]  
 **Next Review:** [Date or trigger]

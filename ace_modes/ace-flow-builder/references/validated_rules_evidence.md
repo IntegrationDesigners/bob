@@ -192,7 +192,7 @@ trusting the template.
 
 ## 16. `Environment` has no Input/Output variants - and `computeMode` gates propagation, it copies nothing
 
-**Stamp.** v13 - manual page ("Compute node", IBM ACE v13 manual via doc-kb) + Toolkit flow inspection (TestApp/TestFlow.msgflow, RetryHTTPDispatcher) + runtime run on 13.0.8.1 (OAuth2 rig: an OutputLocalEnvironment write was discarded until the mode included destination, digest 2026-08-17-ace13-oauth2-rest-request-049388f3, session 2026-08-27) (2026-08-27; digest 2026-08-27-bob-modes, commit 60316b0); the literal set is doc-verified, the InputEnvironment/OutputEnvironment nonexistence rests on the manual plus Matthias's report of Bob-generated ESQL failing (no compile error captured), and WebScrapeProxy.msgflow carries computeMode="localEnvironmentAndMessage" deploy-untested - do not widen the literal list without a test.
+**Stamp.** v13 - manual page ("Compute node", IBM ACE v13 manual) + Toolkit flow inspection (TestApp/TestFlow.msgflow, RetryHTTPDispatcher) + runtime run on 13.0.8.1 (OAuth2 rig: an OutputLocalEnvironment write was discarded until the mode included destination, digest 2026-08-17-ace13-oauth2-rest-request-049388f3, session 2026-08-27) (2026-08-27; digest 2026-08-27-bob-modes, commit 60316b0); the literal set is doc-verified, the InputEnvironment/OutputEnvironment nonexistence rests on the manual plus Matthias's report of Bob-generated ESQL failing (no compile error captured), and WebScrapeProxy.msgflow carries computeMode="localEnvironmentAndMessage" deploy-untested - do not widen the literal list without a test.
 
 ---
 
@@ -240,7 +240,7 @@ and lost; the better of the two captured SQLCODE/SQLSTATE/row count into variabl
 traced them (Matthias, expert review 2026-08-25, findings M1/M2). Rule 15 keeps the
 message; this rule keeps the diagnosis.
 
-**Stamp.** v13 - expert ruling (pair 1 review M1/M2, 2026-08-25) with the diagnostics capture from a runtime run on 13.0.8.1 (Level 3 pair 1 kb run: SQLCODE/SQLSTATE captured into variables and traced through the S3 table-break fault injection, 2026-08-25) + manual page ("DECLARE HANDLER statement", "SQLSTATE function") + Toolkit template inspection (the DatabaseInput templates use the same 'D%' class) (2026-08-25); the DECLARE CONTINUE HANDLER block as written has not been deployed by any Level-3 run - both pair-1 flows lacked it (M2) and pairs 2 and 3 touch no database.
+**Stamp.** v13 - expert ruling (pair 1 review M1/M2, 2026-08-25) with the diagnostics capture from a runtime run on 13.0.8.1 (Level 3 pair 1 run: SQLCODE/SQLSTATE captured into variables and traced through the S3 table-break fault injection, 2026-08-25) + manual page ("DECLARE HANDLER statement", "SQLSTATE function") + Toolkit template inspection (the DatabaseInput templates use the same 'D%' class) (2026-08-25); the DECLARE CONTINUE HANDLER block as written has not been deployed by any Level-3 run - both pair-1 flows lacked it (M2) and pairs 2 and 3 touch no database.
 
 ---
 
@@ -276,7 +276,7 @@ it in the flow. Checkable in B3.7 (every MQOutput/MQReply carries an explicit
 `messageContext`), and the 2035 signature is documented in `msgflow_format.md` for the
 validation subagent.
 
-**Stamp.** v13 - runtime run on 13.0.8.1 (Level 3 pair 2 Run C: MQOPEN failed with MQRC 2035 / BIP2666 / AMQ8077W "unauthorized: passall" under the default passAll for user app, fixed to messageContext="default" and re-run live, digest 2026-08-28-kb; Run D carried messageContext="default" and passed) (2026-08-28; rule committed 33283fd, 2026-08-30); measured for passAll against the MQ dev image's least-privilege app user only - setAll, passIdentity and setIdentity needing the same authority is from the manual, and the 16 template nodes were changed by a re-scan, not run.
+**Stamp.** v13 - runtime run on 13.0.8.1 (Level 3 pair 2 Run C: MQOPEN failed with MQRC 2035 / BIP2666 / AMQ8077W "unauthorized: passall" under the default passAll for user app, fixed to messageContext="default" and re-run live, Run D carried messageContext="default" and passed) (2026-08-28; rule committed 33283fd, 2026-08-30); measured for passAll against the MQ dev image's least-privilege app user only - setAll, passIdentity and setIdentity needing the same authority is from the manual, and the 16 template nodes were changed by a re-scan, not run.
 
 ---
 
@@ -314,9 +314,9 @@ name only the connector-family types. Checkable in B3.7.
 **Why this is a rule.** Comparison pair 2 (2026-08-28): the classic run's `PrepareOrder`
 set five MQMD fields for a plain fire-and-forget put. Expert review 2026-09-11 (M4): not
 necessary unless the flow does something special such as adding an MQRFH2 header. The
-kb run of the same pair put the same bytes on the queue with no MQMD code at all (rule
+other run of the same pair put the same bytes on the queue with no MQMD code at all (rule
 17's copy-then-drop). Checkable in B3.7.
 
-**Stamp.** v13 - expert ruling (pair 2 review M4) on the pair-2 outputs plus the manual's MQOutput page (13.0.x export: the node creates the default MQMD, Persistence mode row), with the "node creates the default MQMD" behaviour exercised by a runtime run on 13.0.8.1 (pair-2 kb run at Level 3, byte-exact put with no MQMD code, 2026-08-28) (2026-09-11); the classic run's five-field MQMD block was judged unnecessary, not measured as harmful, and MQOutput MQMD handling is not listed under any mod pack on the manual's new-function page.
+**Stamp.** v13 - expert ruling (pair 2 review M4) on the pair-2 outputs plus the manual's MQOutput page (13.0.x export: the node creates the default MQMD, Persistence mode row), with the "node creates the default MQMD" behaviour exercised by a runtime run on 13.0.8.1 (pair-2 run at Level 3, byte-exact put with no MQMD code, 2026-08-28) (2026-09-11); the classic run's five-field MQMD block was judged unnecessary, not measured as harmful, and MQOutput MQMD handling is not listed under any mod pack on the manual's new-function page.
 
 ---

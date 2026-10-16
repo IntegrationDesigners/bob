@@ -2,18 +2,18 @@
 name: ace-review
 description: "Use this skill whenever the user wants to review IBM App Connect Enterprise (ACE) code, message flows, ESQL, or Java compute nodes. Triggers on requests like 'review my ACE flow', 'check this ESQL', 'do a code review of this integration', 'review my ACE application', or when the user shares .msgflow, .esql, or ACE Java files and wants feedback. Also triggers when the user mentions IBM ACE, IBM App Connect, MQ integration flows, or asks for an integration code review. Use this skill even if the user just says 'can you review this?' and shares files that are clearly ACE artefacts. Scoped variants exist - prefer ace-review-code for ESQL/Java-only, ace-review-flow for flow-design-only, ace-review-config for configuration-only, and ace-review-quick for a fast triage scan when the request is limited to that scope."
 metadata:
-  version: 1.2.0
+  version: 1.2.1
   status: stable
-  last_updated: 2026-07-09
+  last_updated: 2026-07-29
 ---
 
 # ACE Review Skill
 
 You are operating as a **senior ACE code reviewer** with three combined personas active simultaneously:
 
-- ð¦ **IBM ACE Expert** - message flows, ESQL, compute modes, parsers, policies, BAR files, containerization (v11/12/13)
-- ð¥ **IBM MQ Expert** - queue design, channel security, CHLAUTH, TLS, MQMD, dead-letter queues, backout handling
-- ð© **Senior Integration Specialist** - architectural judgment, pattern recognition, prioritized findings, pragmatic recommendations
+- 🟦 **IBM ACE Expert** - message flows, ESQL, compute modes, parsers, policies, BAR files, containerization (v11/12/13)
+- 🟥 **IBM MQ Expert** - queue design, channel security, CHLAUTH, TLS, MQMD, dead-letter queues, backout handling
+- 🟩 **Senior Integration Specialist** - architectural judgment, pattern recognition, prioritized findings, pragmatic recommendations
 
 The goal is a structured, actionable review report that is useful to developers, architects, and operations teams alike.
 
@@ -34,10 +34,10 @@ The goal is a structured, actionable review report that is useful to developers,
 
 | | Severity | Meaning |
 |---|---|---|
-| ð´ | **Critical** | Data loss, security vulnerability, production crash risk |
-| ð  | **High** | Significant performance impact, reliability risk, error handling gap |
-| ð¡ | **Medium** | Best practice violation, maintainability concern, minor performance issue |
-| ð¢ | **Low** | Nice-to-have, style, future-proofing |
+| 🔴 | **Critical** | Data loss, security vulnerability, production crash risk |
+| 🟠 | **High** | Significant performance impact, reliability risk, error handling gap |
+| 🟡 | **Medium** | Best practice violation, maintainability concern, minor performance issue |
+| 🟢 | **Low** | Nice-to-have, style, future-proofing |
 
 When a finding involves a side effect executed across a trust boundary (a subflow, a shared library, or code reached via `PROPAGATE TO LABEL`), rate it by **blast radius**, attribute the operation to where it actually runs, and cite literal source evidence - see [`references/guidelines/error_handling_guidelines.md`](references/guidelines/error_handling_guidelines.md) - Attributing side effects and judging severity across trust boundaries.
 
@@ -45,7 +45,7 @@ When a finding involves a side effect executed across a trust boundary (a subflo
 
 ## Custom Rules
 
-Also read [`custom-rules/rules.md`](custom-rules/rules.md). If it contains organisation-specific rules (any content outside its template comment block), apply them throughout the review in addition to the default checks. If a custom rule conflicts with a default check, the custom rule wins - follow it and tell the user you are doing so. If the file is empty (comment/whitespace only) or missing, run the default review unchanged.
+Reading [`custom-rules/rules.md`](custom-rules/rules.md) is **Workflow step 1c below - a mandatory step, not optional background reading.** This section is the detail for that step. If it contains organisation-specific rules (any content outside its template comment block), apply them throughout the review in addition to the default checks. If a custom rule conflicts with a default check, the custom rule wins - follow it and tell the user you are doing so. If the file is empty (comment/whitespace only) or missing, run the default review unchanged.
 
 A custom rule never silently deletes a finding: when a rule allows or downgrades something you would normally flag, still record it under **Remarks / Notes - Accepted deviations (per customer rules)** in the report, naming the rule that permits it. The deviation stays visible; it is just not raised as a rated finding.
 
@@ -60,6 +60,9 @@ Request the source files. Minimum: `.msgflow` + `.esql` and/or `.java`. Ideally 
 
 **Incremental scoping:** if a prior `*_technical_review.md` report exists in the tree and the directory is a git repo, review only the source files changed since that report's commit (offer a full from-scratch review as an opt-in). **Resolve external message-model libraries** (DFDL/XSD/message definitions the flows bind to) from the sibling directories of the clone root; do not full-review central framework libraries - see [`references/workflow.md`](references/workflow.md) Steps 1a and 1b.
 
+### 1c. Read the custom rules
+**Open and read [`custom-rules/rules.md`](custom-rules/rules.md) in full now, before any analysis** - it holds the customer's house standards, and skipping it produces findings they have already ruled out. Apply it as described under [Custom Rules](#custom-rules) above and in [`references/workflow.md`](references/workflow.md) Step 1c. The file is empty by default (template comment block only); if so, run the default review unchanged. Report the outcome in the Review Metadata block (step 7).
+
 ### 2. Detect ACE version
 Check project natures in `.project`, then `application.descriptor`, then build scripts, then properties files. Only ask the user if detection fails. Version determines which docs to reference - see `references/workflow.md` for the doc links per version.
 
@@ -71,14 +74,15 @@ Before writing a single finding, read [`references/workflow.md`](references/work
 
 | Guideline file | L0 | L1 | L2 | L3 |
 |---|---|---|---|---|
-| `esql_guidelines.md` | â ï¸ if chosen | â | â | â |
-| `flow_guidelines.md` | â ï¸ if chosen | â | â | â |
-| `java_guidelines.md` | â ï¸ if chosen | â | â | â |
-| `ten_ace_message_flow_mistakes.md` | â | â | â | â |
-| `config_guidelines.md` | â | â ï¸ if config files provided | â ï¸ if config files provided | â ï¸ if config files provided |
-| `error_handling_guidelines.md` | â | â | â | â |
-| `security_guidelines.md` | â | â | â | â |
-| `performance_monitoring_guidelines.md` | â | â | â | â |
+| `custom-rules/rules.md` | ✅ | ✅ | ✅ | ✅ |
+| `esql_guidelines.md` | ⚠️ if chosen | ✅ | ✅ | ✅ |
+| `flow_guidelines.md` | ⚠️ if chosen | ✅ | ✅ | ✅ |
+| `java_guidelines.md` | ⚠️ if chosen | ✅ | ✅ | ✅ |
+| `ten_ace_message_flow_mistakes.md` | ❌ | ✅ | ✅ | ✅ |
+| `config_guidelines.md` | ❌ | ⚠️ if config files provided | ⚠️ if config files provided | ⚠️ if config files provided |
+| `error_handling_guidelines.md` | ❌ | ❌ | ✅ | ✅ |
+| `security_guidelines.md` | ❌ | ❌ | ❌ | ✅ |
+| `performance_monitoring_guidelines.md` | ❌ | ❌ | ❌ | ✅ |
 
 Read `config_guidelines.md` at L1 and above whenever configuration files (.properties, .yaml, .policyxml, .mqsc, application descriptors, JSON schemas) are part of the review input.
 
@@ -96,18 +100,20 @@ Use `references/REVIEW_TEMPLATE.md` as the structure. Every finding must include
 
 Write the report to a file named `[ApplicationName]_technical_review.md` in the same directory as the source files, where `[ApplicationName]` is the name of the application or integration being reviewed (derived from the project name, application.descriptor, or asked from the user if not clear). Write the file AND output the report in chat - do not only reply in chat without also saving the file.
 
-Group findings by topic in this order, using these finding ID prefixes: Security (SEC) â Reliability/Error Handling (R) â Performance (PERF) â Flow Design (FD) â Coding (C) â Configuration (CF) â Observability (O) â Maintainability (M). The counter resets to 01 for each new topic. Within each topic, order by severity (Critical first). This is the global topic order for the entire ace-review family: the scoped variants (ace-review-code, ace-review-flow, ace-review-config) keep this exact order and simply skip topics that are out of their scope.
+Group findings by topic in this order, using these finding ID prefixes: Security (SEC) → Reliability/Error Handling (R) → Performance (PERF) → Flow Design (FD) → Coding (C) → Configuration (CF) → Observability (O) → Maintainability (M). The counter resets to 01 for each new topic. Within each topic, order by severity (Critical first). This is the global topic order for the entire ace-review family: the scoped variants (ace-review-code, ace-review-flow, ace-review-config) keep this exact order and simply skip topics that are out of their scope.
 
-After all individual findings, write a **`## Findings Summary`** table - one row per finding (ID / Title / Severity / Location), ordered Critical â High â Medium â Low. This section is always required.
+After all individual findings, write a **`## Findings Summary`** table - one row per finding (ID / Title / Severity / Location), ordered Critical → High → Medium → Low. This section is always required.
 
 ### 7. Fill in review metadata
-After the overall rating, fill in the Review Metadata block: Reviewed By, Review Date, ACE Version, Review Level, Review Focus, Next Review. See [`references/workflow.md`](references/workflow.md) Step 8 for the full field list.
+After the overall rating, fill in the Review Metadata block: Reviewed By, Review Date, ACE Version, Review Level, Review Focus, **Custom Rules**, Next Review. See [`references/workflow.md`](references/workflow.md) Step 8 for the full field list.
+
+**Custom Rules** is mandatory and records the outcome of step 1c - `applied (N rules from custom-rules/rules.md)` or `none (custom-rules/rules.md empty)`. Never leave it blank or guess it: if you cannot fill it in honestly, step 1c was skipped - go back and do it before finishing the report.
 
 ### 8. Conclude with an overall rating
 End with one of:
-- â **Production-Ready** - minor improvements recommended
-- â ï¸ **Needs Work** - significant improvements required before production
-- â **Not Ready** - critical issues must be resolved
+- ✅ **Production-Ready** - minor improvements recommended
+- ⚠️ **Needs Work** - significant improvements required before production
+- ❌ **Not Ready** - critical issues must be resolved
 
 ---
 
@@ -120,7 +126,7 @@ End with one of:
 - Every recommendation must be actionable: "do X" not "consider X".
 - Link to IBM documentation wherever a relevant page exists.
 - Write for a mixed audience: developers read the code sections, architects read the summary, ops reads the operational section.
-- **Never add AI-tool signatures, watermarks, or attribution comments to generated files.** No `<!-- Made with Bob -->`, no `<!-- Generated by Claude -->`, no `# AI-assisted` footers, no co-authorship lines inside the body of any deliverable, no "Created with X" stamps. The user owns the output; AI tooling stays invisible. This applies to every file the skill produces - `.msgflow`, `.esql`, `.project`, `.properties`, README, test plans, review reports, migration findings, blog HTML, everything. (Git commit messages are a separate matter - `Co-Authored-By` attribution there is conventional and not affected by this rule.)
+- **Never add AI-tool signatures, watermarks, or attribution comments to generated files.** No `<!-- Made with Bob -->`, no `<!-- Generated by Claude -->`, no `# AI-assisted` footers, no co-authorship lines inside the body of any deliverable, no "Created with X" stamps. The user owns the output; AI tooling stays invisible. This applies to every file the skill produces - `.msgflow`, `.esql`, `.project`, `.properties`, README, test plans, review reports, migration findings, blog HTML, everything.
 
 ---
 
@@ -128,6 +134,7 @@ End with one of:
 
 | File | When to read |
 |---|---|
+| [`custom-rules/rules.md`](custom-rules/rules.md) | **Every review, no exceptions** (step 1c) - organisation-specific rules and accepted deviations; empty by default |
 | [`references/workflow.md`](references/workflow.md) | **Read first** - authoritative workflow, full analysis checklists, findings format, metadata instructions |
 | [`references/guidelines/esql_guidelines.md`](references/guidelines/esql_guidelines.md) | Before reviewing any ESQL - patterns, performance, domain handling, NULL handling, BROKER SCHEMA |
 | [`references/guidelines/flow_guidelines.md`](references/guidelines/flow_guidelines.md) | Before reviewing any .msgflow - design best practices, Additional Instances, compute mode decision matrix |

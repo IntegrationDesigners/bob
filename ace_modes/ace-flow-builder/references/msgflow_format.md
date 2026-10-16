@@ -146,7 +146,7 @@ A subflow that lives in a shared library is dropped into a flow as an ordinary n
 Without this shape a generated flow references the library in `.project` but never
 uses it (seen 2026-10-11 and 2026-10-12: compute modules commented "the LogEntry
 subflow node is wired after this compute", no such node in the XML). Toolkit-written
-example: `D:\GIT\Ace_test_cases\ContextLogNode\AppWithLogging\FlowWithLogging.msgflow`.
+example: `Ace_test_cases\ContextLogNode\AppWithLogging\FlowWithLogging.msgflow`.
 
 1. Namespace on `ecore:EPackage`: the prefix is the subflow's path inside the library
    project with `/` turned into `_`; the value is that path.

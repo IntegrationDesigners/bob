@@ -2,7 +2,7 @@
 
 A different job from a flow harness: the question is not "does my flow work" but "how
 do the ACE parsers treat this piece of syntax". Worked exemplar:
-`D:/GIT/Ace_test_cases/ExecutableComments/` (`gen.py`, `build.cmd`, `server.cmd`,
+`Ace_test_cases/ExecutableComments/` (`gen.py`, `build.cmd`, `server.cmd`,
 `toolkit.cmd`, `TESTING.md`) - it established on ACE 13.0.8.1 that the runtime executes
 `/*!{ }!*/` and `--!{` while the Toolkit treats both as comments.
 
@@ -41,4 +41,4 @@ do the ACE parsers treat this piece of syntax". Worked exemplar:
   `taskkill /IM IntegrationServer.exe` - that kills every server on the box.
 
 Record the measured matrix (variant x runtime x Toolkit) in the test folder's TESTING.md
-and the conclusion in the vault; the probe folder lives in `D:/GIT/Ace_test_cases/`.
+and the conclusion wherever your team keeps test findings; the probe folder lives in `Ace_test_cases/`.

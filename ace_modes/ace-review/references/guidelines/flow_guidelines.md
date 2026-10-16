@@ -261,7 +261,7 @@ BIP fingerprints when run logs are available: parse-side schema violations = BIP
 
 **Attribute verification gate:** key findings only on attributes verified on a real deploy: `messageDomain`, `resetMessageDomain`, `validateMaster`, `validateFailureAction`, `validateTiming`. The set/type/format reset attributes are product-plausible but not yet verified - before conditioning a finding on them, confirm their serialized names from a real `.msgflow` rather than guessing (same discipline as the `validateTiming`/`parseTiming` trap above).
 
-**Validate node (`ComIbmValidate`) with a JSON schema** - the builder's rules (`../ace-flow-builder/references/msgflow_format.md`, Validate section, 2026-08-30), seen from the review side; a review on 2026-10-12 contradicted the first one, and a deploy that day confirmed the second:
+**Validate node (`ComIbmValidate`) with a JSON schema** - the builder's rules (the ace-flow-builder skill's `references/msgflow_format.md`, Validate section, 2026-08-30), seen from the review side; a review on 2026-10-12 contradicted the first one, and a deploy that day confirmed the second:
 - `validateFailureAction` `exception` and `exceptionList` both route a validation failure to the node's `failure` terminal (`exceptionList` adds the detail chain); only `userTrace` / `localError` just log. A 400 path wired from `failure` with either action is correct - not a finding.
 - `checkSet="true"` with `set="<x>.schema.json"` needs the same schema bound on the upstream input node (`messageSetProperty`). Without it EVERY message fails (ERROR_CODE 4162), valid ones included: **🟠 High**, the happy path never runs.
 

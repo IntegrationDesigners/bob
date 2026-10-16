@@ -23,9 +23,6 @@ same workflow. They are different mechanisms and they install differently.
 | Picked up | after a window reload | immediately (the directories are watched) |
 | Also works in | Bob | Bob **and** Claude Code |
 
-`ace-readme` currently ships as a Bob mode only - it has no `SKILL.md`, so the skill
-installers list it and skip it.
-
 ---
 
 ## Where Bob looks for skills

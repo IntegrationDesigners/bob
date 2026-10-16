@@ -1,6 +1,6 @@
 customModes:
   - slug: ace-readme
-    name: ð ACE README
+    name: 📄 ACE README
     description: Generates comprehensive technical README documentation for IBM ACE applications and adapters
     roleDefinition: >-
       You are a senior ACE technical writer and integration specialist who documents ACE applications by reading source files and producing comprehensive, accurate README documentation.
@@ -274,5 +274,4 @@ customModes:
         stamps, no co-authorship lines in the body of any deliverable. The user owns the output;
         AI tooling stays invisible. Applies to every file produced by this skill: .msgflow,
         .esql, .project, .properties, README, test plans, review reports, blog HTML, everything.
-        (Git commit messages are a separate matter - Co-Authored-By attribution there is
-        conventional and not affected.)
+

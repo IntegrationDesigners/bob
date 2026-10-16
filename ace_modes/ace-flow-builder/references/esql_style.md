@@ -332,7 +332,7 @@ SET OutputRoot.JSON.Data.length = LENGTH(InputBody.Field);
 
 **Module header (confirmed by expert review, comparison pair 2, 2026-09-11, M3):** every compute module opens with a short WHY block, between `CREATE COMPUTE MODULE` and `Main()`, stating its contract - what it guarantees and the quirk that forces the shape. A module with no header comment is the shape to avoid.
 
-✅ **Good** - the pair-2 kb module
+✅ **Good** - the pair-2 module
 ```esql
 CREATE COMPUTE MODULE HttpToMq_Compute
     -- The MQ payload must be byte-for-byte identical to the received HTTP body,
@@ -401,7 +401,7 @@ The compute modules that implement one flow's steps (prepare, transform, build t
 
 **Why:** The reader follows one flow top to bottom in one file instead of hopping between files whose only difference is the module name. Nothing in the `.msgflow` changes: the schema triple (`BROKER SCHEMA`, folder, `esql://routine/<schema>#<Module>.Main`) does not care which file holds a module.
 
-✅ **Good** - one file, two modules (comparison pair 2, kb)
+✅ **Good** - one file, two modules (comparison pair 2)
 ```
 com/mbl/httptomq/HttpToMq_Compute.esql          -- HttpToMq_Compute + HttpToMq_BuildReply
 com/mbl/httptomq/HttpToMq_HandleException.esql

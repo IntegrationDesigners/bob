@@ -329,7 +329,7 @@ Each mode directory contains:
 
 ## Installing the Skills
 
-Every mode here except `ace-readme` also ships as a **skill** - the same workflow, discovered
+Every mode here also ships as a **skill** - the same workflow, discovered
 by Bob itself when your request matches its description, and usable from Claude Code as well.
 Skills install into a skills directory rather than into `custom_modes.yaml`, and the folder
 name there is the name you invoke.

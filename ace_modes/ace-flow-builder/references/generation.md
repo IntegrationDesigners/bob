@@ -1,4 +1,4 @@
-# ACE Flow Builder KB - Generation Reference (Phase B3)
+# ACE Flow Builder - Generation Reference (Phase B3)
 
 This file is read by the Phase B3/B4 generation subagent only - never by the main
 conversation. It contains the full Phase B3 procedure plus the node/ESQL reference

@@ -69,19 +69,19 @@ Keep the conversation focused. Do not ask for information that has already been 
 
 Ask: **"Do you have direct access to run commands on the ACE server?"**
 
-- **Yes** â ask for `MQSI_BASE_FILEPATH`, OS, node vs standalone; run commands directly and collect into `ACE_SupportCase_<NodeName>_<YYYYMMDD>/` in the current working directory
-- **No** â ask the same questions, generate a ready-to-run script (`.sh` or `.bat`), instruct the user to run it and share the output
+- **Yes** → ask for `MQSI_BASE_FILEPATH`, OS, node vs standalone; run commands directly and collect into `ACE_SupportCase_<NodeName>_<YYYYMMDD>/` in the current working directory
+- **No** → ask the same questions, generate a ready-to-run script (`.sh` or `.bat`), instruct the user to run it and share the output
 
 ### Phase 3: Baseline Collection (always - every problem type)
 
-1. Run `mqsiservice -v` â save to file
+1. Run `mqsiservice -v` → save to file
 2. Run **aceDataCollector** for the node/IS/standalone server
 
 **Important - ACE commands require the ACE environment:**
-- **Windows:** Run from the **ACE Console** (Start menu â IBM App Connect Enterprise â ACE Console or IBM App Connect Enterprise Command Console). Do NOT use a regular Command Prompt or PowerShell - the commands will not be found.
+- **Windows:** Run from the **ACE Console** (Start menu → IBM App Connect Enterprise → ACE Console or IBM App Connect Enterprise Command Console). Do NOT use a regular Command Prompt or PowerShell - the commands will not be found.
 - **Linux/AIX:** Source the ACE profile first: `. <install_dir>/server/bin/mqsiprofile` (e.g., `. /opt/ibm/ace-13/server/bin/mqsiprofile`)
 
-**aceDataCollector** is the most important single tool. It is bundled in ACE â¥ v11.0.0.8 and all v12/v13. Detect at `$MQSI_BASE_FILEPATH/server/bin/aceDataCollector.sh|.bat`. For ACE < v11.0.0.8, direct the user to download it from the IBM support page.
+**aceDataCollector** is the most important single tool. It is bundled in ACE ≥ v11.0.0.8 and all v12/v13. Detect at `$MQSI_BASE_FILEPATH/server/bin/aceDataCollector.sh|.bat`. For ACE < v11.0.0.8, direct the user to download it from the IBM support page.
 
 See [`references/diagnostics_guide.md`](references/diagnostics_guide.md) for exact command syntax per OS and OCP containers.
 
@@ -92,10 +92,10 @@ Collect based on the category. **Functional** problems are about gathering what 
 | Category / type | Key additions |
 |---|---|
 | All / always | Check abend files in `errors/` directory |
-| Functional - Crash / abend | Event Viewer export (Â±30 min around the event, not the full log) + abend/dump files |
+| Functional - Crash / abend | Event Viewer export (±30 min around the event, not the full log) + abend/dump files |
 | Functional - Message flow | User trace (normal) + event log + project interchange via `mqsipackagebar` |
 | Functional - Deployment / start-up | `mqsicvp` + service trace + JVM property check + event log |
-| Functional - Database / ODBC | DSN inventory first (`mqsireportdbparms -n "*"` + ODBC.INI/ODBCINST.INI export) â then ODBC trace + vendor-specific tools once the vendor is confirmed. Trace procedure follows the driver: Windows + SQL Server means a Microsoft ODBC driver, so use Microsoft's tracing steps, not the IBM `uktrc95.dll` route |
+| Functional - Database / ODBC | DSN inventory first (`mqsireportdbparms -n "*"` + ODBC.INI/ODBCINST.INI export) → then ODBC trace + vendor-specific tools once the vendor is confirmed. Trace procedure follows the driver: Windows + SQL Server means a Microsoft ODBC driver, so use Microsoft's tracing steps, not the IBM `uktrc95.dll` route |
 | Functional - SSL / TLS / GSKit | Library path ordering (MQ GSKit before Db2/Oracle) + user trace |
 | Performance | User trace (debug) + ACELogAnalyser `traceAnalysis` + `mqsireportproperties` (Nagle check) |
 | General / unknown | All of the above |
@@ -135,11 +135,11 @@ Collect based on the category. **Functional** problems are about gathering what 
 - **Always ask for timing** - date and approximate time of the issue is required to scope log extraction
 - **mqsiservice -v first** - version is mandatory context for every IBM case
 - **Check abend files proactively** in `<install_dir>\errors\` (Windows) or `/var/mqsi/errors/` (Linux) - their presence means a crash and changes priority
-- **ODBC trace procedure follows the driver, not ACE:** on Windows the IBM/DataDirect route (copy `uktrc95.dll`, Select DLL) applies to Oracle/PostgreSQL/Sybase/Db2, but SQL Server is reached through a **Microsoft** ODBC driver - use Microsoft's Driver Manager tracing steps and tick **Machine-Wide tracing for all user identities** when the integration server runs under a service account (see `references/diagnostics_guide.md` Â§3)
+- **ODBC trace procedure follows the driver, not ACE:** on Windows the IBM/DataDirect route (copy `uktrc95.dll`, Select DLL) applies to Oracle/PostgreSQL/Sybase/Db2, but SQL Server is reached through a **Microsoft** ODBC driver - use Microsoft's Driver Manager tracing steps and tick **Machine-Wide tracing for all user identities** when the integration server runs under a service account (see `references/diagnostics_guide.md` §3)
 - **Service trace only on IBM direction** or explicit user request - it is heavyweight
 - **Trace wrapping:** if first and last timestamps in the trace are suspiciously close, data was lost; increase trace size and re-collect
 - **GSKit library conflicts** (SQL10013N / BIP2322E): MQ GSKit path must come before Db2 or Oracle library paths in `LD_LIBRARY_PATH` / `LIBPATH`
-- **TMPDIR on Linux:** each IS needs â¥50 MB in `/tmp` - low space causes BIP4512 / `NoClassDefFoundError`
+- **TMPDIR on Linux:** each IS needs ≥50 MB in `/tmp` - low space causes BIP4512 / `NoClassDefFoundError`
 - **Distinguish node-managed IS from standalone IS** - log paths differ
 
 ---

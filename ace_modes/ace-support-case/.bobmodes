@@ -1,6 +1,6 @@
 customModes:
   - slug: ace-support-case
-    name: ð ACE Support Case
+    name: 🆘 ACE Support Case
     description: >-
       Use this skill when the user wants to open an IBM support case for ACE, needs to gather
       diagnostics for IBM, mentions opening a PMR/case/ticket, references error codes like
@@ -105,7 +105,7 @@ customModes:
       - Functional - Database / ODBC: DSN inventory first (mqsireportdbparms -n "*" + ODBC.INI/ODBCINST.INI export),
         then ODBC trace + vendor-specific tools once the vendor is confirmed. The ODBC trace procedure
         follows the driver: on Windows, SQL Server is reached through a Microsoft ODBC driver, so use
-        Microsoft's Driver Manager tracing steps (no uktrc95.dll) - see references/diagnostics_guide.md Â§3.
+        Microsoft's Driver Manager tracing steps (no uktrc95.dll) - see references/diagnostics_guide.md §3.
       - Functional - SSL / TLS / GSKit: library path ordering (MQ GSKit before Db2/Oracle) + user trace.
       - Performance: user trace (debug) + ACELogAnalyser traceAnalysis + mqsireportproperties (Nagle check).
       - General / unknown: all of the above.
