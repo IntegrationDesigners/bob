@@ -125,8 +125,8 @@ bob/
 │   ├── README.md               # Detailed general modes documentation
 │   ├── ibm-champion-report/    # IBM Champion activity report builder
 │   ├── prompt-forge/           # Model-tuned prompt builder
-|   |-- id-deck-builder/        # ID house-style PowerPoint deck builder
-|   `-- bob-offload/            # Claude Code skill: delegate coding tasks to Bob Shell
+│   ├── id-deck-builder/        # ID house-style PowerPoint deck builder
+│   └── bob-offload/            # Claude Code skill: delegate coding tasks to Bob Shell
 └── [future mode collections]/
 ```
 
