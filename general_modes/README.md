@@ -82,23 +82,23 @@ This directory contains Bob modes that are not tied to IBM App Connect Enterpris
 
 ### Bob Offload (`bob-offload`)
 
-**Purpose:** Lets Claude Code hand a well-specified coding task to IBM Bob through Bob Shell (`bob run`, headless), so the generation cost lands on the team's Bobcoin budget instead of Claude usage. Claude keeps the brief, the review and the integration; Bob only generates.
+**Purpose:** Lets a coding agent hand a well-specified coding task to IBM Bob through Bob Shell (`bob run`, headless), so the generation cost lands on the team's Bobcoin budget instead of the agent's own usage. The agent keeps the brief, the review and the integration; Bob only generates.
 
-**This is a Claude Code skill, not a Bob mode.** It has no `.bobmodes` file and is meant for Claude Code: install it with `-Agent Claude` (see [Installing the Skills](#installing-the-skills)).
+**This is a skill, not a Bob mode.** It has no `.bobmodes` file. Any skill-reading agent can run it, Bob included (it has a separate launch section for when Bob is the host): install it with `-Agent Both` (see [Installing the Skills](#installing-the-skills)).
 
 **When to use:**
-- Mechanical, verifiable work you would rather not spend Claude usage on: boilerplate, tests, pattern refactors, scaffolding, doc drafts
+- Mechanical, verifiable work you would rather not spend the agent's own usage on: boilerplate, tests, pattern refactors, scaffolding, doc drafts
 - IBM-stack work (ACE, MQ, IBM i) with a precise brief
-- Not for judgment-heavy, underspecified or architecture work, and never for review - Claude reviews, Bob generates
+- Not for judgment-heavy, underspecified or architecture work, and never for review - the agent reviews, Bob generates
 
 **What it does:**
-- **Brief** - Claude writes a standalone brief file (task, workspace, numbered requirements, "done when" commands); Bob sees none of the conversation
+- **Brief** - the agent writes a standalone brief file (task, workspace, numbered requirements, "done when" commands); Bob sees none of the conversation
 - **Pick the mode** - by what Bob must execute: `ask` and `plan` have no shell, so a brief that runs `git` or tests needs `agent` mode, with the edit tool groups disabled when nothing may change, in a git worktree
 - **Launch** - `bob run --format json` in the background with `--max-cost` and `--max-turns` caps, stderr kept in its own file
 - **Review** - scans the output for error records first (`status: success` and exit 0 do not prove the caps held), judges the diff itself, runs the done-criterion, and resumes the same Bob task for corrections
-- **Report** - what was delegated, the Bobcoin cost (`session_costs`), the verdict and what Claude fixed
+- **Report** - what was delegated, the Bobcoin cost (`session_costs`), the verdict and what the agent fixed
 
-**Requirements:** Claude Code, Bob Shell (`npm install -g bobshell`, binary `bob`) signed in to a team with Bobcoin budget, and git for worktrees. Written against bobshell 2.0.5.
+**Requirements:** a skill-reading coding agent, Bob Shell (`npm install -g bobshell`, binary `bob`) signed in to a team with Bobcoin budget, and git for worktrees. Written against bobshell 2.0.5.
 
 **Location:** `bob-offload/`
 
@@ -116,8 +116,8 @@ Each mode directory contains:
 
 ## Installing the Skills
 
-The modes here also ship as **skills** (bob-offload ships only as a skill, for Claude Code:
-`..\scripts\Install-Skills.ps1 -Agent Claude -Name bob-offload`). Bob selects a skill itself
+The modes here also ship as **skills** (bob-offload ships only as a skill:
+`..\scripts\Install-Skills.ps1 -Agent Both -Name bob-offload`). Bob selects a skill itself
 when your request matches, and Claude Code can use them too. They install into a skills directory, where the folder name
 is the name you invoke:
 
