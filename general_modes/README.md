@@ -84,7 +84,7 @@ This directory contains Bob modes that are not tied to IBM App Connect Enterpris
 
 **Purpose:** Lets a coding agent hand a well-specified coding task to IBM Bob through Bob Shell (`bob run`, headless), so the generation cost lands on the team's Bobcoin budget instead of the agent's own usage. The agent keeps the brief, the review and the integration; Bob only generates.
 
-**This is a skill, not a Bob mode.** It has no `.bobmodes` file. Any skill-reading agent can run it, Bob included (it has a separate launch section for when Bob is the host): install it with `-Agent Both` (see [Installing the Skills](#installing-the-skills)).
+**This is an AI agent skill, not a Bob mode.** It has no `.bobmodes` file. Any skill-reading agent can run it, Bob included (it has a separate launch section for when Bob is the host): install it with `-Agent Both` (see [Installing the Skills](#installing-the-skills)).
 
 **When to use:**
 - Mechanical, verifiable work you would rather not spend the agent's own usage on: boilerplate, tests, pattern refactors, scaffolding, doc drafts
