@@ -30,6 +30,7 @@ Modes for general developer and advocacy workflows, not tied to ACE:
 - **ibm-champion-report** - assembles an IBM Champion act-of-advocacy submission: prefilled champ-report form URL plus a copy-paste field sheet, a private activity log, and a Playwright MCP form fill in a normal or lean workflow (never auto-submits)
 - **prompt-forge** - turns a rough idea or brain dump into a clean prompt tuned for a specific target model; the deliverable is the prompt, not the task's output
 - **id-deck-builder** - builds Integration Designers house-style PowerPoint decks from a marp/markdown deck or outline: slides rebuilt on the template carcass with python-pptx, speaker notes carried over, every slide rendered for a visual check
+- **bob-offload** - Claude Code skill (not a Bob mode): Claude hands a well-specified coding task to Bob Shell (`bob run`, headless) so it spends the team's Bobcoins, then reviews the diff itself; covers mode choice (`ask`/`plan` have no shell), cost caps and output checks
 
 [View detailed general modes documentation →](general_modes/README.md)
 
@@ -124,7 +125,8 @@ bob/
 │   ├── README.md               # Detailed general modes documentation
 │   ├── ibm-champion-report/    # IBM Champion activity report builder
 │   ├── prompt-forge/           # Model-tuned prompt builder
-│   └── id-deck-builder/        # ID house-style PowerPoint deck builder
+|   |-- id-deck-builder/        # ID house-style PowerPoint deck builder
+|   `-- bob-offload/            # Claude Code skill: delegate coding tasks to Bob Shell
 └── [future mode collections]/
 ```
 
