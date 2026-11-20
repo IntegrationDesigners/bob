@@ -1,6 +1,6 @@
 ---
 name: bob-offload
-description: "Use this skill when the user wants a coding task handed off to IBM Bob through the Bob Shell CLI (bob run, headless) so it spends Bobcoins from the IBM team budget instead of Claude usage, with Claude staying in control as orchestrator and reviewer. Triggers on 'offload this to bob', 'hand this to bob', 'let bob do this', 'run this through bob shell', 'burn some bobcoins', 'use the bob budget', or when the user wants to spare Claude usage on well-specified coding work and Bob's team budget has room. Claude writes a standalone brief, launches bob run in the background, then reviews the resulting diff itself. Do NOT use for judgment-heavy, underspecified or architecture work, and do not hand Bob a review job - Claude reviews, Bob generates."
+description: "Use this skill when the user wants a coding task handed off to IBM Bob through the Bob Shell CLI (bob run, headless) so it spends Bobcoins from the IBM team budget instead of the orchestrating agent's own usage, with that agent staying in control as orchestrator and reviewer. Triggers on 'offload this to bob', 'hand this to bob', 'let bob do this', 'run this through bob shell', 'burn some bobcoins', 'use the bob budget', or when the user wants to spare the agent's own usage on well-specified coding work and Bob's team budget has room. The agent writes a standalone brief, launches bob run in the background, then reviews the resulting diff itself. Do NOT use for judgment-heavy, underspecified or architecture work, and do not hand Bob a review job - the agent reviews, Bob generates."
 metadata:
   version: 0.4.0
   status: draft
@@ -10,8 +10,8 @@ metadata:
 # Bob Offload
 
 Delegate a well-specified coding task to IBM Bob via Bob Shell (`bob run`, headless) so the
-generation cost lands on the IBM Bob team budget (Bobcoins), while you - Claude - keep the
-brief, the review and the integration.
+generation cost lands on the IBM Bob team budget (Bobcoins), while you - the orchestrating
+agent - keep the brief, the review and the integration.
 
 Written against bobshell 2.0.5 (npm package `bobshell`, binary `bob`, home `~/.bob`, a
 Gemini-CLI fork), signed in with SSO. Every launch flag and behaviour below was measured
@@ -23,7 +23,7 @@ Offload: mechanical, well-specified, verifiable work - boilerplate, tests, patte
 scaffolding, doc drafts. Bob is also a reasonable pick for IBM-stack work (ACE, MQ, IBM i)
 when the brief is precise.
 
-Keep in Claude: anything that needs conversation context, judgment, architecture, root-cause
+Keep with the orchestrating agent: anything that needs conversation context, judgment, architecture, root-cause
 debugging, or secrets. Never put credentials or private personal data in a brief: it goes
 to IBM's gateway.
 
@@ -33,9 +33,9 @@ Bob IDE before queueing a batch.
 ## Workflow
 
 **Host check first.** If you are IBM Bob running this skill (Bob IDE or Bob Shell: your shell
-tool is `execute_command`, not Claude Code's Bash), steps 1-3 and 5-6 stand, but step 4's
-launch does NOT work for you. Launch as described in "When the host is IBM Bob" below. In
-Claude Code, ignore that section.
+tool is `execute_command`, not a regular Bash tool), steps 1-3 and 5-6 stand, but step 4's
+launch does NOT work for you. Launch as described in "When the host is IBM Bob" below. In any
+other agent, ignore that section.
 
 ### 1. Write the brief - a file, with the Write tool
 
@@ -63,7 +63,7 @@ run (git, tests, build, grep via shell) needs agent mode.
 | Bob must... | Mode and flags | Where `-w` points |
 |---|---|---|
 | read files and answer, no commands | `--mode ask` | live checkout is fine |
-| summarise command output (git log, test results) | `--mode ask`, Claude runs the commands and pastes the output into the brief | live checkout is fine |
+| summarise command output (git log, test results) | `--mode ask`, you run the commands and paste the output into the brief | live checkout is fine |
 | run commands, change nothing | `--mode agent --disable-tool-groups edit,mcp,browser --disable-subagents` | a git worktree |
 | write code | `--mode agent` | a git worktree |
 
@@ -86,7 +86,7 @@ next to a plain `BOB_API_KEY`). Choosing a key chooses whose budget pays, so nev
    - bash: `compgen -e | grep '^BOB_API_KEY'`
 2. Choose, in this order:
    1. the key the user named in this request;
-   2. the key the project's memory or CLAUDE.md names for Bob runs;
+   2. the key the project's memory or agent instructions file names for Bob runs;
    3. the only key, when exactly one exists;
    4. otherwise STOP and ask the user, listing the names you found.
 3. Set it for this launch only, in the same command, and never echo it. Identify a key by
@@ -131,7 +131,7 @@ Run it with the Bash tool, `run_in_background: true`, and:
 - `--max-cost` is in Bobcoins; set it. Probe tasks cost 0.04-0.21 each.
 - Never pipe the launch through `tail`/`grep` - it masks the real exit status.
 
-### 5. Review - the reason Claude stays in the loop
+### 5. Review - the reason the orchestrating agent stays in the loop
 
 The output file holds JSON lines. The final record is
 `{"type":"result","status":...,"stats":{"task_id","duration_ms","session_costs","max_cost","tool_calls"},"last_message":...}`.
@@ -167,7 +167,7 @@ Bob's diagnosis of the stale key was that `cmd /c` does not inherit `$env:`. The
 cause is that each `execute_command` call is a fresh process, so the variable was gone. The
 fix is the same either way: set the key inside the launcher.
 
-From Claude Code's Bash, both stdin piping and ask mode behaved differently (step 4 and
+From a regular Bash tool outside Bob, both stdin piping and ask mode behaved differently (step 4 and
 step 2). Treat these rows as Bob-host behaviour only.
 
 **The launch that works from Bob (verified 2026-10-16, 0.04 coins):** a `.cmd` launcher run
@@ -205,7 +205,7 @@ echo exit %ERRORLEVEL%
   stderr out of the JSON file, but in its own file, never `2>/dev/null`: a refused API key
   exited 1 with empty stdout, and with stderr discarded the reason was lost (2026-10-16).
 - Bob tasks land in `~/.bob/db/bob.db` (`tasks` table, id = the `task_id` above), not
-  `~/.claude`. Bob IDE shows them too.
+  in the orchestrating agent's session store. Bob IDE shows them too.
 - `bob` and Bob IDE share the team budget: a big overnight batch can exhaust it for the
   user's interactive Bob work the next morning.
 - Reading is what costs: an ask-mode review read 12 client files in 31 tool calls and spent

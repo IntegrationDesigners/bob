@@ -30,7 +30,7 @@ Modes for general developer and advocacy workflows, not tied to ACE:
 - **ibm-champion-report** - assembles an IBM Champion act-of-advocacy submission: prefilled champ-report form URL plus a copy-paste field sheet, a private activity log, and a Playwright MCP form fill in a normal or lean workflow (never auto-submits)
 - **prompt-forge** - turns a rough idea or brain dump into a clean prompt tuned for a specific target model; the deliverable is the prompt, not the task's output
 - **id-deck-builder** - builds Integration Designers house-style PowerPoint decks from a marp/markdown deck or outline: slides rebuilt on the template carcass with python-pptx, speaker notes carried over, every slide rendered for a visual check
-- **bob-offload** - Claude Code skill (not a Bob mode): Claude hands a well-specified coding task to Bob Shell (`bob run`, headless) so it spends the team's Bobcoins, then reviews the diff itself; covers mode choice (`ask`/`plan` have no shell), cost caps and output checks
+- **bob-offload** - AI agent skill (not a Bob mode): a coding agent hands a well-specified coding task to Bob Shell (`bob run`, headless) so it spends the team's Bobcoins, then reviews the diff itself; covers mode choice (`ask`/`plan` have no shell), cost caps and output checks
 
 [View detailed general modes documentation →](general_modes/README.md)
 
@@ -48,6 +48,10 @@ This comprehensive guide covers:
 - Creating your first custom mode
 - Best practices and troubleshooting
 - Real-world examples and templates
+
+### AI guidelines for customer work
+
+Before you point Bob or Flow Pilot at a customer project, read **[AI_GUIDELINES.md](AI_GUIDELINES.md)**: what the customer has to agree to first, how to keep secrets out of Bob's context (a recursive `.bobignore` and a hook that blocks secrets), approvals for writes and commands, MCP least privilege, and the shared Bobcoin budget.
 
 ### Quick Start
 
@@ -125,8 +129,8 @@ bob/
 │   ├── README.md               # Detailed general modes documentation
 │   ├── ibm-champion-report/    # IBM Champion activity report builder
 │   ├── prompt-forge/           # Model-tuned prompt builder
-|   |-- id-deck-builder/        # ID house-style PowerPoint deck builder
-|   `-- bob-offload/            # Claude Code skill: delegate coding tasks to Bob Shell
+│   ├── id-deck-builder/        # ID house-style PowerPoint deck builder
+│   └── bob-offload/            # AI agent skill: delegate coding tasks to Bob Shell
 └── [future mode collections]/
 ```
 
