@@ -49,6 +49,10 @@ This comprehensive guide covers:
 - Best practices and troubleshooting
 - Real-world examples and templates
 
+### AI guidelines for customer work
+
+Before you point Bob or Flow Pilot at a customer project, read **[AI_GUIDELINES.md](AI_GUIDELINES.md)**: what the customer has to agree to first, how to keep secrets out of Bob's context (a recursive `.bobignore` and a hook that blocks secrets), approvals for writes and commands, MCP least privilege, and the shared Bobcoin budget.
+
 ### Quick Start
 
 ### Installing the skills
